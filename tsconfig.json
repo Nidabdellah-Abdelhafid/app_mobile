@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "firebase/app": ["node_modules/firebase/app"]
+    }
+  },
+  "extends": "expo/tsconfig.base"
+}
