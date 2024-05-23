@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet,  ListRenderItem, TouchableOpacity,Modal, Image, Button } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons ,Fontisto} from '@expo/vector-icons';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { NavigationProp } from '@react-navigation/native';
-import { FlatList, TextInput } from 'react-native-gesture-handler';
+import { FlatList } from 'react-native-gesture-handler';
 
 interface Props{
     listings: any[];
@@ -54,22 +54,29 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
             <TouchableOpacity onPress={() => navigation.navigate('DetailPage', { itemId: item.id })}>
             <Animated.View style={styles.listView} entering={FadeInRight} exiting={FadeOutLeft}>
                 <Image source={{ uri: item.medium_url }} style={styles.image} />
-                <TouchableOpacity style={{ position: 'absolute', right: 30, top: 30 }} onPress={openModal}>
-                    <Ionicons name={isFavorited ? 'heart' : 'heart-outline'} size={24} color={isFavorited ? 'red' : '#000'} />
+                <TouchableOpacity style={{ position: 'absolute', right: 32, top: 15 }} onPress={openModal}>
+                    <Ionicons name={isFavorited ? 'heart' : 'heart-outline'} size={25} color={isFavorited ? 'white' : '#fff'} />
                 </TouchableOpacity>
-
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.name}</Text>
+                
+                <View style={{ position: 'absolute',left: 35, top: 160,flexDirection:'row', justifyContent: 'space-between' }}>
+                    <View >
+                    <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.name}</Text>
                     <View style={{ flexDirection: 'row', gap: 4 }}>
-                        <Ionicons name="star" size={16} />
-                        <Text style={{}}>{item.review_scores_rating / 20}</Text>
+                        <Ionicons name="star" size={16} color='orange'/>
+                        <Ionicons name="star" size={16} color='orange'/>
+                        <Ionicons name="star" size={16} color='orange'/>
+                        <Ionicons name="star" size={16} color='orange'/>
+                        <Ionicons name="star" size={16} color='orange'/>
+                        {/* <Text style={{}}>{Number(item.review_scores_rating / 20)}</Text> */}
                     </View>
+                    </View>
+                    
+                    
                 </View>
-                <Text style={{ fontWeight: '400' }}>{item.room_type}</Text>
-                <View style={{ flexDirection: 'row', gap: 4 }}>
-                    <Text style={{ fontWeight: '900' }}>€ {item.price}</Text>
-                    <Text style={{}}>night</Text>
-                </View>
+                <TouchableOpacity style={{ position: 'absolute', right: 35, top: 180 }} onPress={openModal}>
+                    {isFavorited ?<Fontisto name='favorite' size={25} color='white' /> :<Fontisto name="bookmark" size={24} color="#fff" />}
+                 </TouchableOpacity>
+                
             </Animated.View>
             {modalVisible && (
                 <Modal
@@ -99,32 +106,10 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
         renderItem={renderRow}
         data={loading ? [] : items}
         ref={listRef}
-        ListHeaderComponent={<Text style={styles.info}>{items.length} homes</Text>}
+        // ListHeaderComponent={<Text style={styles.info}>{items.length} homes</Text>}
         
       />
-      {/* <Modal
-                animationType="fade"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={closeModal}
-            >
-          
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.inputView}>
-                  <TextInput
-                    style={styles.inputText}
-                    placeholder="Email"
-                    placeholderTextColor="#003f5c"
-                  />
-                </View>
-                <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-                  <Button title="close" onPress={closeModal} />
-                  <Button title="add" onPress={setEtatFavorie(true)} />
-                </View>
-                    </View>
-                </View>
-            </Modal> */}
+      
     </View>
   )
 }
@@ -133,19 +118,25 @@ export default ListingPage
 
 const styles= StyleSheet.create({
     container:{
-        padding: 10,
-        backgroundColor:'#fff',
+        paddingLeft:10,
+        paddingRight:10,
+        backgroundColor:'#222',
         marginVertical: 0,
     },
     listView:{
-        padding:16,
+        paddingLeft:15,
+        paddingRight:20,
+        paddingBottom:20,
+        paddingEnd:20,
+        paddingStart:20,
         gap: 10,
-        marginVertical: 16,
     },
     image:{
         width: 340,
-        height: 300,
-        borderRadius:10,
+        height: 220,
+        borderRadius:20,
+        backgroundColor:'#000',
+        opacity:0.85
     },
     info: {
         textAlign: 'center',
@@ -153,11 +144,6 @@ const styles= StyleSheet.create({
         fontWeight:'500',
         
       },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        marginTop: 22,
-    },
     modalContainer: {
       position: 'absolute',
       bottom: 80,

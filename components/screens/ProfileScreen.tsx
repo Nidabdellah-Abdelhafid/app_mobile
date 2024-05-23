@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Animated, ActivityIndicator } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator, Modal, ListRenderItem, ImageBackground } from "react-native";
 import { collection, getDocs, query, where} from 'firebase/firestore';
 import { FIREBASE_AUTH, FIREBASE_DB } from "FirebaseConfig";
-import { NavigationProp } from '@react-navigation/native';
+import { NavigationProp, useIsFocused } from '@react-navigation/native';
+import { Ionicons ,Fontisto,MaterialCommunityIcons,MaterialIcons,FontAwesome6} from '@expo/vector-icons';
+import fileData from '../../assets/data/file.json';
+import { FlatList } from "react-native-gesture-handler";
+import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 
 interface RouterProps {
   navigation: NavigationProp<any,any>;
@@ -11,9 +15,12 @@ interface RouterProps {
 
 const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const { user: currentUser } = route.params;
-  const scrollY = new Animated.Value(0);
   const [userData, setUserData] = useState(null);
-
+  const [modalVisible1, setModalVisible1] = useState(false);
+  const listRef = useRef<FlatList>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const items = fileData;
+  const isFocused = useIsFocused();
   const fetchUserData = async () => {
     try {
       const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
@@ -32,53 +39,144 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   useEffect(() => {
     fetchUserData(); 
   }, []);
+  
+  
+  const openModal1 = () => {
+    setModalVisible1(true);
+};
 
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
+const closeModal1 = () => {
+    setModalVisible1(false);
+};
+const handleDateSelect1 = () => {
+    // Close the modal
+    closeModal1();
+};
+
+const renderRow: ListRenderItem<any> = ({item}) => (
+  
+  <Animated.View style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
+      <Image source={{ uri: item.medium_url }} style={styles.imagelike} />
+      <TouchableOpacity style={{ position: 'absolute', right: 18, top: 10 }}>
+          <Ionicons name='heart' size={25} color='white' />
+      </TouchableOpacity>
+      
+      <View style={{ position: 'absolute',left: 10, top: 85,flexDirection:'row' }}>
+          <View style={{ flex:1,justifyContent:'space-between',flexDirection:'row'}}>
+            <View>
+              <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.name}</Text>
+            </View>
+          
+          <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:10,padding:1,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailPage', { itemId: item.id });handleDateSelect1() }}>
+              <Text  style={{color:'#fff',fontWeight:'700'}}>Voir l'Offre 
+              </Text>
+              <Ionicons name="chevron-forward" size={12} color="white" />
+          </TouchableOpacity>
+          </View>
+          
+          
+      </View>
+      
+  </Animated.View>
+)
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-       
-      </Animated.View>
-      <ScrollView
-        style={styles.scrollContainer}
-      >
+    <ImageBackground source={require('./../../assets/profil_bg.png')} style={styles.container}>
+      
         {userData ? (
-        <View >
+        <View style={{marginTop:75}}>
             <View style={styles.imageFloat}>
-            <Image source={{ uri: userData.image }} style={styles.profileImage} />
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
             </View>
           <View  style={styles.card}>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>{userData.fullName}</Text>
-              <View style={styles.vinfo}>
-                <View >
-                  <Text style={styles.label}>Age</Text>
-                  <Text style={styles.text}>{userData.age}</Text>
-                </View>
-                <View >
-                  <Text style={styles.label}>Country</Text>
-                  <Text style={styles.text}>{userData.country}</Text>
-                </View>
-                <View >
-                  <Text style={styles.label}>Phone Number</Text>
-                  <Text style={styles.text}>{userData.phone_Number}</Text>
-                </View>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
               
-              </View>
-              <Text style={styles.labelE}>Email</Text>
-              <Text style={styles.text}>{userData.email}</Text>
+            </View>
+            <View style={{flexDirection:'row',justifyContent:'center',marginBottom:15}}>
+              <Text style={{color:'#fff',fontWeight:'700'}}>1,239    </Text>
+              <Text style={{color:'#A4A3A3'}}>Total des leux visites</Text>
+              
             </View>
 
+            <View style={{flexDirection:'row',justifyContent:'center'}}>
+              
+              <View style={{justifyContent:'space-between',alignItems:'center',padding:13}}>
+                 <Ionicons name="heart" size={25} color="white"/>
+                 <Text style={{color:'#C4C2C2',fontWeight:'700',}}>5 Places Like</Text>
+                 <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:15,padding:10,width:110,alignItems:'center'}} onPress={openModal1}>
+                  <Text  style={{color:'#fff',fontWeight:'800'}}>Voir</Text>
+                  
+                 </TouchableOpacity>
+
+              </View>
+              
+              <View style={{justifyContent:'center',alignItems:'center',padding:1,height:155,backgroundColor:'#fff',marginLeft:5}}></View>
+              
+              <View style={{justifyContent:'space-between',alignItems:'center',padding:13}}>
+                <Fontisto name='favorite' size={25} color='white' />
+                <View style={{justifyContent:'center',alignItems:'center',padding:10}}>
+                <Text style={{color:'#C4C2C2',fontWeight:'700',}}>Enregistre</Text>
+                <Text style={{color:'#C4C2C2',fontWeight:'700'}}>dans les favoris</Text>
+                </View>
+                <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:15,padding:10,width:110,alignItems:'center'}}>
+                  <Text  style={{color:'#fff',fontWeight:'800'}}>Voir</Text>
+                 </TouchableOpacity>
+              </View>
+            </View>
+            <View style={{justifyContent:'center',marginTop:10}}>
+              <TouchableOpacity style={styles.loginBtnOption} >
+                <FontAwesome6 name="user-large" size={19} color="white" style={styles.icon}/>
+                <View style={{flex:5,flexDirection:'row'}}>
+                    <Text style={styles.loginTextOption}>Modifier le profil</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.loginBtnOption} >
+                <MaterialIcons name="shopping-cart" size={25} color="white" style={styles.icon}/>
+                <View style={{flex:5,flexDirection:'row'}}>
+                    <Text style={styles.loginTextOption}>Panier</Text>
+                    <View style={styles.notifView}>
+                      <Text style={{color:'#000',fontWeight:'700'}}>2</Text>
+                    </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.loginBtnOption} >
+                <MaterialCommunityIcons name="clipboard-text" size={25} color="white" style={styles.icon}/>
+                <View style={{flex:5,flexDirection:'row'}}>
+                    <Text style={styles.loginTextOption}>Historique des achats</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.loginBtnOption} >
+              <Ionicons name="notifications" size={25} color="white" style={styles.icon}/>
+                <View style={{flex:5,flexDirection:'row'}}>
+                    <Text style={styles.loginTextOption}>Notification</Text>
+                    <View style={styles.notifView}>
+                      <Text style={{color:'#000',fontWeight:'700'}}>4</Text>
+                    </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.loginBtnOption} >
+                <MaterialIcons name="credit-card" size={25} color="white" style={styles.icon}/>
+                <View style={{flex:5,flexDirection:'row'}}>
+                    <Text style={styles.loginTextOption}>Cartes</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
+              </TouchableOpacity>
+            </View>
+            
           </View>
           
           </View>
           
           ):(
-            <View style={styles.loadingContainer}>
+            <View style={[styles.loadingContainer,{marginTop:100}]}>
             <ActivityIndicator size="large" color="blue" />
             <Text style={{color:"white",fontSize:15,fontWeight:'800'}}>Loading...</Text>
           </View>
@@ -87,121 +185,169 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
           <View style={{margin:30,justifyContent:'flex-end',alignContent:'flex-end',alignSelf:'center',alignItems:'center'}}>
               
           </View>
-      </ScrollView>
-      <View style={{backgroundColor:"white",margin:30,justifyContent:'center',alignContent:'flex-end',alignSelf:'center',alignItems:'center'}}>
+      {/* <View style={{backgroundColor:"white",margin:30,justifyContent:'center',alignContent:'flex-end',alignSelf:'center',alignItems:'center'}}>
           <TouchableOpacity onPress={()=> FIREBASE_AUTH.signOut()} style={styles.button}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
-          </View>
-    </View>
+          </View> */}
+
+      <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible1}
+                onRequestClose={closeModal1}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <Ionicons name="heart" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect1()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                    <FlatList
+                      renderItem={renderRow}
+                      data={items}
+                    />
+                    </View>
+                </View>
+            </Modal>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#222',
+  },
+  imageContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    opacity: 0.7, 
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    // opacity:0.8
+    
   },
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#fb5b5a',
-    zIndex: -1,
-    height:400
-  },
-  headerText: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  scrollContainer: {
-    paddingTop: 100,
-    paddingHorizontal: 20,
-    flex:1
-    
-  },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    backgroundColor: '#111',
+    opacity:0.9,
+    borderRadius: 20,
+    height:"92%",
+    margin:20,
     elevation: 5,
-    marginBottom: 20,
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: 15,
-    top:70,
+    padding: 10,
+    top:25,
   },
   profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 150,
-    marginRight: 20,
+    width: 75,
+    height: 75,
+    borderRadius: 75,
   },
   imageFloat:{
     position:'absolute',
     alignItems: 'center',
     zIndex:1,
-    left:'30%',
+    left:'42%',
+  },
+  imageFloatM:{
+    position:'absolute',
+    alignItems: 'center',
+    zIndex:1,
+    left:'43.42%',
+    bottom:583
   },
   userInfo: {
-    flex: 1,
+
   },
   userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    marginTop:90,
-    color:'#fb5b5a',
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 5,
+    marginTop:30,
+    color:'#fff',
     textAlign:'center'
   },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fb5b5a',
-    marginBottom: 5,
-    textAlign:'center'
+  loginBtnOption: {
+    width: '100%',
+    borderRadius: 15,
+    borderColor:'#C4C2C2',
+    borderWidth:2,
+    height: 58,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 9,
+    flexDirection:'row'
   },
-  labelE:{
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fb5b5a',
-    marginBottom: 5,
+  icon: {
+    marginLeft:15,
+    flex:1
+  },
+  loginTextOption: {
+    color: '#A4A3A3',
+    fontWeight:'700',
+    marginRight:10
+  },
+  notifView:{
+    backgroundColor:'#fff',
+    borderRadius:22,
+    justifyContent:'center',
+    alignItems:'center',
+    height:22,
+    width:22,
     alignSelf:'center'
   },
-
-  text: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 10,
-    textAlign:'center'
-  },
-  vinfo:{
-    flexDirection:'row',
-    justifyContent:'space-between',
-    alignItems:'center',
-    alignContent:'space-between',
-    textAlign:'center',
-    height:100
-  }, 
-  button: {
-    backgroundColor: '#fb5b5a',
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+},
+modalView: {
+    position: 'absolute',
+    top: 93,
+    left: 20,
+    right: 20,
+    height:"78%",
+    backgroundColor: '#000',
+    opacity:1,
+    borderRadius: 20,
     padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 15,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+        width: 0,
+        height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+},
+listViewlike:{
+  gap: 10,
+  marginTop:10
+},
+imagelike:{
+  width: 315,
+  height: 125,
+  borderRadius:20,
+  backgroundColor:'#000',
+  opacity:0.8
   },
 });
 

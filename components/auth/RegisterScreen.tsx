@@ -196,7 +196,7 @@ const RegisterScreen = ({navigation}: RouterProps) => {
         Create a new account!
       </Animatable.Text>
         </View>
-        <Animatable.View animation="fadeInUp" style={{flex:1,padding: '10px', backgroundColor: 'white', marginTop: '-10px', borderTopLeftRadius: 35, borderTopRightRadius: 35, boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)'}}>
+        <Animatable.View animation="fadeInUp" style={styles.viewAnimated}>
         <ScrollView>
     	<KeyboardAvoidingView behavior='padding' style={styles.kybcontainer}>
             
@@ -304,6 +304,22 @@ const styles = StyleSheet.create({
     alignItems:"center",
      
   },
+  viewAnimated:{
+    flex:1,
+    padding: 10,
+    backgroundColor: 'white',
+    marginTop: -10, 
+    borderTopLeftRadius: 35, 
+    borderTopRightRadius: 35, 
+    shadowColor: 'black',
+    shadowOffset: { 
+        width: 0,
+        height: 4 
+      },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+        elevation: 6,
+    },
   logo: {
     fontWeight: 'bold',
     fontSize: 40,

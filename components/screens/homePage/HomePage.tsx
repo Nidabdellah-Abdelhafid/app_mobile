@@ -1,7 +1,6 @@
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import React, { useMemo, useState } from 'react'
 import ExploreHeader from 'components/headerCategories/ExploreHeader';
-import ListingPage from '../listingPage/ListingPage';
 import lisingData from '../../../assets/data/airbnb-listings.json';
 import lisingDataMap from '../../../assets/data/airbnb-listings.geo.json';
 

@@ -3,19 +3,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './components/auth/LoginScreen';
 import { useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { FIREBASE_AUTH } from './FirebaseConfig'; // Corrected import path
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ProfileScreen from 'components/screens/ProfileScreen';
+import { FIREBASE_AUTH } from './FirebaseConfig'; 
 import RegisterScreen from 'components/auth/RegisterScreen';
-import SettingsScreen from 'components/screens/SettingsScreen';
-import Ionicons from "@expo/vector-icons/Ionicons";
 import SplashScreen from 'components/splash/SplashScreen';
-import { FontAwesome5, AntDesign } from '@expo/vector-icons';
-import HomePageNav from 'components/screens/homePage/HomePageNav';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import MainComponent from 'components/MainComponent';
 
-const Tab = createBottomTabNavigator();
 
 const Stack = createNativeStackNavigator();
 
@@ -42,40 +36,14 @@ export default function App() {
     <SafeAreaProvider>
     <GestureHandlerRootView style={{flex:1}}>
     <NavigationContainer>
+    
       {user ? (
-        <Tab.Navigator screenOptions={{
-          tabBarLabelPosition: "below-icon",
-          tabBarShowLabel: true,
-          tabBarActiveTintColor: "#e63c4c"
-        }} >
-          <Tab.Screen name='Explorer' component={HomePageNav}
-            options={{
-              tabBarIcon: ({ color }) => (<Ionicons name='search' size={20} color={color} />),
-              headerTintColor: "#e63c4c",
-              headerShown: false,
 
-            }}
-          />
-
-          <Tab.Screen name='Favoris' component={SettingsScreen}
-            options={{
-              tabBarIcon: ({ color }) => (<AntDesign name="hearto" size={20} color={color} />),
-              headerShown: true,
-              headerTintColor: "#e63c4c"
-            }}
-          />
-          <Tab.Screen name='Profil' component={ProfileScreen}
+        <Stack.Navigator initialRouteName='Login'>
+            <Stack.Screen name='MainComponent' component={MainComponent} options={{ headerShown: false }} 
             initialParams={{ user: user?.email }}
-
-            options={{
-              tabBarIcon: ({ color }) => (<FontAwesome5 name="user-circle" size={20} color={color} />),
-              tabBarBadge: 3,
-              headerTintColor: "#e63c4c",
-              headerShown: true,
-            }}
-          />
-
-        </Tab.Navigator>
+            />
+        </Stack.Navigator>
       ) : (
         <Stack.Navigator initialRouteName='Login'>
           <Stack.Screen name='SplashScr' component={SplashScreen} options={{ headerShown: false }} />
@@ -88,6 +56,7 @@ export default function App() {
         </Stack.Navigator>
 
       )}
+      
     </NavigationContainer>
     </GestureHandlerRootView>
     </SafeAreaProvider>

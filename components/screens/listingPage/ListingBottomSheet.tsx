@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from 'react-native';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { View, StyleSheet, Text, TouchableOpacity, } from 'react-native';
+import BottomSheet from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import ListingPage from './ListingPage';
 import { NavigationProp } from '@react-navigation/native';
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const ListingsBottomSheet = ({ navigation, listings, category }: Props) => {
-  const snapPoints = useMemo(() => ['28%', '81%'], []);
+  const snapPoints = useMemo(() => ['21%', '82%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [refresh, setRefresh] = useState<number>(0);
 
@@ -27,9 +27,9 @@ const ListingsBottomSheet = ({ navigation, listings, category }: Props) => {
       index={1}
       snapPoints={snapPoints}
       enablePanDownToClose={false}
-      handleIndicatorStyle={{ backgroundColor: '#999' }}
+      handleIndicatorStyle={{ backgroundColor: '#222' }}
       style={styles.sheetContainer}
-
+      backgroundComponent={({ style }) => <View style={[style, { backgroundColor: '#222' }]} />}
       >
       <View style={styles.contentContainer}>
         <ListingPage listings={listings} navigation={navigation} refresh={refresh} category={category} />

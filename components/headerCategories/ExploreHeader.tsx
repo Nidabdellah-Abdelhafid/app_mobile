@@ -1,9 +1,9 @@
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import MainPage from 'components/screens/MainPage';
-
+import MainPage from 'components/headerCategories/MainPage';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const categories = [
     {
@@ -59,11 +59,13 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
       };
   
     return (
-      <View style={{}}>
+      <View style={{backgroundColor: '#555'}}>
 
       <MainPage/>
 
-      <SafeAreaView style={{ backgroundColor: '#fff'}}>
+      <SafeAreaView style={{ backgroundColor: '#222',
+            borderTopLeftRadius:30,
+            borderTopRightRadius:30,}}>
         
         <View style={styles.contHeader}>
           <ScrollView
@@ -75,6 +77,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
               gap: 30,
               paddingHorizontal: 16,
             }}>
+              
             {categories.map((item, index) => (
               <TouchableOpacity
                 ref={(el) => (itemsRef.current[index] = el)}
@@ -84,7 +87,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                 <MaterialIcons
                   name={item.icon as any}
                   size={24}
-                  color={activeIndex === index ? '#000' : '#777'}
+                  color={activeIndex === index ? '#fff' : '#777'}
                 />
                 <Text style={activeIndex === index ? styles.categoryTextActive : styles.categoryText}>
                   {item.name}
@@ -100,7 +103,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
 
   const styles = StyleSheet.create({
     contHeader:{
-            backgroundColor: '#fff',
+            backgroundColor: '#222',
             height: 80,
             elevation: 2,
             shadowColor: '#000',
@@ -110,6 +113,8 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
                 width: 1,
                 height: 10,
             },
+            borderTopLeftRadius:30,
+            borderTopRightRadius:30,
         },
     categoryText: {
         fontSize: 14,
@@ -117,7 +122,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
       },
       categoryTextActive: {
         fontSize: 14,
-        color: '#000',
+        color: '#fff',
       },
       categoriesBtn: {
         flex: 1,
@@ -129,7 +134,7 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        borderBottomColor: '#000',
+        borderBottomColor: '#fff',
         borderBottomWidth: 2,
         paddingBottom: 8,
       }, 

@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, Image, Platform, Alert, ToastAndroid } from 'react-native'
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, Image, Platform, Alert, ToastAndroid, Button, ImageBackground } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { FIREBASE_AUTH, FIREBASE_DB  } from '../../FirebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -23,6 +23,33 @@ const LoginScreen = ({ navigation }: RouterProps) => {
   const [exitingEmail, setExitingEmail] = useState(false);
   const [exitingPassword, setExitingPassword] = useState(false);
   const [users, setUsers] = useState([]);
+
+
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isButtonPressed, setIsButtonPressed] = useState(false);
+  const [isButtonPressedApple, setIsButtonPressedApple] = useState(false);
+  const [isButtonPressedGoogle, setIsButtonPressedGoogle] = useState(false);
+  const [isButtonPressedFacebook, setIsButtonPressedFacebook] = useState(false);
+
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+    setIsButtonPressed(false);
+    setIsButtonPressedApple(false)
+    setIsButtonPressedGoogle(false)
+    setIsButtonPressedFacebook(false)
+  };
+  
+
+  const handleButtonPress = () => {
+    setIsButtonPressed(true);
+    setIsInputFocused(false);
+    setIsButtonPressedApple(false)
+    setIsButtonPressedGoogle(false)
+    setIsButtonPressedFacebook(false)
+  };
+  
+  //
+
 
   const fetchAllUsers = async () => {
     try {
@@ -70,11 +97,12 @@ const LoginScreen = ({ navigation }: RouterProps) => {
     if(exitingEmail){
     setShowEmailInput(false);
     setShowPasswordInput(true);
+    handleButtonPress();
     }
   };
 
   const handleLogin = async () => {
-    
+    handleButtonPress();
 
     // Validation
     let isValid = true;
@@ -130,15 +158,37 @@ const LoginScreen = ({ navigation }: RouterProps) => {
   const handleRegister = () => {
     navigation.navigate('RegisterScreen');
   };
+  const handleLoginApple = () => {
+    setIsButtonPressedApple(true)
+    setIsButtonPressedGoogle(false)
+    setIsButtonPressedFacebook(false)
+  };
+  const handleLoginGoogle = () => {
+    setIsButtonPressedGoogle(true)
+    setIsButtonPressedApple(false)
+    setIsButtonPressedFacebook(false)
+  };
+  const handleLoginFaceBook = () => {
+    setIsButtonPressedFacebook(true)
+    setIsButtonPressedApple(false)
+    setIsButtonPressedGoogle(false)
+  };
+  const [searchWord, setSearchWord] = useState('');
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`http://192.168.11.106:1337/api/${searchWord}?populate=*`);
+      const data = await response.json();
+      console.log('Result:', data.data[0]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   return (
     <Animatable.View animation="fadeInUp" style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={require('./../../assets/bg_first.jpg')}
-          style={styles.backgroundImage}
-        />
-      </View>
+      <ImageBackground source={require('./../../assets/lg_bg.png')} style={styles.containerBg}>
+
       <KeyboardAvoidingView behavior='padding' style={styles.kybcontainer}>
       
           <SvgUri
@@ -158,7 +208,8 @@ const LoginScreen = ({ navigation }: RouterProps) => {
         <View style={styles.parentView}>
           <View style={styles.inputView}>
           <TextInput
-            style={styles.inputText}
+            style={[styles.inputText,isInputFocused && styles.inputFocused]}
+            onFocus={handleInputFocus}
             placeholder="Email..."
             placeholderTextColor="#444"
             onChangeText={handleInputEmailChange}
@@ -181,16 +232,16 @@ const LoginScreen = ({ navigation }: RouterProps) => {
         
       <View style={styles.inputViewO}>
         {exitingPassword ? 
-          <Text style={{ color: 'green' ,marginBottom:10,marginLeft:35,fontWeight:'600',fontSize:16}}> </Text> 
+          <Text style={{ color:'green',marginBottom:10,marginLeft:35,fontWeight:'600',fontSize:16}}> </Text> 
           :
-          <Text style={{ color: 'red' ,marginBottom:10,marginLeft:35,fontWeight:'600',fontSize:16}}>Inserez votre mot de passe </Text>
-        
+          <Text style={{ color:'red',marginBottom:10,marginLeft:35,fontWeight:'500',fontSize:16}}>Inserez votre mot de passe </Text>
           }
         <View style={styles.parentView}>
           <View style={styles.inputView}>
           <TextInput
             secureTextEntry
-            style={styles.inputText}
+            onFocus={handleInputFocus}
+            style={[styles.inputText,isInputFocused && styles.inputFocused]}
             placeholder="Mot de passe"
             placeholderTextColor="#444"
             onChangeText={handleInputPasswordChange}
@@ -201,18 +252,18 @@ const LoginScreen = ({ navigation }: RouterProps) => {
           <AntDesign name="check" size={20} color="green" style={styles.iconv}/>
            :
           <FontAwesome6 name="xmark" size={20} color="red" style={styles.iconv}/>
-          
           }
-          
-          
         </View>
         </View>
       )}
-
-      <TouchableOpacity style={styles.loginBtn} onPress={showPasswordInput ? handleLogin : handleShowPasswordInput}>
-        <Text style={styles.loginText}>{showPasswordInput ? 'YALLA!' : 'YALLA!'}</Text>
+    
+      <TouchableOpacity
+        onPress={ showPasswordInput ? handleLogin : handleShowPasswordInput}
+        style={[styles.button2, isButtonPressed ? styles.buttonPressed : null]}
+      >
+        <Text style={[styles.loginText, isButtonPressed ? {color:'black',fontSize:20,fontWeight:'900'} : null]}>{showPasswordInput ? 'YALLA!' : 'YALLA!'}</Text>
       </TouchableOpacity>
-        
+
         <View style={styles.registerv}>
           <Text style={{color:'white'}}>Don't have an account?</Text>
           <TouchableOpacity onPress={handleRegister}>
@@ -220,20 +271,36 @@ const LoginScreen = ({ navigation }: RouterProps) => {
           </TouchableOpacity>
         </View>
         <Text style={{fontWeight:'700',marginTop:20,marginBottom:20,color:'white'}}>Or</Text>
-         <TouchableOpacity style={styles.loginBtnOption} onPress={handleLogin}>
-         <AntDesign name="apple1" size={24} color="white" style={styles.icon} />
-          <Text style={styles.loginTextOption}>Continue with Apple</Text>
+        {/* <TextInput
+        style={styles.input}
+        placeholder="Enter a word"
+        value={searchWord}
+        onChangeText={text => setSearchWord(text)}
+      />
+        <Button
+          title="Search"
+          onPress={fetchData}
+        /> */}
+        
+         <TouchableOpacity style={isButtonPressedApple ? styles.loginBtnOption2 : styles.loginBtnOption} onPress={handleLoginApple}>
+         <AntDesign name="apple1" size={24} color={isButtonPressedApple ? "black" : "white"} style={styles.icon} />
+          <Text style={isButtonPressedApple ? styles.loginTextOption2 : styles.loginTextOption}>Continue with Apple</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.loginBtnOption} onPress={handleLogin}>
-         <AntDesign name="google" size={24} color="white" style={styles.icon} />
-          <Text style={styles.loginTextOption}>Continue with Google</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.loginBtnOption} onPress={handleLogin}>
-        <Entypo name="facebook-with-circle" size={24} color="white" style={styles.icon} />
-          <Text style={styles.loginTextOption}>Continue with Facebook</Text>
-        </TouchableOpacity>
-</KeyboardAvoidingView>
 
+        <TouchableOpacity style={isButtonPressedGoogle ? styles.loginBtnOption2 : styles.loginBtnOption} onPress={handleLoginGoogle}>
+         <AntDesign name="google" size={24} color={isButtonPressedGoogle ? "black" : "white"} style={styles.icon} />
+          <Text style={isButtonPressedGoogle ? styles.loginTextOption2 : styles.loginTextOption}>Continue with Google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={isButtonPressedFacebook ? styles.loginBtnOption2 : styles.loginBtnOption} onPress={handleLoginFaceBook}>
+        <Entypo name="facebook-with-circle" size={24} color={isButtonPressedFacebook ? "black" : "white"} style={styles.icon} />
+          <Text style={isButtonPressedFacebook ? styles.loginTextOption2 : styles.loginTextOption}>Continue with Facebook</Text>
+        </TouchableOpacity>
+
+    </KeyboardAvoidingView>
+
+      </ImageBackground>
+      
       
 
     </Animatable.View>
@@ -246,9 +313,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
   },
+  containerBg:{
+    flex: 1,
+    opacity:0.9,
+    backgroundColor:'#000',
+    justifyContent: 'center',
+  },
   kybcontainer: {
     alignItems: "center",
 
+  },
+  input: {
+    height: 40,
+    width: '80%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
   logo: {
     fontWeight: 'bold',
@@ -285,20 +366,25 @@ const styles = StyleSheet.create({
     height: 50,
     color: 'white',
   },
-  loginBtn: {
-    width: '65%',
-    backgroundColor: '#fb5b5a',
-    borderRadius: 15,
+  loginBtnOption: {
+    width: '80%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    borderColor:'#fff',
+    borderWidth:2,
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 2,
+    flexDirection:'row'
   },
-  loginBtnOption: {
+  loginBtnOption2: {
     width: '80%',
-    backgroundColor: '#fb5b5a',
+    backgroundColor: '#fff',
     borderRadius: 10,
+    borderColor:'#fff',
+    borderWidth:2,
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
@@ -312,12 +398,19 @@ const styles = StyleSheet.create({
   },
   loginText: {
     color: 'white',
-    fontWeight:'900'
+    fontWeight:'900',
+    fontSize:20
   },
   
   loginTextOption: {
     color: 'white',
-    flex:3
+    flex:3,
+    fontWeight:'500',
+  },
+  loginTextOption2: {
+    color: 'black',
+    flex:3,
+    fontWeight:'500',
   },
   registerText: {
     color: '#fb5b5a',
@@ -361,6 +454,25 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
     // Other styles for your background image
+  },
+  inputFocused: {
+    borderBottomColor: 'blue', 
+  },
+  button2: {
+    width: '62%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Default background color
+    padding: 10,
+    borderColor:'#fff',
+    borderWidth:2,
+    borderRadius: 15,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  buttonPressed: {
+    backgroundColor: 'white', // Change background color when pressed
   },
 });
 
