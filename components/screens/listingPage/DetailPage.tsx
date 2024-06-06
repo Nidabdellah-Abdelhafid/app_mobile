@@ -1,6 +1,5 @@
 import {  View,Text, StyleSheet, Image, Dimensions, TouchableOpacity, Share, Modal } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import lisingData from '../../../assets/data/airbnb-listings.json';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   SlideInDown,
@@ -27,7 +26,6 @@ const IMG_HEIGHT = 300;
 
 const DetailPage = ({ route ,navigation }:RouterProps) => {
   const { itemId } = route.params;
-  const listing = (lisingData as any[]).find((item) => item.id === "1563562");
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [modalVisible1, setModalVisible1] = useState(false);
   const items = fileData;
@@ -72,14 +70,14 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
       closeModal1();
   };
   const shareListing = async () => {
-    try {
-      await Share.share({
-        title: listing.name,
-        url: listing.xl_picture_url,
-      });
-    } catch (err) {
-      console.log(err);
-    }
+    // try {
+    //   await Share.share({
+    //     title: listing.name,
+    //     url: listing.xl_picture_url,
+    //   });
+    // } catch (err) {
+    //   console.log(err);
+    // }
   };
 
   useLayoutEffect(() => {
