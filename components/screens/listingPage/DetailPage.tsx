@@ -1,5 +1,5 @@
 import {  View,Text, StyleSheet, Image, Dimensions, TouchableOpacity, Share, Modal } from 'react-native'
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import lisingData from '../../../assets/data/airbnb-listings.json';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
@@ -8,27 +8,58 @@ import Animated, {
   useAnimatedRef,
   useAnimatedStyle,
   useScrollViewOffset,
+  FadeInRight,
+   FadeOutLeft
 } from 'react-native-reanimated';
-import { defaultStyles } from '../../../constants/Styles';
 import Colors from '../../../constants/Colors';
-import { useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Entypo } from '@expo/vector-icons';
 import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import fileData from '../../../assets/data/file.json';
 
-
-
+interface RouterProps {
+  navigation: NavigationProp<any,any>;
+  route
+}
 const { width } = Dimensions.get('window');
 const IMG_HEIGHT = 300;
 
-const DetailPage = ({ route }: { route: any }) => {
+const DetailPage = ({ route ,navigation }:RouterProps) => {
   const { itemId } = route.params;
-  const listing = (lisingData as any[]).find((item) => item.id === itemId);
-  const navigation = useNavigation();
+  const listing = (lisingData as any[]).find((item) => item.id === "1563562");
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [modalVisible1, setModalVisible1] = useState(false);
   const items = fileData;
+
+  const [datafetch,setDatafetch]=useState(null) ;
+  const [datafetchOffre,setDatafetchOffre]=useState(null) ;
+   
+ 
+
+  const  fetchData = async () => {
+    try {
+      const response = await fetch(`http://192.168.11.107:1337/api/pays/${itemId}?populate=*&pagination[limit]=-1`);
+      const data = await response.json();
+      // console.log('Result5:', data);
+      setDatafetch(data.data);
+      
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (itemId) {
+      fetchData();
+    }
+  }, [itemId]);
+  
+  useEffect(() => {
+    // console.log('Data fetched5:', datafetch);
+  }, [datafetch]);
+
+
   const openModal1 = () => {
       setModalVisible1(true);
   };
@@ -44,7 +75,7 @@ const DetailPage = ({ route }: { route: any }) => {
     try {
       await Share.share({
         title: listing.name,
-        url: listing.listing_url,
+        url: listing.xl_picture_url,
       });
     } catch (err) {
       console.log(err);
@@ -107,38 +138,32 @@ const DetailPage = ({ route }: { route: any }) => {
     const newColumns = columns === 1 ? 2 : 1; // Toggle between 1 and 2 columns
     setColumns(newColumns);
   };
-  const data = [
-    {
-      "id": 1,
-      "url": "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:22:54.402876217_1.png"
-    },
-    {
-      "id": 2,
-      "url": "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:23:13.130844341_2.png"
-    },
-    {
-      "id": 3,
-      "url": "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:23:23.670653154_3.png"
-    },
-    {
-      "id": 4,
-      "url": "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:25:18.453257083_4.png"
-    },
-    {
-      "id": 5,
-      "url": "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:25:29.490899143_5.png"
-    },
-    {
-      "id": 6,
-      "url": "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:25:50.145203725_6.png"
-    }
-  ];
+  const data = datafetch?.attributes.photos?.data;
+  const dataOffres = datafetch?.attributes.offres?.data;
+
+  // console.log("hona : ",dataOffres)
   const renderItemImage = ({ item, index }) => {
     // Change numColumns dynamically
     return (
       <View style={{ flex: 1 , margin: 5 }}>
-      <Image source={{uri:item.url}} style={styles.stImageModal}/>
+      <Image source={{uri:item.attributes.url}} style={styles.stImageModal}/>
     </View>
+    );
+  };
+
+  const StarRating = ({ reviews }) => {
+    const stars = [];
+  
+    for (let i = 0; i < reviews; i++) {
+      stars.push(
+        <Ionicons key={i} name="star" size={16} color="orange" />
+      );
+    }
+  
+    return (
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        {stars}
+      </View>
     );
   };
   return (
@@ -146,60 +171,68 @@ const DetailPage = ({ route }: { route: any }) => {
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         ref={scrollRef}
-        scrollEventThrottle={16}>
+        scrollEventThrottle={16}
+        >
         <Animated.Image
-          source={{ uri: listing.xl_picture_url }}
+          source={{ uri: datafetch?.attributes.photos?.data[0]?.attributes.url }}
           style={[styles.image, imageAnimatedStyle]}
           resizeMode="cover"
         />
         <View style={{flexDirection:'row',position:'absolute',top:240,left:"30%"}}>
-          <Image source={{uri: "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:22:54.402876217_1.png"}} style={styles.stImage}/>
-          <Image source={{uri: "https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-07-05T12:23:13.130844341_2.png"}} style={styles.stImage}/>
+          <Image source={{uri: datafetch?.attributes.photos?.data[0]?.attributes.url}} style={styles.stImage}/>
+          <Image source={{uri: datafetch?.attributes.photos?.data[1]?.attributes.url}} style={styles.stImage}/>
           <TouchableOpacity style={[styles.stImage,{backgroundColor:'#000',justifyContent:'center',alignItems:'center',opacity:0.8}]} onPress={openModal1}>
               <MaterialCommunityIcons name="image-area" size={20} color="white" />
           </TouchableOpacity>
         </View>
         <View style={styles.infoContainer}>
-          <View style={{flexDirection:'row'}}>
+          <TouchableOpacity style={{flexDirection:'row'}}>
             <Entypo name="location-pin" size={20} color="#CFCECE" />
-            <Text style={{color:'#CFCECE',marginBottom:16}}>{listing.country}</Text>
+            <Text style={{color:'#CFCECE',marginBottom:16}}>{datafetch?.attributes.continent}</Text>
+          </TouchableOpacity>
+          <Text style={styles.name}>{datafetch?.attributes.label}</Text>
+          
+          
+          <View style={{ flexDirection: 'row', gap: 4 ,marginBottom:10}}>
+            <StarRating reviews={datafetch?.attributes.reviews} />
           </View>
-          <Text style={styles.name}>{listing.name}</Text>
-          
-          
-          <View style={{ flexDirection: 'row', gap: 4 }}>
-          <Ionicons name="star" size={16} color={'orange'}/>
-          <Ionicons name="star" size={16} color={'orange'}/>
-          <Ionicons name="star" size={16} color={'orange'}/>
-          <Ionicons name="star" size={16} color={'orange'}/>
-            <Ionicons name="star" size={16} color={'orange'}/>
            
-          </View>
           <Text style={styles.location}>
-            Bienvenue Aux {listing.country} !
+            Bienvenue Aux {datafetch?.attributes.label} !
             </Text>
-          <Text style={styles.description}>{listing.description}</Text>
-          
-          <View style={{height:300,backgroundColor:'#222'}}>
+          <Text style={styles.description}>{datafetch?.attributes.description}</Text>
+
+           {dataOffres?.map((item, index) => (
+          <Animated.View key={index} style={styles.listViewOffre} entering={FadeInRight} exiting={FadeOutLeft}>
+                <Image source={{ uri: item.attributes.image }} style={styles.imageOffre} />
+                
+                <View style={{ position: 'absolute',left: 10, top: 110,flexDirection:'row' }}>
+                    <View style={{ flex:1,justifyContent:'space-between',flexDirection:'row'}}>
+                      <View style={{backgroundColor: 'rgba(0, 0, 0, 0.5)',borderRadius:10,padding:5,width:115,alignItems:'center',marginRight:20,justifyContent:'center'}}>
+                        <Text style={{ fontSize: 10, fontWeight: '900' ,color:'#fff',textAlign:'center'}}>{item.attributes.label}</Text>
+                      </View>
+                    
+                    <TouchableOpacity style={{borderColor:'#fff',borderWidth:1.5,borderRadius:10,padding:4,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailOffre', { itemId: item.id }) }}>
+                        <Text  style={{color:'#fff',fontWeight:'600'}}>Voir l'Offre 
+                        </Text>
+                        <Ionicons name="chevron-forward" size={12} color="white" />
+                    </TouchableOpacity>
+                    </View>
+                    
+                    
+                </View>
+                
+            </Animated.View>
+          ))}
+          <View style={{height:100,backgroundColor:'#222'}}>
             <Text></Text>
+
           </View>
+          
         </View>
 
       </ScrollView>
-
-      {/* <Animated.View style={defaultStyles.footer} entering={SlideInDown.delay(200)}>
-        <View
-          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <TouchableOpacity style={styles.footerText}>
-            <Text style={styles.footerPrice}>€{listing.price}</Text>
-            <Text style={{color:'#fff'}}>night</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[defaultStyles.btn, { paddingRight: 20, paddingLeft: 20 }]}>
-            <Text style={defaultStyles.btnText}>Reserve</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View> */}
+      
 
       <Modal
                 animationType="fade"
@@ -355,7 +388,7 @@ modalView: {
     right: 20,
     height:"85%",
     backgroundColor: '#000',
-    opacity:0.8,
+    opacity:0.85,
     borderRadius: 20,
     padding: 10,
     shadowColor: '#000',
@@ -368,6 +401,17 @@ modalView: {
     elevation: 5,
     
 },
+listViewOffre:{
+  gap: 10,
+  marginTop:30
+},
+imageOffre:{
+  width: width-50,
+  height: 160,
+  borderRadius:20,
+  backgroundColor:'#000',
+  opacity:0.9
+  },
 });
 
 export default DetailPage

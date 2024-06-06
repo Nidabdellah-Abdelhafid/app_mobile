@@ -4,15 +4,12 @@ import { Ionicons ,Fontisto} from '@expo/vector-icons';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { NavigationProp } from '@react-navigation/native';
 import { FlatList } from 'react-native-gesture-handler';
-
 interface Props{
     listings: any[];
     category:string;
     navigation: NavigationProp<any, any>;
     refresh: number;
 }
-
-
 
 const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
     const [loading,setLoading]= useState(false);
@@ -24,13 +21,16 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
         setModalVisible(true);
     };
 
+
     const closeModal = () => {
         setModalVisible(false);
     };
 
+
     const toggleFavorite = () => {
         setIsFavorited(!isFavorited);
     };
+
 
     useEffect(() => {
         if (refresh) {
@@ -38,29 +38,32 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
         }
       }, [refresh]);
 
+
       const scrollListTop = () => {
         listRef.current?.scrollToOffset({ offset: 0, animated: true });
       };
 
+
     useEffect(()=>{
         setLoading(true);
-        console.log("R List ");
+        //console.log("R List :",items);
         setTimeout(()=>{
             setLoading(false);
         },100)
     },[category]);
-    
+   
     const renderRow: ListRenderItem<any> = ({item}) => (
+
             <TouchableOpacity onPress={() => navigation.navigate('DetailPage', { itemId: item.id })}>
             <Animated.View style={styles.listView} entering={FadeInRight} exiting={FadeOutLeft}>
-                <Image source={{ uri: item.medium_url }} style={styles.image} />
+                <Image source={{ uri: item.attributes.photos.data[0].attributes.url }} style={styles.image} />
                 <TouchableOpacity style={{ position: 'absolute', right: 32, top: 15 }} onPress={openModal}>
                     <Ionicons name={isFavorited ? 'heart' : 'heart-outline'} size={25} color={isFavorited ? 'white' : '#fff'} />
                 </TouchableOpacity>
-                
+               
                 <View style={{ position: 'absolute',left: 35, top: 160,flexDirection:'row', justifyContent: 'space-between' }}>
                     <View >
-                    <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.name}</Text>
+                    <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.attributes.label}</Text>
                     <View style={{ flexDirection: 'row', gap: 4 }}>
                         <Ionicons name="star" size={16} color='orange'/>
                         <Ionicons name="star" size={16} color='orange'/>
@@ -70,13 +73,13 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
                         {/* <Text style={{}}>{Number(item.review_scores_rating / 20)}</Text> */}
                     </View>
                     </View>
-                    
-                    
+                   
+                   
                 </View>
                 <TouchableOpacity style={{ position: 'absolute', right: 35, top: 180 }} onPress={openModal}>
                     {isFavorited ?<Fontisto name='favorite' size={25} color='white' /> :<Fontisto name="bookmark" size={24} color="#fff" />}
                  </TouchableOpacity>
-                
+               
             </Animated.View>
             {modalVisible && (
                 <Modal
@@ -98,7 +101,7 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
                 </Modal>
             )}
         </TouchableOpacity>
-        
+       
     )
   return (
     <View style={styles.container}>
@@ -107,14 +110,17 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
         data={loading ? [] : items}
         ref={listRef}
         // ListHeaderComponent={<Text style={styles.info}>{items.length} homes</Text>}
-        
+       contentContainerStyle={{ paddingBottom: 120 }} // Add paddingBottom to ensure the last item is visible
+        ListFooterComponent={<View style={{ height: 120 }} />} // Add a footer component
       />
-      
+     
     </View>
   )
 }
 
+
 export default ListingPage
+
 
 const styles= StyleSheet.create({
     container:{
@@ -136,13 +142,14 @@ const styles= StyleSheet.create({
         height: 220,
         borderRadius:20,
         backgroundColor:'#000',
-        opacity:0.85
+        opacity:0.85,
+        
     },
     info: {
         textAlign: 'center',
         fontSize: 16,
         fontWeight:'500',
-        
+       
       },
     modalContainer: {
       position: 'absolute',
@@ -195,3 +202,6 @@ const styles= StyleSheet.create({
       fontWeight: 'bold',
     },
 })
+
+
+
