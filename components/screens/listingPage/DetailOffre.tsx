@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Share, Modal, ImageBackground, Button } from 'react-native'
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Share, Modal, ImageBackground, Button, Alert } from 'react-native'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import lisingData from '../../../assets/data/airbnb-listings.json';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,13 +14,16 @@ import Animated, {
 import Colors from '../../../constants/Colors';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Entypo } from '@expo/vector-icons';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { FlatList, ScrollView, Switch, TextInput } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
 import fileData from '../../../assets/data/file.json';
 import Carousel from 'pinar';
 import  {  Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import { MaterialIcons } from '@expo/vector-icons';
+import axios from 'axios';
+import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const INITIAL_REGION = {
   latitude: 33.5883100,
@@ -41,6 +44,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
+  const [modalVisible3, setModalVisible3] = useState(false);
   const items = fileData;
 
   const [datafetch, setDatafetch] = useState(null);
@@ -51,7 +55,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`http://192.168.11.107:1337/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
+      const response = await fetch(`http://192.168.91.62:1337/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
       const data = await response.json();
         // console.log('Result5:', data.data.attributes);
       setDatafetch(data.data);
@@ -63,7 +67,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchDataPlanning = async () => {
     try {
-      const response = await fetch(`http://192.168.11.107:1337/api/planings?populate=*&pagination[limit]=-1`);
+      const response = await fetch(`http://192.168.91.62:1337/api/planings?populate=*&pagination[limit]=-1`);
       const data = await response.json();
       // console.log('Result5:', data.data[0].attributes.offre?.data);
       const filteredData = data.data.filter(item => item.attributes.offre?.data.id === itemId);
@@ -98,7 +102,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
     // Close the modal
     closeModal1();
   };
-
+  //------
   const openModal2 = () => {
     setModalVisible2(true);
   };
@@ -110,6 +114,20 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
     // Close the modal
     closeModal2();
   };
+  //----
+  const openModal3 = () => {
+    setModalVisible3(true);
+  };
+
+  const closeModal3 = () => {
+    setModalVisible3(false);
+  };
+  const handleDateSelect3 = () => {
+    // Close the modal
+    videForm();
+    closeModal3();
+  };
+
 
 
   const shareListing = async () => {
@@ -185,9 +203,9 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   // console.log("hona : ",datafetchPlanning)
   const handleDateSelectProgramme = async (id)=>{
       try {
-        console.log('id :', id);
+        // console.log('id :', id);
 
-        const response = await fetch(`http://192.168.11.107:1337/api/programmes?populate=*&pagination[limit]=-1`);
+        const response = await fetch(`http://192.168.91.62:1337/api/programmes?populate=*&pagination[limit]=-1`);
         const data = await response.json();
         // console.log('Result5--:', data.data);
         const filteredData = data.data.filter(item => item.attributes.planing?.data.id === id);
@@ -211,7 +229,211 @@ const animateToRegion = () => {
 
   mapRef.current.animateToRegion(region, 2000);
 };
+const [reference, setReference] = useState('');
+const [destination, setDestination] = useState('');
+const [nbr_voyageurs_adultes, setNbr_voyageurs_adultes] = useState(0);
+const [nbr_voyageurs_enfants, setNbr_voyageurs_enfants] = useState(0);
+const [pourquoi_voyagez_vous, setPourquoi_voyagez_vous] = useState('');
+const [date_partir, setDate_partir] = useState(new Date());
+const [showDatePicker, setShowDatePicker] = useState(false);
+const [date_fixe, setDate_fixe] = useState(false);
+const [duree, setDuree] = useState(0);
+const [duree_modifiable, setDuree_modifiable] = useState(false);
+const [categorie_hebergement, setCategorie_hebergement] = useState('');
+const [cabine, setCabine] = useState('');
+const [experience_souhaitez, setExperience_souhaitez] = useState('');
+const [offre, setOffre] = useState(null);
+const handleAdultChange = (text) => {
+  const num = parseInt(text, 10);
+  if (!isNaN(num) && num >= 0) {
+    setNbr_voyageurs_adultes(num);
+  } else {
+    setNbr_voyageurs_adultes(0);
+  }
+};
+
+const handleChildrenChange = (text) => {
+  const num = parseInt(text, 10);
+  if (!isNaN(num) && num >= 0) {
+    setNbr_voyageurs_enfants(num);
+  } else {
+    setNbr_voyageurs_enfants(0);
+  }
+};
+const handleDureeChange = (text) => {
+  const num = parseInt(text, 10);
+  if (!isNaN(num) && num >= 0) {
+    setDuree(num);
+  } else {
+    setDuree(0);
+  }
+};
+useEffect(() => {
+  if (datafetch?.attributes?.pay?.data?.attributes?.label) {
+    setDestination(datafetch.attributes.pay.data.attributes.label);
+  }
+}, [datafetch]);
+const onChangeDate = (event, selectedDate) => {
+  const currentDate = selectedDate || date_partir;
+  setShowDatePicker(false);
+  setDate_partir(currentDate);
+};
+
+const formatDate = (date) => {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`;
+};
+
+const handleSubmit = async () => {
+  const reservationData = {
+    reference : reference,
+    destination : destination,
+    nbr_voyageurs_enfants : nbr_voyageurs_enfants,
+    nbr_voyageurs_adultes: nbr_voyageurs_adultes,
+    pourquoi_voyagez_vous : pourquoi_voyagez_vous,
+    date_partir : date_partir,      
+    date_fixe : date_fixe,
+    duree : duree,
+    duree_modifiable : duree_modifiable,
+    categorie_hebergement : categorie_hebergement,
+    cabine : cabine,
+    experience_souhaitez : experience_souhaitez,
+
+};
   
+  try {
+    const response = await axios.post('http://192.168.91.62:1337/api/reservations', {
+      data: reservationData,
+    });
+    console.log('Success', 'Reservation created successfully!', response.data);
+    Alert.alert('🎉 Success! 🎉',
+    '✅ Reservation created successfully!',
+    [{ text: 'OK', onPress: () => {handleDateSelect3()} }],
+    { cancelable: false });
+    // closeModal3();
+  } catch (error) {
+    console.log('Error', error.response?.data || error.message);
+  }
+  
+};
+const handleSubmit1 = () => {
+  // Handle form submission
+  console.log('Form Data Submitted ---:');
+  // Here you can send formData to your server
+};
+const [options, setOptions] = useState([
+  { label: 'Hôtel 4 etoils', value: false ,star:4},
+  { label: 'Hôtel 5 etoils', value: false ,star:5},
+  { label: 'Hôtel de luxe', value: false },
+  { label: 'Un Resort', value: false },
+  { label: 'Un ecolodge', value: false },
+  // Add more options as needed
+]);
+const [options1, setOptions1] = useState([
+  { label: 'Économique', value: false },
+  { label: 'Business', value: false },
+  // Add more options as needed
+]);
+const [options2, setOptions2] = useState([
+  { label: 'Culturelle', value: false },
+  { label: 'Nature', value: false },
+  { label: 'Foodie', value: false },
+  { label: 'Shopping', value: false },
+  { label: 'Romantique', value: false },
+  { label: 'Spa', value: false },
+  
+  { label: 'Soleil', value: false },
+  { label: 'Fête', value: false },
+  { label: 'Famille', value: false },
+  { label: 'Luxe', value: false },
+  { label: 'Romantique', value: false },
+  { label: 'Plage', value: false },
+
+  // Add more options as needed
+]);
+
+
+// useEffect(() => {
+//   console.log(categorie_hebergement);
+// }, [categorie_hebergement]);
+// useEffect(() => {
+//   console.log(cabine);
+// }, [cabine]);
+
+const toggleOption = (index) => {
+  const updatedOptions = options.map((option, i) => {
+    if (i === index) {
+      setCategorie_hebergement(option.label);
+      return { ...option, value: !option.value };
+    } else {
+      return { ...option, value: false };
+    }
+  });
+  setOptions(updatedOptions);
+};
+const toggleOption1 = (index) => {
+  const updatedOptions = options1.map((option, i) => {
+    if (i === index) {
+      setCabine(option.label);
+      return { ...option, value: !option.value };
+    } else {
+      return { ...option, value: false };
+    }
+  });
+  setOptions1(updatedOptions);
+};
+const renderStars = (star) => {
+  const stars = [];
+  for (let i = 0; i < star; i++) {
+    stars.push(<Text key={i}>⭐</Text>);
+  }
+  return stars;
+};
+const toggleOption2 = (index) => {
+  const updatedOptions = options2.map((option, i) => {
+    if (i === index) {
+      return { ...option, value: !option.value };
+    }
+    return option;
+  });
+  setOptions2(updatedOptions);
+
+  const selectedLabels = updatedOptions
+    .filter(option => option.value)
+    .map(option => option.label)
+    .join(', ');
+
+  setExperience_souhaitez(selectedLabels);
+};
+// useEffect(() => {
+//   console.log(experience_souhaitez);
+// }, [experience_souhaitez]);
+const videForm =()=>{
+  setReference('')
+  setNbr_voyageurs_adultes(0)
+  setNbr_voyageurs_enfants(0)
+  setPourquoi_voyagez_vous('')
+  setDate_partir(new Date())
+  setDuree_modifiable(false)
+  setDuree(0)
+  setDate_fixe(false)
+  setCabine('')
+  setCategorie_hebergement('')
+  setExperience_souhaitez('')
+  options.map((i)=>{
+    i.value=false
+  })
+  options1.map((i)=>{
+    i.value=false
+  })
+  options2.map((i)=>{
+    i.value=false
+  })
+
+};
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -265,6 +487,7 @@ const animateToRegion = () => {
           <TouchableOpacity style={[styles.stImage, { justifyContent: 'center', alignItems: 'center', marginTop: 50 }]} onPress={openModal1}>
             <Text style={{color:'#fff',fontSize:12}}>Voir le planning</Text>
             <FontAwesome name="chevron-down" size={24} color="white" />
+            {/* <AntDesign name="down" size={24} color="white" /> */}
           </TouchableOpacity>
           <View style={{width:"100%",height:400,marginTop:40,borderRadius:20,overflow: 'hidden',marginBottom:18}}>
             <MapView style={styles.map} 
@@ -303,7 +526,7 @@ const animateToRegion = () => {
             <Text></Text>
           </View> */}
         </View>
-
+{/* <Button title='press' onPress={handleSubmit}/> */}
       </ScrollView>
 
 
@@ -363,7 +586,7 @@ const animateToRegion = () => {
 
             </View>
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 18 }}>
-              <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "75%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { console.log('pre') }}>
+              <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "75%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { openModal3() }}>
                 <Text style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Préparez votre départ !
                 </Text>
               </TouchableOpacity>
@@ -406,6 +629,152 @@ const animateToRegion = () => {
               </TouchableOpacity>
               </View>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible3}
+        onRequestClose={closeModal3}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect3()}>
+              <FontAwesome name="chevron-up" size={20} color="white" />
+            </TouchableOpacity>
+            <ProgressSteps>
+              <ProgressStep label='Step 1'>
+                <Text style={styles.inputText}>Destination</Text>
+                
+                  <TextInput
+                  placeholder="Destination"
+                  value={destination}
+                  onChangeText={setDestination}
+                  style={styles.inputView}
+                  readOnly={true}
+                />
+                
+                <Text style={styles.inputText}>Nombre de voyageurs adultes</Text>
+                <TextInput
+                  value={nbr_voyageurs_adultes.toString()}
+                  onChangeText={handleAdultChange}
+                  style={styles.inputView}
+                  keyboardType="numeric"
+                />
+                <Text style={styles.inputText}>Nombre d’enfants</Text>
+                <TextInput
+                  value={nbr_voyageurs_enfants.toString()}
+                  onChangeText={handleChildrenChange}
+                  style={styles.inputView}
+                  keyboardType="numeric"
+                />
+              </ProgressStep>
+              <ProgressStep label='Step 2'>
+              <Text style={styles.inputText}>Pourquoi voyagez-vous ?</Text>
+                
+                <TextInput
+                placeholder="Aventure, Culture, détente …"
+                value={pourquoi_voyagez_vous}
+                onChangeText={setPourquoi_voyagez_vous}
+                style={styles.inputView}
+              />
+              
+              <Text style={styles.inputText}>Quand souhaitez-vous partir ?</Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputView}>
+                <Text>{formatDate(date_partir)}</Text>
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={date_partir}
+                      mode="date"
+                      display="default"
+                      onChange={onChangeDate}
+                    />
+                  )}
+              <View style={{flexDirection:'row',alignItems:'center'}}>  
+              <Switch
+                value={date_fixe}
+                onValueChange={setDate_fixe}
+              />
+              <Text style={styles.inputTextSwitch}>Mes dates sont fixes</Text>
+              </View>  
+              <Text style={styles.inputText}>Quelle est la durée de votre séjour ?</Text>
+                <TextInput
+                  value={duree.toString()}
+                  onChangeText={handleDureeChange}
+                  style={styles.inputView}
+                  keyboardType="numeric"
+                />
+              <View style={{flexDirection:'row',alignItems:'center'}}>  
+              <Switch
+                value={duree_modifiable}
+                onValueChange={setDuree_modifiable}
+              />
+              <Text style={styles.inputTextSwitch}> durée de mon voyage est non modifiable</Text>
+              </View> 
+              </ProgressStep>
+              <ProgressStep label='Step 3'>
+              <Text style={styles.inputText}>Vous êtes intéressés par quelle catégorie d’hébergement ?</Text>
+              
+              {options.map((option, index) => (
+                <View key={index} style={{flexDirection:'row',alignItems:'center'}}>
+                  
+                  <Switch
+                    value={option.value}
+                    onValueChange={() => toggleOption(index)}
+                  />
+                  <Text style={styles.inputTextSwitch}>{option.label}</Text>
+                  <View style={styles.starContainer}>
+                    {renderStars(option?.star)}
+                  </View>
+                </View>
+              ))}
+              <Text style={styles.inputText}>Choix de cabine</Text>
+              <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',padding:10,margin:5}}>
+                {options1.map((option, index) => (
+                  <View key={index} style={{flexDirection:'row',alignItems:'center'}}>
+                    
+                    <Switch
+                      value={option.value}
+                      onValueChange={() => toggleOption1(index)}
+                    />
+                    <Text style={styles.inputTextSwitch}>{option.label}</Text>
+                  </View>
+                ))}
+              </View>
+              
+              </ProgressStep>
+              <ProgressStep label='Step 4' onSubmit={handleSubmit}>
+              <Text style={styles.inputText}>Quelle expérience vous souhaitez vivre ?</Text>
+              <View style={{flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            padding: 4,
+                            alignContent:'center',
+                            }}>
+                {options2.map((option, index) => (
+                  <View key={index} style={{flexDirection: 'row',
+                  alignItems: 'center',
+                  width: '45%', // Ensure two items per row
+                  marginBottom: 2.5}}>
+                    
+                    <Switch
+                      value={option.value}
+                      onValueChange={() => toggleOption2(index)}
+                    />
+                    <Text style={styles.inputTextSwitch}>{option.label}</Text>
+                  </View>
+                ))}
+              <Text style={[styles.inputText,{textAlign:'center'}]}>« cliquez pour sélectionner des expériences » Vous pouvez choisir plusieurs expériences</Text>
+
+              </View>
+              </ProgressStep>
+              {/* <ProgressStep label='Step 5' onSubmit={handleSubmit1}>
+                <Text style={{color:'#fff'}}>Step final</Text>
+              </ProgressStep> */}
+            </ProgressSteps>
           </View>
         </View>
       </Modal>
@@ -612,6 +981,30 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 20,
     justifyContent: 'flex-end'
+  },
+  inputView: {
+    width: '100%',
+    borderRadius: 10,
+    height: 50,
+    padding: 10,
+    color: '#000',
+    backgroundColor:'#e8f5e9',
+    marginBottom:11,
+    marginTop:10,
+    justifyContent: 'center'
+    
+  },
+  inputText: {
+    fontSize:16,
+    color: 'white',
+  },
+  inputTextSwitch:{
+    fontSize:14,
+    color: 'white',
+  },
+  starContainer: {
+    flexDirection: 'row',
+    marginLeft:5
   },
 });
 

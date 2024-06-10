@@ -9,6 +9,9 @@ import { Entypo } from '@expo/vector-icons';
 import { collection,getDocs} from 'firebase/firestore';
 import { SvgUri } from 'react-native-svg';
 import { FontAwesome6 } from '@expo/vector-icons';
+import Spinner from 'react-native-loading-spinner-overlay'
+import axios from 'axios';
+
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 
@@ -23,6 +26,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
   const [exitingEmail, setExitingEmail] = useState(false);
   const [exitingPassword, setExitingPassword] = useState(false);
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
 
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -135,19 +139,22 @@ const LoginScreen = ({ navigation }: RouterProps) => {
 
     if (isValid) {
       try {
+        setLoading(true);
         const response = await signInWithEmailAndPassword(auth, email, password);
+        
 
       } catch (error) {
         if (Platform.OS === 'android') {
           ToastAndroid.show('Sign-in failed, the email or password is incorrect!', ToastAndroid.LONG);
           setShowEmailInput(true);
           setShowPasswordInput(false);
-          setExitingEmail(false)
-          setExitingPassword(false)
+          setExitingEmail(false);
+          setExitingPassword(false);
         } else {
           Alert.alert('Sign-in failed', 'The email or password is incorrect!');
         }
       } finally {
+        setLoading(false);
        
       }
     } else {
@@ -184,13 +191,14 @@ const LoginScreen = ({ navigation }: RouterProps) => {
       console.error('Error fetching data:', error);
     }
   };
-
+  
   return (
     <Animatable.View animation="fadeInUp" style={styles.container}>
-      <ImageBackground source={require('./../../assets/lg_bg.png')} style={styles.containerBg}>
+      <Spinner visible={loading}/>
+      <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-11-03T10:19:57.032095662_222x.png'}} style={styles.containerBg}>
 
       <KeyboardAvoidingView behavior='padding' style={styles.kybcontainer}>
-      
+          
           <SvgUri
         width="140"
         height="140"

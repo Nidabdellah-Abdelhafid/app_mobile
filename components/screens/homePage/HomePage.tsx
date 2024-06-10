@@ -14,9 +14,9 @@ const HomePage = ({navigation}:Props) => {
    
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://192.168.11.107:1337/api/pays?populate=*&pagination[limit]=-1`);
+        const response = await fetch(`http://192.168.91.62:1337/api/pays?populate=*&pagination[limit]=-1`);
         const data = await response.json();
-        console.log('Result:', data.data[0].attributes);
+        // console.log('Result:', data.data[0].attributes);
         setDatafetch(data.data);
       } catch (error) {
         console.error('Error fetching data:', error);

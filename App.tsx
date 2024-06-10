@@ -9,13 +9,14 @@ import SplashScreen from 'components/splash/SplashScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import MainComponent from 'components/MainComponent';
-
+import registerNNPushToken from 'native-notify';
 
 const Stack = createNativeStackNavigator();
 
 
 
 export default function App() {
+  registerNNPushToken(21747, 'spLw6CdkKa0b9OuXBZH7ba');
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {

@@ -12,7 +12,6 @@ interface Props{
     navigation: NavigationProp<any, any>;
 }
 
-
 const INITIAL_REGION = {
     latitude: 33.5883100,
     longitude: -7.6113800,
