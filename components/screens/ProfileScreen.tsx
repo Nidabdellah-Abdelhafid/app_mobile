@@ -80,7 +80,7 @@ const renderRow: ListRenderItem<any> = ({item}) => (
   </Animated.View>
 )
   return (
-    <ImageBackground source={require('./../../assets/profil_bg.png')} style={styles.container}>
+    <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:47:18.607875882_profile%20bg@2x.png'}} style={styles.container}>
       
         {userData ? (
         <View style={{marginTop:75}}>

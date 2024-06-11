@@ -183,7 +183,7 @@ const toggleShowAll = () => {
 
   return (
     <BottomSheetModalProvider>
-      <ImageBackground source={require('./../assets/hm_bg.png')} style={styles.container}>
+      <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:44:57.261240285_home%20bg@2x.png'}}  style={styles.container}>
       
       <TouchableOpacity style={{ position: 'absolute', right: 20, top: 45 }} onPress={openModal}>
             <Image source={{ uri: userData?.image }} style={styles.profileImage} />

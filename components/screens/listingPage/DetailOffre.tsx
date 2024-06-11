@@ -55,7 +55,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`http://192.168.91.62:1337/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
+      const response = await fetch(`http://192.168.11.107:1337/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
       const data = await response.json();
         // console.log('Result5:', data.data.attributes);
       setDatafetch(data.data);
@@ -67,7 +67,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchDataPlanning = async () => {
     try {
-      const response = await fetch(`http://192.168.91.62:1337/api/planings?populate=*&pagination[limit]=-1`);
+      const response = await fetch(`http://192.168.11.107:1337/api/planings?populate=*&pagination[limit]=-1`);
       const data = await response.json();
       // console.log('Result5:', data.data[0].attributes.offre?.data);
       const filteredData = data.data.filter(item => item.attributes.offre?.data.id === itemId);
@@ -205,7 +205,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
       try {
         // console.log('id :', id);
 
-        const response = await fetch(`http://192.168.91.62:1337/api/programmes?populate=*&pagination[limit]=-1`);
+        const response = await fetch(`http://192.168.11.107:1337/api/programmes?populate=*&pagination[limit]=-1`);
         const data = await response.json();
         // console.log('Result5--:', data.data);
         const filteredData = data.data.filter(item => item.attributes.planing?.data.id === id);
@@ -304,7 +304,7 @@ const handleSubmit = async () => {
 };
   
   try {
-    const response = await axios.post('http://192.168.91.62:1337/api/reservations', {
+    const response = await axios.post('http://192.168.11.107:1337/api/reservations', {
       data: reservationData,
     });
     console.log('Success', 'Reservation created successfully!', response.data);

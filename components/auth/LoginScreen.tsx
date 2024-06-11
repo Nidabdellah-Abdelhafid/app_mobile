@@ -195,7 +195,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
   return (
     <Animatable.View animation="fadeInUp" style={styles.container}>
       <Spinner visible={loading}/>
-      <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2023-11-03T10:19:57.032095662_222x.png'}} style={styles.containerBg}>
+      <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:37:53.426190693_login%20g@2x.png'}} style={styles.containerBg}>
 
       <KeyboardAvoidingView behavior='padding' style={styles.kybcontainer}>
           

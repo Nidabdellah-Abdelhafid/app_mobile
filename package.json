@@ -47,6 +47,7 @@
     "react-native": "0.74.1",
     "react-native-animatable": "^1.4.0",
     "react-native-country-picker-modal": "^2.0.0",
+    "react-native-emoji-selector": "^0.2.0",
     "react-native-fbsdk-next": "^13.0.0",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-linear-gradient": "^2.8.3",
@@ -67,6 +68,7 @@
     "react-native-toastify": "^0.2.2",
     "react-native-web": "~0.19.10",
     "react-native-webview": "13.8.6",
+    "socket.io-client": "^4.7.5",
     "typescript": "~5.3.3",
     "yup": "^1.4.0"
   },
