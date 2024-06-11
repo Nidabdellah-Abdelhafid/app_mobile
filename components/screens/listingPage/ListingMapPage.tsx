@@ -27,7 +27,7 @@ const ListingMapPage = ({ navigation, listing, category}:Props) => {
         setSelectedMarker(item);
     }
     const onMarketSelectedModal= (item)=>{
-        navigation.navigate('DetailPage', { itemId: item.id });
+        navigation.navigate('DetailPage', { itemId: item?.id });
         setSelectedMarker(null);
         
     }
@@ -66,18 +66,18 @@ const ListingMapPage = ({ navigation, listing, category}:Props) => {
       // renderCluster={renderCluster}
       >
 
-        {listing.map((item) => (
+        {listing?.map((item) => (
                     <Marker
                     onPress={()=> onMarketSelected(item)}
                         key={item.id}
                         coordinate={{
-                            latitude: +item.attributes.latitude,
-                            longitude: +item.attributes.longitude
+                          latitude: +item?.attributes.latitude,
+                            longitude: +item?.attributes.longitude
                         }}
                     >
                         <View style={styles.marker}>
                             <MaterialIcons name="pin-drop" size={24} color="red" />
-                            <Text style={styles.markerText}>{item.attributes.label}</Text>
+                            <Text style={styles.markerText}>{item?.attributes.label}</Text>
                         </View>
                   </Marker>
                 ))}
@@ -101,11 +101,11 @@ const ListingMapPage = ({ navigation, listing, category}:Props) => {
                 <View style={styles.modalContent}>
                   
                     <View style={styles.imageContainer}>
-                    <Image source={{uri: selectedMarker.attributes.photos.data[0].attributes.url}} style={styles.image}/>
+                    <Image source={{uri: selectedMarker?.attributes.photos?.data[0]?.attributes.url}} style={styles.image}/>
                     </View>
                     <View style={styles.detailsContainer}>
                         <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:2}}>
-                            <Text style={styles.detailTextName}>{selectedMarker.attributes.label}</Text>
+                            <Text style={styles.detailTextName}>{selectedMarker?.attributes.label}</Text>
                                         
                             <TouchableOpacity style={styles.favorieItem}>
                                 <Ionicons name="heart-outline" size={18} color="#000" />
@@ -113,12 +113,12 @@ const ListingMapPage = ({ navigation, listing, category}:Props) => {
                         </View>
                         <View style={{flexDirection:'row'}}>
                           <Entypo name="location-pin" size={20} color="#CFCECE" />
-                          <Text style={styles.detailText}>{selectedMarker.attributes.continent}</Text>
+                          <Text style={styles.detailText}>{selectedMarker?.attributes.continent}</Text>
                         </View>
                         <Text style={styles.detailText}></Text>
                         <View style={{flexDirection:'row',justifyContent:'space-between'}}>
                             <View style={{ flexDirection: 'row', gap: 4 ,marginBottom:10}}>
-                            <StarRating reviews={selectedMarker.attributes.reviews} />
+                            <StarRating reviews={selectedMarker?.attributes.reviews} />
                             </View>
                         </View>
                         

@@ -4,12 +4,17 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomePage from './HomePage';
 import DetailPage from '../listingPage/DetailPage';
 import DetailOffre from '../listingPage/DetailOffre';
+import { NavigationProp } from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator();
 
+interface RouterProps {
+  navigation: NavigationProp<any,any>;
+  route
+}
 
-const HomePageNav = () => {
-  
+const HomePageNav = ({ route ,navigation }:RouterProps) => {
+  const { user } = route.params || {}; 
   return (
     <View style={styles.container}>
       <Stack.Navigator>
@@ -23,6 +28,7 @@ const HomePageNav = () => {
             headerTitle: ''
           }} />
           <Stack.Screen name='DetailOffre' component={DetailOffre}
+          initialParams={{ user }}  
           options={{
             headerTitle: ''
           }} />

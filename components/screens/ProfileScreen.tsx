@@ -17,10 +17,14 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const { user: currentUser } = route.params;
   const [userData, setUserData] = useState(null);
   const [modalVisible1, setModalVisible1] = useState(false);
-  const listRef = useRef<FlatList>(null);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
+  const [modalVisible3, setModalVisible3] = useState(false);
+  const [modalVisible4, setModalVisible4] = useState(false);
+  const [modalVisible5, setModalVisible5] = useState(false);
+  const [modalVisible6, setModalVisible6] = useState(false);
+  const [modalVisible7, setModalVisible7] = useState(false);
+
   const items = fileData;
-  const isFocused = useIsFocused();
   const fetchUserData = async () => {
     try {
       const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
@@ -43,15 +47,87 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   
   const openModal1 = () => {
     setModalVisible1(true);
-};
+  };
 
-const closeModal1 = () => {
-    setModalVisible1(false);
-};
-const handleDateSelect1 = () => {
-    // Close the modal
-    closeModal1();
-};
+  const closeModal1 = () => {
+      setModalVisible1(false);
+  };
+  const handleDateSelect1 = () => {
+      // Close the modal
+      closeModal1();
+  };
+  const openModal2 = () => {
+    setModalVisible2(true);
+  };
+
+  const closeModal2 = () => {
+      setModalVisible2(false);
+  };
+  const handleDateSelect2 = () => {
+      // Close the modal
+      closeModal2();
+  };
+
+  const openModal3 = () => {
+    setModalVisible3(true);
+  };
+
+  const closeModal3 = () => {
+      setModalVisible3(false);
+  };
+  const handleDateSelect3 = () => {
+      // Close the modal
+      closeModal3();
+  };
+
+  const openModal4 = () => {
+    setModalVisible4(true);
+  };
+
+  const closeModal4 = () => {
+      setModalVisible4(false);
+  };
+  const handleDateSelect4 = () => {
+      // Close the modal
+      closeModal4();
+  };
+
+  const openModal5 = () => {
+    setModalVisible5(true);
+  };
+
+  const closeModal5 = () => {
+      setModalVisible5(false);
+  };
+  const handleDateSelect5 = () => {
+      // Close the modal
+      closeModal5();
+  };
+
+  const openModal6 = () => {
+    setModalVisible6(true);
+  };
+
+  const closeModal6 = () => {
+      setModalVisible6(false);
+  };
+  const handleDateSelect6 = () => {
+      // Close the modal
+      closeModal6();
+  };
+
+  const openModal7 = () => {
+    setModalVisible7(true);
+  };
+
+  const closeModal7 = () => {
+      setModalVisible7(false);
+  };
+  const handleDateSelect7 = () => {
+      // Close the modal
+      closeModal7();
+  };
+
 
 const renderRow: ListRenderItem<any> = ({item}) => (
   
@@ -118,13 +194,13 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                 <Text style={{color:'#C4C2C2',fontWeight:'700',}}>Enregistre</Text>
                 <Text style={{color:'#C4C2C2',fontWeight:'700'}}>dans les favoris</Text>
                 </View>
-                <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:15,padding:10,width:110,alignItems:'center'}}>
+                <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:15,padding:10,width:110,alignItems:'center'}} onPress={openModal2}>
                   <Text  style={{color:'#fff',fontWeight:'800'}}>Voir</Text>
                  </TouchableOpacity>
               </View>
             </View>
             <View style={{justifyContent:'center',marginTop:10}}>
-              <TouchableOpacity style={styles.loginBtnOption} >
+              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal3}>
                 <FontAwesome6 name="user-large" size={19} color="white" style={styles.icon}/>
                 <View style={{flex:5,flexDirection:'row'}}>
                     <Text style={styles.loginTextOption}>Modifier le profil</Text>
@@ -132,7 +208,7 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                 <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.loginBtnOption} >
+              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal4}>
                 <MaterialIcons name="shopping-cart" size={25} color="white" style={styles.icon}/>
                 <View style={{flex:5,flexDirection:'row'}}>
                     <Text style={styles.loginTextOption}>Panier</Text>
@@ -143,7 +219,7 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                 <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.loginBtnOption} >
+              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal5}>
                 <MaterialCommunityIcons name="clipboard-text" size={25} color="white" style={styles.icon}/>
                 <View style={{flex:5,flexDirection:'row'}}>
                     <Text style={styles.loginTextOption}>Historique des achats</Text>
@@ -151,7 +227,7 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                 <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.loginBtnOption} >
+              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal6}>
               <Ionicons name="notifications" size={25} color="white" style={styles.icon}/>
                 <View style={{flex:5,flexDirection:'row'}}>
                     <Text style={styles.loginTextOption}>Notification</Text>
@@ -162,7 +238,7 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                 <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.loginBtnOption} >
+              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal7}>
                 <MaterialIcons name="credit-card" size={25} color="white" style={styles.icon}/>
                 <View style={{flex:5,flexDirection:'row'}}>
                     <Text style={styles.loginTextOption}>Cartes</Text>
@@ -217,6 +293,149 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                     </View>
                 </View>
             </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible2}
+                onRequestClose={closeModal2}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <Ionicons name="heart" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect2()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                    <FlatList
+                      renderItem={renderRow}
+                      data={items}
+                    />
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible3}
+                onRequestClose={closeModal3}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <Ionicons name="heart" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect3()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                    <Text style={{color:'#fff'}}>3</Text>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible4}
+                onRequestClose={closeModal4}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <Ionicons name="heart" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect4()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                   <Text style={{color:'#fff'}}>4</Text>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible5}
+                onRequestClose={closeModal5}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <Ionicons name="heart" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect5()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                    <Text style={{color:'#fff'}}>5</Text>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible6}
+                onRequestClose={closeModal6}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <Ionicons name="heart" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect6()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                    <Text style={{color:'#fff'}}>6</Text>
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible7}
+                onRequestClose={closeModal7}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <Ionicons name="heart" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect7()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                    <Text style={{color:'#fff'}}>7</Text>
+                    </View>
+                </View>
+            </Modal>
+
+
     </ImageBackground>
   );
 };

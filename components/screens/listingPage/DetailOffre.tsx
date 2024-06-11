@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, Share, Mod
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import lisingData from '../../../assets/data/airbnb-listings.json';
 import { Ionicons } from '@expo/vector-icons';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { FIREBASE_DB } from "FirebaseConfig";
 import Animated, {
   SlideInDown,
   interpolate,
@@ -50,7 +52,46 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const [datafetch, setDatafetch] = useState(null);
   const [datafetchPlanning, setDatafetchPlanning] = useState(null);
   const [datafetchProgramme, setDatafetchProgramme] = useState(null);
-
+  // const [currentUser,setcurrentUser]=useState('hafidnid909@gmail.com')
+  const { user: currentUser } = route.params;
+  const [userData, setUserData] = useState(null);
+  const [userDC, setUserDC] = useState(null);
+  
+    const fetchUserData = async () => {
+      // console.log(currentUser)
+      try {
+        const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
+        const querySnapshot = await getDocs(userQuery);
+        const userData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (userData.length > 0) {
+          setUserData(userData[0]);
+        } else {
+          setUserData(null);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+  
+  const fetchUser = async () => {
+      try {
+        const response = await axios.get('http://192.168.11.107:1337/api/users?populate=*&pagination[limit]=-1');
+        const users = response.data;
+  
+        const email = userData?.email;
+  
+        const currentUserData = users.find(user => user.email === email);
+        setUserDC(currentUserData);
+        // console.log(currentUserData.id)
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+  
+    useEffect(()=>{
+      fetchUserData();
+      fetchUser();
+    }, []);
 
 
   const fetchData = async () => {
@@ -242,7 +283,7 @@ const [duree_modifiable, setDuree_modifiable] = useState(false);
 const [categorie_hebergement, setCategorie_hebergement] = useState('');
 const [cabine, setCabine] = useState('');
 const [experience_souhaitez, setExperience_souhaitez] = useState('');
-const [offre, setOffre] = useState(null);
+// const [offre, setOffre] = useState(null);
 const handleAdultChange = (text) => {
   const num = parseInt(text, 10);
   if (!isNaN(num) && num >= 0) {
@@ -300,6 +341,8 @@ const handleSubmit = async () => {
     categorie_hebergement : categorie_hebergement,
     cabine : cabine,
     experience_souhaitez : experience_souhaitez,
+    offre: itemId,
+    user: userDC.id
 
 };
   
@@ -307,7 +350,7 @@ const handleSubmit = async () => {
     const response = await axios.post('http://192.168.11.107:1337/api/reservations', {
       data: reservationData,
     });
-    console.log('Success', 'Reservation created successfully!', response.data);
+    // console.log('Success', 'Reservation created successfully!', response.data);
     Alert.alert('🎉 Success! 🎉',
     '✅ Reservation created successfully!',
     [{ text: 'OK', onPress: () => {handleDateSelect3()} }],
@@ -410,27 +453,28 @@ const toggleOption2 = (index) => {
 // useEffect(() => {
 //   console.log(experience_souhaitez);
 // }, [experience_souhaitez]);
+
 const videForm =()=>{
-  setReference('')
-  setNbr_voyageurs_adultes(0)
-  setNbr_voyageurs_enfants(0)
-  setPourquoi_voyagez_vous('')
-  setDate_partir(new Date())
-  setDuree_modifiable(false)
-  setDuree(0)
-  setDate_fixe(false)
-  setCabine('')
-  setCategorie_hebergement('')
-  setExperience_souhaitez('')
-  options.map((i)=>{
-    i.value=false
-  })
-  options1.map((i)=>{
-    i.value=false
-  })
-  options2.map((i)=>{
-    i.value=false
-  })
+    setReference('')
+    setNbr_voyageurs_adultes(0)
+    setNbr_voyageurs_enfants(0)
+    setPourquoi_voyagez_vous('')
+    setDate_partir(new Date())
+    setDuree_modifiable(false)
+    setDuree(0)
+    setDate_fixe(false)
+    setCabine('')
+    setCategorie_hebergement('')
+    setExperience_souhaitez('')
+    options.map((i)=>{
+      i.value=false
+    })
+    options1.map((i)=>{
+      i.value=false
+    })
+    options2.map((i)=>{
+      i.value=false
+    })
 
 };
 
@@ -557,21 +601,21 @@ const videForm =()=>{
                   <View key={index} style={{ width: '100%', height: "100%" }}>
 
 
-                    <ImageBackground source={{ uri: item.attributes.photos?.data[0].attributes.url }} style={styles.imageOffre} imageStyle={{ borderRadius: 20, height: "100%" }}>
+                    <ImageBackground source={{ uri: item.attributes.photos?.data[0]?.attributes.url }} style={styles.imageOffre} imageStyle={{ borderRadius: 20, height: "100%" }}>
                       <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
                         
                         <View style={{ flex: 1, justifyContent: 'space-between', }}>
                         <View style={{  marginLeft: 15,backgroundColor: '#74D0F8', borderRadius: 8, padding: 5, width: "25%", alignItems: 'center', justifyContent: 'center', marginBottom: 15 }}>
-                        <Text style={{ color: '#fff', fontWeight: '600' }}>Jour {item.attributes.jourNumero}</Text>
+                        <Text style={{ color: '#fff', fontWeight: '600' }}>Jour {item?.attributes.jourNumero}</Text>
                       </View>
                           <View style={{ width: "50%", marginLeft: 15 }}>
-                            <Text style={{ fontSize: 16, fontWeight: '900', color: '#fff', }}>{item.attributes.titre}</Text>
+                            <Text style={{ fontSize: 16, fontWeight: '900', color: '#fff', }}>{item?.attributes.titre}</Text>
                           </View>
                           <View style={{ width: "90%", marginLeft: 15, marginTop: 10 }}>
-                            <Text style={{ fontSize: 13, fontWeight: '500', color: '#fff', }}>{item.attributes.description}</Text>
+                            <Text style={{ fontSize: 13, fontWeight: '500', color: '#fff', }}>{item?.attributes.description}</Text>
                           </View>
                           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelectProgramme(item.id)}}>
+                            <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelectProgramme(item?.id)}}>
                               <Text style={{ color: '#fff', fontWeight: '600' }}>Voir programme
                               </Text>
                             </TouchableOpacity>
@@ -612,9 +656,9 @@ const videForm =()=>{
                 const isLastItem = index === datafetchProgramme.length - 1;
                 return (
                   <View key={index} style={{padding:20,justifyContent:'center',alignContent:'center',alignItems:'center'}}>
-                    <Image source={{uri: item.attributes.photos?.data[0]?.attributes.url}} style={{height:140,width:"100%",borderRadius:20,marginBottom:10}}/>
-                    <Text style={{color:'#fff',alignItems:'center',textAlign:'center',marginBottom:8}}>{item.attributes.heure}</Text>
-                    <Text style={{color:'#fff',alignItems:'center',textAlign:'center'}}>{item.attributes.description}</Text>
+                    <Image source={{uri: item?.attributes.photos?.data[0]?.attributes.url}} style={{height:140,width:"100%",borderRadius:20,marginBottom:10}}/>
+                    <Text style={{color:'#fff',alignItems:'center',textAlign:'center',marginBottom:8}}>{item?.attributes.heure}</Text>
+                    <Text style={{color:'#fff',alignItems:'center',textAlign:'center'}}>{item?.attributes.description}</Text>
                     {!isLastItem && (
                       <View style={{justifyContent:'center',alignItems:'center',padding:1,height:50,backgroundColor:'#fff'}}></View>
                     )}

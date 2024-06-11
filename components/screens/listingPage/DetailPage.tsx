@@ -144,7 +144,7 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
     // Change numColumns dynamically
     return (
       <View style={{ flex: 1 , margin: 5 }}>
-      <Image source={{uri:item.attributes.url}} style={styles.stImageModal}/>
+      <Image source={{uri:item?.attributes.url}} style={styles.stImageModal}/>
     </View>
     );
   };
@@ -202,12 +202,12 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
 
            {dataOffres?.map((item, index) => (
           <Animated.View key={index} style={styles.listViewOffre} entering={FadeInRight} exiting={FadeOutLeft}>
-                <Image source={{ uri: item.attributes.image }} style={styles.imageOffre} />
+                <Image source={{ uri: item?.attributes.image }} style={styles.imageOffre} />
                 
                 <View style={{ position: 'absolute',left: 10, top: 110,flexDirection:'row' }}>
                     <View style={{ flex:1,justifyContent:'space-between',flexDirection:'row'}}>
                       <View style={{backgroundColor: 'rgba(0, 0, 0, 0.5)',borderRadius:10,padding:5,width:115,alignItems:'center',marginRight:20,justifyContent:'center'}}>
-                        <Text style={{ fontSize: 10, fontWeight: '900' ,color:'#fff',textAlign:'center'}}>{item.attributes.label}</Text>
+                        <Text style={{ fontSize: 10, fontWeight: '900' ,color:'#fff',textAlign:'center'}}>{item?.attributes.label}</Text>
                       </View>
                     
                     <TouchableOpacity style={{borderColor:'#fff',borderWidth:1.5,borderRadius:10,padding:4,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailOffre', { itemId: item.id }) }}>

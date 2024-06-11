@@ -27,7 +27,7 @@ const HomePage = ({navigation}:Props) => {
     useEffect(() => {
       fetchData();
      
-    }, []);
+    }, [datafetch]);
     useEffect(() => {
       //console.log('Data fetched2:', datafetch);
     }, [datafetch]);

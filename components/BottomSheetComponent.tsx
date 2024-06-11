@@ -240,6 +240,7 @@ const toggleShowAll = () => {
         
         >
           <Tab.Screen name='Explorer' component={HomePageNav}
+          initialParams={{ user: user }}
             options={{
               tabBarIcon: ({ color }) => (
                 <Ionicons name="filter" size={28} color={color} />

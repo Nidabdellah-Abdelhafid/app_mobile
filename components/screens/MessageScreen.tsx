@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Modal, Alert } from 'react-native';
 import axios from 'axios';
 import socket from './socket';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -9,6 +9,9 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesome6 } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
+import EmojiSelector, { Categories } from "react-native-emoji-selector";
+import { Ionicons } from '@expo/vector-icons';
+import io from 'socket.io-client';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -22,7 +25,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const [userData, setUserData] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [userDC, setUserDC] = useState([]);
+  const [userDC, setUserDC] = useState(null);
 
   const fetchUserData = async () => {
     try {
@@ -44,6 +47,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   }, []);
 
   useEffect(() => {
+    
     if (userData) {
       fetchUser();
       fetchMessages();
@@ -55,12 +59,12 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         socket.off('recvMsg');
       };
     }
-  }, [userData]);
+  }, [userData,messages]);
 
   const fetchMessages = async () => {
     try {
       const response = await axios.get('http://192.168.11.107:1337/api/messages?populate=*&pagination[limit]=-1');
-      console.log('msgs : ',response.data.data);
+      // console.log('msgs : ',response.data.data);
       const messages = response.data.data;
 
         // Define the current user's email and the admin's email
@@ -69,15 +73,15 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
 
         // Filter the messages
         const filteredMessages = messages.filter(message => {
-          const senderEmail = message.attributes.sender.data.attributes.email;
-          const receiverEmail = message.attributes.receiver.data.attributes.email;
+          const senderEmail = message?.attributes.sender?.data?.attributes.email;
+          const receiverEmail = message?.attributes.receiver?.data?.attributes.email;
 
           // Check if the sender or receiver matches the current user or admin email
           return (senderEmail === currentUserEmail && receiverEmail === adminEmail) ||
                 (senderEmail === adminEmail && receiverEmail === currentUserEmail);
         });
 
-        console.log(filteredMessages);
+        // console.log(filteredMessages);
       setMessages(filteredMessages)
       // setUserDC(currentUserData);
     } catch (error) {
@@ -101,7 +105,8 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
 
   const sendMessage = () => {
     if (!userDC || !message) {
-      console.error('Error: User data or message content is undefined');
+      Alert.alert("🚫 Le message est vide!");
+      // console.error('Error: User data or message content is undefined');
       return;
     }
 
@@ -114,6 +119,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     socket.emit('sendMsg', newMessage);
 
     setMessage('');
+    setSelectedEmojis([]);
     fetchMessages();
   };
 
@@ -125,17 +131,58 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     return messageSender === ADMIN_ID;
   };
 
+  const [selectedEmojis, setSelectedEmojis] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleEmojiSelect = emoji => {
+    const newEmojis = [...selectedEmojis, emoji];
+    setSelectedEmojis(newEmojis);
+    setMessage(message+ newEmojis.join(''));
+     // Close the modal after selecting an emoji
+  };
+  const closeModel =()=>{
+    setModalVisible(false);
+  }
+
+  const clearSelection = () => {
+    setSelectedEmojis([]);
+  };
+
+  const handleDateSelect1 = () => {
+    // Close the modal
+    closeModel();
+  };
+  
+
   return (
     
     <View style={{flex:1}}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModel}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity onPress={()=>handleDateSelect1()}>
+          <Ionicons name="close" size={24} color="black" />
+          </TouchableOpacity>
+          <View style={styles.modalContent}>
+            <EmojiSelector columns={5} onEmojiSelected={handleEmojiSelect} category={Categories.emotion}/>
+            {/* <Picker onEmojiClick={onEmojiClick}/>
+            {chosenEmoji && <p>Selected Emoji: {chosenEmoji.emoji}</p>} */}
+          </View>
+        </View>
+      </Modal>
       <View style={styles.container}>
+        
       {/* {userData ? (
         <Text style={{ color: '#000' }}>{userData?.email}</Text>
       ) : (
         <Text>User not found</Text>
       )} */}
       <ScrollView
-       contentContainerStyle={{ paddingBottom: 100 }}
+       contentContainerStyle={{ paddingBottom: 30 }}
       >
         {messages?.map((item, index) => {
           const isSender = isCurrentUser(item?.attributes?.sender?.data?.attributes?.username);
@@ -150,7 +197,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
             >
              
               <View style={[styles.messageContent, isMessageFromAdmin ? styles.adminMessage : styles.userMessage]}> 
-                {!isSender && <Text>{item?.attributes?.sender?.data?.attributes?.username}</Text>}
+                {!isSender ? <Text>~{item?.attributes?.sender?.data?.attributes?.username}~</Text> :<Text>~you~</Text>}
                 <Text style={styles.messageText}>{item?.attributes?.content}</Text>
                 <Text style={styles.timestamp}>{item?.attributes?.createdAt}</Text>
               </View>
@@ -161,9 +208,10 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
      
     </View>
     <View style={{height:1,backgroundColor:'#999'}}></View>
+    
       <View style={styles.containerSender}>
       <View style={styles.bubble}>
-        <TouchableOpacity >
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
         <FontAwesome6 name="face-laugh" size={24} color="black" style={styles.icon}/>
         </TouchableOpacity>
         <TextInput
@@ -182,6 +230,50 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
 };
 
 const styles = StyleSheet.create({
+  button: {
+    backgroundColor: 'skyblue',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding:10,
+    marginTop:20,
+    marginLeft:20,
+    marginRight:20,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5, // Android shadow
+    shadowColor: 'black', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  selectedEmojiContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  selectedEmojiText: {
+    fontSize: 20,
+  },
+  clearSelection: {
+    marginTop: 10,
+    color: 'red',
+    textDecorationLine: 'underline',
+  },
+
+
+////
   containerSender: {
     flexDirection: 'row',
     alignItems: 'center',

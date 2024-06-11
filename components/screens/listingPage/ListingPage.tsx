@@ -54,16 +54,16 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
    
     const renderRow: ListRenderItem<any> = ({item}) => (
 
-            <TouchableOpacity onPress={() => navigation.navigate('DetailPage', { itemId: item.id })}>
+            <TouchableOpacity onPress={() => navigation.navigate('DetailPage', { itemId: item?.id })}>
             <Animated.View style={styles.listView} entering={FadeInRight} exiting={FadeOutLeft}>
-                <Image source={{ uri: item.attributes.photos.data[0].attributes.url }} style={styles.image} />
+                <Image source={{ uri: item?.attributes.photos?.data[0]?.attributes.url }} style={styles.image} />
                 <TouchableOpacity style={{ position: 'absolute', right: 32, top: 15 }} onPress={openModal}>
                     <Ionicons name={isFavorited ? 'heart' : 'heart-outline'} size={25} color={isFavorited ? 'white' : '#fff'} />
                 </TouchableOpacity>
                
                 <View style={{ position: 'absolute',left: 35, top: 160,flexDirection:'row', justifyContent: 'space-between' }}>
                     <View >
-                    <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.attributes.label}</Text>
+                    <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item?.attributes.label}</Text>
                     <View style={{ flexDirection: 'row', gap: 4 }}>
                         <Ionicons name="star" size={16} color='orange'/>
                         <Ionicons name="star" size={16} color='orange'/>

@@ -10,24 +10,8 @@ import { FontAwesome5, AntDesign } from '@expo/vector-icons';
 const Tab = createBottomTabNavigator();
 
 const FirstPage = ({ route }: { route: any }) => {
-    
-    const { user } = route.params;
-    
-    const [modalVisible1, setModalVisible1] = useState(false);
-    const openModal1 = () => {
-        setModalVisible1(true);
+  const { user } = route.params;
 
-    };
-    const closeModal1 = () => {
-        setModalVisible1(false);
-    };
-    const handleDateSelect1 = (selectedDate) => {
-        // Handle the selected date here
-        console.log(selectedDate);
-        // Close the modal
-        closeModal1();
-    };
-    
   return (
    
          <Tab.Navigator screenOptions={{
@@ -36,6 +20,7 @@ const FirstPage = ({ route }: { route: any }) => {
           tabBarActiveTintColor: "#e63c4c"
         }} >
           <Tab.Screen name='Explorer' component={HomePageNav}
+            initialParams={{ user: user }}
             options={{
               tabBarIcon: ({ color }) => (<Ionicons name='search' size={20} color={color} />),
               headerTintColor: "#e63c4c",
