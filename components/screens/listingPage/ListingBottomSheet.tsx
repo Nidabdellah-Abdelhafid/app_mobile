@@ -9,9 +9,10 @@ interface Props {
   listings: any[];
   category: string;
   navigation: NavigationProp<any, any>;
+  user
 }
 
-const ListingsBottomSheet = ({ navigation, listings, category }: Props) => {
+const ListingsBottomSheet = ({ navigation, listings, category ,user}: Props) => {
   const snapPoints = useMemo(() => ['21%', '82%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [refresh, setRefresh] = useState<number>(0);
@@ -32,7 +33,7 @@ const ListingsBottomSheet = ({ navigation, listings, category }: Props) => {
       backgroundComponent={({ style }) => <View style={[style, { backgroundColor: '#222' }]} />}
       >
       <View style={styles.contentContainer}>
-        <ListingPage listings={listings} navigation={navigation} refresh={refresh} category={category} />
+        <ListingPage listings={listings} navigation={navigation} refresh={refresh} category={category} user={user} />
         
         <View style={styles.absoluteView}>
           <TouchableOpacity onPress={onShowMap} style={styles.btn}>

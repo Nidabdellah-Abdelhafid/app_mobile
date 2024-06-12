@@ -1,7 +1,8 @@
 // import { useEffect } from 'react';
 import io from 'socket.io-client';
+import { URL_BACKEND } from "api";
 
-const socket = io('http://192.168.11.107:1337', {
+const socket = io(URL_BACKEND, {
   transports: ['websocket'],
   jsonp: false,
 });

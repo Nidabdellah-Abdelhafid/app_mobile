@@ -7,7 +7,7 @@ import { Ionicons ,Fontisto,MaterialCommunityIcons,MaterialIcons,FontAwesome6} f
 import fileData from '../../assets/data/file.json';
 import { FlatList } from "react-native-gesture-handler";
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
-
+import { URL_BACKEND } from "api";
 interface RouterProps {
   navigation: NavigationProp<any,any>;
   route

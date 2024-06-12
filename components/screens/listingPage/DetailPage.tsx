@@ -16,6 +16,7 @@ import { Entypo } from '@expo/vector-icons';
 import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import fileData from '../../../assets/data/file.json';
+import { URL_BACKEND } from "api";
 
 interface RouterProps {
   navigation: NavigationProp<any,any>;
@@ -37,7 +38,7 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
 
   const  fetchData = async () => {
     try {
-      const response = await fetch(`http://192.168.11.107:1337/api/pays/${itemId}?populate=*&pagination[limit]=-1`);
+      const response = await fetch(`${URL_BACKEND}/api/pays/${itemId}?populate=*&pagination[limit]=-1`);
       const data = await response.json();
       // console.log('Result5:', data);
       setDatafetch(data.data);

@@ -12,6 +12,7 @@ import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import EmojiSelector, { Categories } from "react-native-emoji-selector";
 import { Ionicons } from '@expo/vector-icons';
 import io from 'socket.io-client';
+import { URL_BACKEND } from "api";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -44,7 +45,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [userData]);
 
   useEffect(() => {
     
@@ -63,7 +64,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
 
   const fetchMessages = async () => {
     try {
-      const response = await axios.get('http://192.168.11.107:1337/api/messages?populate=*&pagination[limit]=-1');
+      const response = await axios.get(`${URL_BACKEND}/api/messages?populate=*&pagination[limit]=-1`);
       // console.log('msgs : ',response.data.data);
       const messages = response.data.data;
 
@@ -91,7 +92,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://192.168.11.107:1337/api/users?populate=*&pagination[limit]=-1');
+      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
       const users = response.data;
 
       const email = userData?.email;

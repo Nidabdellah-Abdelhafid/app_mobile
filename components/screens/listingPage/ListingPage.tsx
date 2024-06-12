@@ -1,21 +1,68 @@
 import { View, Text, StyleSheet,  ListRenderItem, TouchableOpacity,Modal, Image, Button } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState ,useCallback} from 'react';
 import { Ionicons ,Fontisto} from '@expo/vector-icons';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { NavigationProp } from '@react-navigation/native';
 import { FlatList } from 'react-native-gesture-handler';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { FIREBASE_DB } from "FirebaseConfig";
+import axios from 'axios';
+import { URL_BACKEND } from "api";
+import LottieView from 'lottie-react-native';
+
 interface Props{
     listings: any[];
     category:string;
     navigation: NavigationProp<any, any>;
     refresh: number;
+    user
 }
 
-const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
+const ListingPage = ({ navigation, listings:items,refresh, category,user}:Props) => {
     const [loading,setLoading]= useState(false);
     const listRef = useRef<FlatList>(null);
     const [isFavorited, setIsFavorited] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [userData, setUserData] = useState(null);
+    const [userDC, setUserDC] = useState(null);
+    const [favorie, setFavorie] = useState(null);
+    
+      const fetchUserData = async () => {
+        // console.log(currentUser)
+        try {
+          const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', user));
+          const querySnapshot = await getDocs(userQuery);
+          const userData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          if (userData.length > 0) {
+            setUserData(userData[0]);
+          } else {
+            setUserData(null);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
+    
+    const fetchUser = async () => {
+        try {
+          const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+          const users = response.data;
+    
+          const email = userData?.email;
+    
+          const currentUserData = users.find(user => user.email === email);
+          setUserDC(currentUserData);
+          // console.log(currentUserData.id)
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
+      };
+    
+      useEffect(()=>{
+        fetchUserData();
+        fetchUser();
+        fetchFavories(); 
+      }, []);
 
     const openModal = () => {
         setModalVisible(true);
@@ -25,7 +72,7 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
     const closeModal = () => {
         setModalVisible(false);
     };
-
+ 
 
     const toggleFavorite = () => {
         setIsFavorited(!isFavorited);
@@ -51,15 +98,113 @@ const ListingPage = ({ navigation, listings:items,refresh, category}:Props) => {
             setLoading(false);
         },100)
     },[category]);
-   
+
+    const handleSubmit = async (item_Id) => {
+      const favorieData = {
+        pay: item_Id,
+        user: userDC.id
+    
+    };
+      
+      try {
+        const response = await axios.post(`${URL_BACKEND}/api/favories`, {
+          data: favorieData,
+        });
+        //  console.log('Success', 'Reservation created successfully!', response.data);
+         fetchFavories(); 
+      } catch (error) {
+        console.log('Error', error.response?.data || error.message);
+      }
+      
+    };
+
+    const fetchFavories = async () => {
+      try {
+        const response = await axios.get(`${URL_BACKEND}/api/favories?populate=*&pagination[limit]=-1`);
+        const favories = response.data.data;
+        setFavorie(favories);
+        // console.log(favories)
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+    
+    const deleteItem = async (id) => {
+      const fvid = favorie?.find(i=> i.attributes?.pay?.data.id ==id)
+
+      const url = `${URL_BACKEND}/api/favories/${fvid.id}`;
+      // const token = 'cef4dfdb24e8b97960573fd31b9d5f331accddaf8084b4274574c5bd8fbebe0a9b1d3b59bc71bef98a4ab6b67fd3f4b524362d597a1159cb1b0b6eb8b27d97e147d9d1099ed3c05e492bbd09430312dfab97648de745ead39c0deabda377f997d39cc12a09a8f7688fcad75b3ba32e27112ee5de81b38b39b7b7e3fd57cefe7d'
+      try {
+        const response = await axios.delete(url);
+        // console.log(`Item deleted successfully`, response.data);
+        fetchFavories(); 
+      } catch (error) {
+        console.error('Error deleting item:', error.response ? error.response.data : error.message);
+      }
+    };
+
+    const [isFirstRun,setIsFirstRun] = useState(true);
+    
+    const favorieItem = (item) => {
+
+      // Function to check if the item is in favorites
+      const isFavorited = () => {
+          if (!favorie || !userDC) return false;
+          return favorie.some(fav => 
+              fav.attributes.user?.data.id === userDC.id && 
+              fav.attributes.pay?.data.id === item.id
+          );
+
+      };
+  
+      return (
+          <TouchableOpacity 
+              style={{ position: 'absolute', right: 5, top: 0 }} 
+              onPress={() => { 
+                  if (isFavorited()) {
+                      deleteItem(item?.id);
+                  } else {
+                      handleSubmit(item?.id);
+                  }
+              }}
+          > 
+              {/* <Ionicons 
+                  name={isFavorited() ? 'heart' : 'heart-outline'} 
+                  size={25}  
+                  color={isFavorited() ? 'red' : '#fff'}
+              /> */}
+              <LottieView
+              ref={(animation) => {
+                if (animation) {
+                  if (isFirstRun) {
+                    if (isFavorited()) {
+                      animation.play(66, 66);
+                    } else {
+                      animation.play(19, 19);
+                    }
+                    setIsFirstRun(false);
+                  } else if (isFavorited()) {
+                    animation.play(19, 50);
+                  } else {
+                    animation.play(0, 19);
+                  }
+                }
+              }} 
+              style={styles.heartLottie}
+              source={require("../../../assets/data/likeHeart.json")}
+              autoPlay={false}
+              loop={false}
+              />
+          </TouchableOpacity>
+      );   
+  };
+
     const renderRow: ListRenderItem<any> = ({item}) => (
 
             <TouchableOpacity onPress={() => navigation.navigate('DetailPage', { itemId: item?.id })}>
             <Animated.View style={styles.listView} entering={FadeInRight} exiting={FadeOutLeft}>
                 <Image source={{ uri: item?.attributes.photos?.data[0]?.attributes.url }} style={styles.image} />
-                <TouchableOpacity style={{ position: 'absolute', right: 32, top: 15 }} onPress={openModal}>
-                    <Ionicons name={isFavorited ? 'heart' : 'heart-outline'} size={25} color={isFavorited ? 'white' : '#fff'} />
-                </TouchableOpacity>
+                {favorieItem(item)}
                
                 <View style={{ position: 'absolute',left: 35, top: 160,flexDirection:'row', justifyContent: 'space-between' }}>
                     <View >
@@ -123,6 +268,10 @@ export default ListingPage
 
 
 const styles= StyleSheet.create({
+  heartLottie:{
+    width:80,
+    height:80,
+  },
     container:{
         paddingLeft:10,
         paddingRight:10,

@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Button } from "react-native";
 import { NavigationProp } from '@react-navigation/native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
+import { URL_BACKEND } from "api";
 
 interface RouterProps {
   navigation: NavigationProp<any,any>;

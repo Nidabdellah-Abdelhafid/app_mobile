@@ -19,6 +19,7 @@ const HomePageNav = ({ route ,navigation }:RouterProps) => {
     <View style={styles.container}>
       <Stack.Navigator>
         <Stack.Screen name='HomePage' component={HomePage}
+        initialParams={{ user }}  
           options={{
             headerShown: false,
 

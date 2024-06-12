@@ -26,6 +26,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { URL_BACKEND } from "api";
 
 const INITIAL_REGION = {
   latitude: 33.5883100,
@@ -75,7 +76,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   
   const fetchUser = async () => {
       try {
-        const response = await axios.get('http://192.168.11.107:1337/api/users?populate=*&pagination[limit]=-1');
+        const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
         const users = response.data;
   
         const email = userData?.email;
@@ -91,12 +92,12 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
     useEffect(()=>{
       fetchUserData();
       fetchUser();
-    }, []);
+    });
 
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`http://192.168.11.107:1337/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
+      const response = await fetch(`${URL_BACKEND}/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
       const data = await response.json();
         // console.log('Result5:', data.data.attributes);
       setDatafetch(data.data);
@@ -108,7 +109,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchDataPlanning = async () => {
     try {
-      const response = await fetch(`http://192.168.11.107:1337/api/planings?populate=*&pagination[limit]=-1`);
+      const response = await fetch(`${URL_BACKEND}/api/planings?populate=*&pagination[limit]=-1`);
       const data = await response.json();
       // console.log('Result5:', data.data[0].attributes.offre?.data);
       const filteredData = data.data.filter(item => item.attributes.offre?.data.id === itemId);
@@ -246,7 +247,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
       try {
         // console.log('id :', id);
 
-        const response = await fetch(`http://192.168.11.107:1337/api/programmes?populate=*&pagination[limit]=-1`);
+        const response = await fetch(`${URL_BACKEND}/api/programmes?populate=*&pagination[limit]=-1`);
         const data = await response.json();
         // console.log('Result5--:', data.data);
         const filteredData = data.data.filter(item => item.attributes.planing?.data.id === id);
@@ -347,7 +348,7 @@ const handleSubmit = async () => {
 };
   
   try {
-    const response = await axios.post('http://192.168.11.107:1337/api/reservations', {
+    const response = await axios.post(`${URL_BACKEND}/api/reservations`, {
       data: reservationData,
     });
     // console.log('Success', 'Reservation created successfully!', response.data);
