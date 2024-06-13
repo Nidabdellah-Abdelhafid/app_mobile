@@ -5,7 +5,7 @@ import { FIREBASE_AUTH, FIREBASE_DB } from "FirebaseConfig";
 import { NavigationProp, useIsFocused } from '@react-navigation/native';
 import { Ionicons ,Fontisto,MaterialCommunityIcons,MaterialIcons,FontAwesome6} from '@expo/vector-icons';
 import fileData from '../../assets/data/file.json';
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, TextInput } from "react-native-gesture-handler";
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { URL_BACKEND } from "api";
 interface RouterProps {
@@ -23,6 +23,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const [modalVisible5, setModalVisible5] = useState(false);
   const [modalVisible6, setModalVisible6] = useState(false);
   const [modalVisible7, setModalVisible7] = useState(false);
+  const [isButtonPressed, setIsButtonPressed] = useState(false);
 
   const items = fileData;
   const fetchUserData = async () => {
@@ -333,12 +334,48 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
-                    <Ionicons name="heart" size={25} color="white"/>
-                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <View style={{flexDirection:'row'}}>
+                    <FontAwesome6 name="user-large" size={19} color="white" />
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginLeft:10}}>Modifier le profil</Text>
+                    </View>
                     <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect3()}>
                         <Ionicons name="close" size={26} color="white" />
                     </TouchableOpacity>
-                    <Text style={{color:'#fff'}}>3</Text>
+                    <View style={{width:'100%',marginTop:20,padding:10}}>
+                    <Text style={styles.inputText}>Le nom complet</Text>
+                    <TextInput
+                      placeholder=""
+                      value={null}
+                      onChangeText={null}
+                      style={styles.inputView}
+                    />
+                    </View>
+                    <View style={{width:'100%',padding:10}}>
+                    <Text style={styles.inputText}>Email</Text>
+                    <TextInput
+                      placeholder=""
+                      value={null}
+                      onChangeText={null}
+                      style={styles.inputView}
+                    />
+                    </View>
+                    <View style={{width:'100%',padding:10}}>
+                    <Text style={styles.inputText}>Numero de telephone</Text>
+                    <TextInput
+                      placeholder=""
+                      value={null}
+                      onChangeText={null}
+                      style={styles.inputView}
+                    />
+                    </View>
+                    <View style={{width:'100%',padding:10,justifyContent:'center',alignItems:'center'}}>
+                    <TouchableOpacity
+                      // onPress={ showPasswordInput ? handleLogin : handleShowPasswordInput}
+                      style={[styles.button2, isButtonPressed ? styles.buttonPressed : null]}
+                    >
+                      <Text style={[styles.loginText, isButtonPressed ? {color:'black',fontSize:20,fontWeight:'900'} : null]}>Approve</Text>
+                    </TouchableOpacity>
+                    </View>
                     </View>
                 </View>
             </Modal>
@@ -567,6 +604,43 @@ imagelike:{
   borderRadius:20,
   backgroundColor:'#000',
   opacity:0.8
+  },
+  inputView: {
+    width: '100%',
+    borderRadius: 10,
+    height: 50,
+    padding: 10,
+    color: '#000',
+    backgroundColor:'#444',
+    marginBottom:11,
+    marginTop:10,
+    justifyContent: 'center'
+    
+  },
+  inputText: {
+    fontSize:16,
+    color: '#E1E1E1',
+  },
+  button2: {
+    width: '62%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Default background color
+    padding: 0, 
+    borderColor:'#fff',
+    borderWidth:2,
+    borderRadius: 15,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  buttonPressed: {
+    backgroundColor: 'white', // Change background color when pressed
+  },
+  loginText: {
+    color: 'white',
+    fontWeight:'900',
+    fontSize:15
   },
 });
 

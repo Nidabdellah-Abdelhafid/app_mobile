@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Modal, Alert } from 'react-native';
 import axios from 'axios';
 import socket from './socket';
@@ -27,7 +27,11 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [userDC, setUserDC] = useState(null);
+  const [selectedEmojis, setSelectedEmojis] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const scrollViewRef = useRef(null);
 
+ 
   const fetchUserData = async () => {
     try {
       const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
@@ -43,15 +47,65 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     }
   };
 
+  const fetchMessages = async () => {
+    if (!userData) return;
+
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/messages?populate=*&pagination[limit]=-1`);
+      const messages = response.data.data;
+
+      const currentUserEmail = userData?.email;
+      const adminEmail = 'admin@atlasvoyage.com';
+
+      const filteredMessages = messages.filter(message => {
+        const senderEmail = message?.attributes.sender?.data?.attributes.email;
+        const receiverEmail = message?.attributes.receiver?.data?.attributes.email;
+
+        return (senderEmail === currentUserEmail && receiverEmail === adminEmail) ||
+              (senderEmail === adminEmail && receiverEmail === currentUserEmail);
+      });
+
+      setMessages(filteredMessages);
+      scrollToBottom();
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+  
+ const scrollToBottom = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  };
+  
+  const fetchUser = async () => {
+    if (!userData) return;
+
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+      const users = response.data;
+
+      const email = userData?.email;
+      const currentUserData = users.find(user => user.email === email);
+      setUserDC(currentUserData);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    if (userData) {
+      fetchMessages();
+      fetchUser();
+    }
   }, [userData]);
 
   useEffect(() => {
-    
     if (userData) {
-      fetchUser();
-      fetchMessages();
       socket.on('recvMsg', (message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
       });
@@ -60,54 +114,11 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         socket.off('recvMsg');
       };
     }
-  }, [userData,messages]);
-
-  const fetchMessages = async () => {
-    try {
-      const response = await axios.get(`${URL_BACKEND}/api/messages?populate=*&pagination[limit]=-1`);
-      // console.log('msgs : ',response.data.data);
-      const messages = response.data.data;
-
-        // Define the current user's email and the admin's email
-        const currentUserEmail = userData?.email;
-        const adminEmail = 'admin@atlasvoyage.com';
-
-        // Filter the messages
-        const filteredMessages = messages.filter(message => {
-          const senderEmail = message?.attributes.sender?.data?.attributes.email;
-          const receiverEmail = message?.attributes.receiver?.data?.attributes.email;
-
-          // Check if the sender or receiver matches the current user or admin email
-          return (senderEmail === currentUserEmail && receiverEmail === adminEmail) ||
-                (senderEmail === adminEmail && receiverEmail === currentUserEmail);
-        });
-
-        // console.log(filteredMessages);
-      setMessages(filteredMessages)
-      // setUserDC(currentUserData);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
-
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
-      const users = response.data;
-
-      const email = userData?.email;
-
-      const currentUserData = users.find(user => user.email === email);
-      setUserDC(currentUserData);
-    } catch (error) {
-      console.error('Error fetching user:', error);
-    }
-  };
+  }, [userData]);
 
   const sendMessage = () => {
     if (!userDC || !message) {
       Alert.alert("🚫 Le message est vide!");
-      // console.error('Error: User data or message content is undefined');
       return;
     }
 
@@ -132,32 +143,22 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     return messageSender === ADMIN_ID;
   };
 
-  const [selectedEmojis, setSelectedEmojis] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-
   const handleEmojiSelect = emoji => {
     const newEmojis = [...selectedEmojis, emoji];
     setSelectedEmojis(newEmojis);
-    setMessage(message+ newEmojis.join(''));
-     // Close the modal after selecting an emoji
+    setMessage(message + newEmojis.join(''));
   };
-  const closeModel =()=>{
-    setModalVisible(false);
-  }
 
-  const clearSelection = () => {
-    setSelectedEmojis([]);
+  const closeModel = () => {
+    setModalVisible(false);
   };
 
   const handleDateSelect1 = () => {
-    // Close the modal
     closeModel();
   };
-  
 
   return (
-    
-    <View style={{flex:1}}>
+    <View style={{ flex: 1 }}>
       <Modal
         animationType="slide"
         transparent={true}
@@ -165,67 +166,54 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         onRequestClose={closeModel}
       >
         <View style={styles.modalContainer}>
-          <TouchableOpacity onPress={()=>handleDateSelect1()}>
-          <Ionicons name="close" size={24} color="black" />
+          <TouchableOpacity onPress={handleDateSelect1}>
+            <Ionicons name="close" size={24} color="black" />
           </TouchableOpacity>
           <View style={styles.modalContent}>
-            <EmojiSelector columns={5} onEmojiSelected={handleEmojiSelect} category={Categories.emotion}/>
-            {/* <Picker onEmojiClick={onEmojiClick}/>
-            {chosenEmoji && <p>Selected Emoji: {chosenEmoji.emoji}</p>} */}
+            <EmojiSelector columns={5} onEmojiSelected={handleEmojiSelect} category={Categories.emotion} />
           </View>
         </View>
       </Modal>
       <View style={styles.container}>
-        
-      {/* {userData ? (
-        <Text style={{ color: '#000' }}>{userData?.email}</Text>
-      ) : (
-        <Text>User not found</Text>
-      )} */}
-      <ScrollView
-       contentContainerStyle={{ paddingBottom: 30 }}
-      >
-        {messages?.map((item, index) => {
-          const isSender = isCurrentUser(item?.attributes?.sender?.data?.attributes?.username);
-          const isMessageFromAdmin = isAdmin(item?.attributes?.sender?.data?.id);
-          return (
-            <View
-              key={index}
-              style={[
-                styles.messageContainer,
-                isSender ? styles.senderMessage : styles.receiverMessage,
-              ]}
-            >
-             
-              <View style={[styles.messageContent, isMessageFromAdmin ? styles.adminMessage : styles.userMessage]}> 
-                {!isSender ? <Text>~{item?.attributes?.sender?.data?.attributes?.username}~</Text> :<Text>~you~</Text>}
-                <Text style={styles.messageText}>{item?.attributes?.content}</Text>
-                <Text style={styles.timestamp}>{item?.attributes?.createdAt}</Text>
+        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 30 }}>
+          {messages.map((item, index) => {
+            const isSender = isCurrentUser(item?.attributes?.sender?.data?.attributes?.username);
+            const isMessageFromAdmin = isAdmin(item?.attributes?.sender?.data?.id);
+            return (
+              <View
+                key={index}
+                style={[
+                  styles.messageContainer,
+                  isSender ? styles.senderMessage : styles.receiverMessage,
+                ]}
+              >
+                <View style={[styles.messageContent, isMessageFromAdmin ? styles.adminMessage : styles.userMessage]}>
+                  {!isSender ? <Text>~{item?.attributes?.sender?.data?.attributes?.username}~</Text> : <Text>~you~</Text>}
+                  <Text style={styles.messageText}>{item?.attributes?.content}</Text>
+                  <Text style={styles.timestamp}>{item?.attributes?.createdAt}</Text>
+                </View>
               </View>
-            </View>
-          );
-        })}
-      </ScrollView>
-     
-    </View>
-    <View style={{height:1,backgroundColor:'#999'}}></View>
-    
-      <View style={styles.containerSender}>
-      <View style={styles.bubble}>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <FontAwesome6 name="face-laugh" size={24} color="black" style={styles.icon}/>
-        </TouchableOpacity>
-        <TextInput
-        value={message}
-        onChangeText={setMessage}
-        placeholder="Type a message"
-        style={styles.input}
-        />
+            );
+          })}
+        </ScrollView>
       </View>
-      <TouchableOpacity style={styles.sendButton} onPress={sendMessage} >
-        <MaterialCommunityIcons name="send" size={24} color="white" />
-      </TouchableOpacity>
-    </View>
+      <View style={{ height: 1, backgroundColor: '#999' }}></View>
+      <View style={styles.containerSender}>
+        <View style={styles.bubble}>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <FontAwesome6 name="face-laugh" size={24} color="black" style={styles.icon} />
+          </TouchableOpacity>
+          <TextInput
+            value={message}
+            onChangeText={setMessage}
+            placeholder="Type a message"
+            style={styles.input}
+          />
+        </View>
+        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+          <MaterialCommunityIcons name="send" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -245,10 +233,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding:10,
-    marginTop:20,
-    marginLeft:20,
-    marginRight:20,
+    padding: 10,
+    marginTop: 20,
+    marginLeft: 20,
+    marginRight: 20,
   },
   modalContent: {
     backgroundColor: 'white',
@@ -272,14 +260,11 @@ const styles = StyleSheet.create({
     color: 'red',
     textDecorationLine: 'underline',
   },
-
-
-////
   containerSender: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginBottom:15
+    marginBottom: 15,
   },
   bubble: {
     flexDirection: 'row',
@@ -353,7 +338,7 @@ const styles = StyleSheet.create({
   input: {
     padding: 8,
     marginVertical: 5,
-    width:'90%'
+    width: '90%',
   },
 });
 

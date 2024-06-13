@@ -58,6 +58,11 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const [userData, setUserData] = useState(null);
   const [userDC, setUserDC] = useState(null);
   
+
+
+ 
+
+
     const fetchUserData = async () => {
       // console.log(currentUser)
       try {
@@ -89,10 +94,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
       }
     };
   
-    useEffect(()=>{
-      fetchUserData();
-      fetchUser();
-    });
+    
 
 
   const fetchData = async () => {
@@ -106,6 +108,20 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
       console.error('Error fetching data:', error);
     }
   };
+
+  useEffect(()=>{
+    fetchUserData();
+  },[]);
+
+ useEffect(()=>{
+    fetchData();
+
+  },[]);
+  
+  useEffect(()=>{
+    fetchUser();
+  },[]);
+
 
   const fetchDataPlanning = async () => {
     try {
@@ -122,16 +138,12 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   };
 
   useEffect(() => {
+    
     if (itemId) {
-      fetchData();
+     
       fetchDataPlanning();
     }
-  }, [itemId]);
-
-  useEffect(() => {
-    // console.log('Data fetched5:', datafetch);
-  }, [datafetch]);
-
+  }, []);
 
   const openModal1 = () => {
     setModalVisible1(true);
@@ -310,11 +322,16 @@ const handleDureeChange = (text) => {
     setDuree(0);
   }
 };
+
+
 useEffect(() => {
   if (datafetch?.attributes?.pay?.data?.attributes?.label) {
     setDestination(datafetch.attributes.pay.data.attributes.label);
   }
 }, [datafetch]);
+
+
+
 const onChangeDate = (event, selectedDate) => {
   const currentDate = selectedDate || date_partir;
   setShowDatePicker(false);
@@ -392,7 +409,7 @@ const [options2, setOptions2] = useState([
   { label: 'Fête', value: false },
   { label: 'Famille', value: false },
   { label: 'Luxe', value: false },
-  { label: 'Romantique', value: false },
+  { label: 'Casino', value: false },
   { label: 'Plage', value: false },
 
   // Add more options as needed
@@ -685,7 +702,7 @@ const videForm =()=>{
         onRequestClose={closeModal3}
       >
         <View style={styles.centeredView}>
-          <View style={styles.modalView}>
+          <View style={styles.modalViewRs}>
           <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect3()}>
               <FontAwesome name="chevron-up" size={20} color="white" />
             </TouchableOpacity>
@@ -1004,6 +1021,26 @@ const styles = StyleSheet.create({
     right: 20,
     height: "84%",
     backgroundColor: '#000',
+    opacity: 1,
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+
+  },
+  modalViewRs: {
+    position: 'absolute',
+    top: 58,
+    left: 20,
+    right: 20,
+    height: "84%",
+    backgroundColor: '#666666',
     opacity: 1,
     borderRadius: 20,
     padding: 10,
