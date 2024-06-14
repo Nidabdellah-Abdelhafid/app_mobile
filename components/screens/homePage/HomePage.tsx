@@ -13,7 +13,7 @@ interface Props{
 const HomePage = ({route,navigation}:Props) => {
     const { user } = route.params || {};
     const [category,setCategory]=useState('Tiny homes');
-    const [datafetch,setDatafetch]=useState([]) ;
+    const [datafetch,setDatafetch]=useState([]);
    
     const fetchData = async () => {
       try {

@@ -175,7 +175,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         </View>
       </Modal>
       <View style={styles.container}>
-        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 30 }}>
+        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 25 }}>
           {messages.map((item, index) => {
             const isSender = isCurrentUser(item?.attributes?.sender?.data?.attributes?.username);
             const isMessageFromAdmin = isAdmin(item?.attributes?.sender?.data?.id);

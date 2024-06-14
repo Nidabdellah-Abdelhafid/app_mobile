@@ -8,6 +8,7 @@ import fileData from '../../assets/data/file.json';
 import { FlatList, TextInput } from "react-native-gesture-handler";
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { URL_BACKEND } from "api";
+import axios from "axios";
 interface RouterProps {
   navigation: NavigationProp<any,any>;
   route
@@ -16,6 +17,7 @@ interface RouterProps {
 const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const { user: currentUser } = route.params;
   const [userData, setUserData] = useState(null);
+  
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible3, setModalVisible3] = useState(false);
@@ -24,28 +26,126 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const [modalVisible6, setModalVisible6] = useState(false);
   const [modalVisible7, setModalVisible7] = useState(false);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
+  const [userDC, setUserDC] = useState(null);
+  const [favorie, setFavorie] = useState(null);
+  const [isFirstRun, setIsFirstRun] = useState(true);
+  const [datafetch,setDatafetch]=useState([]);
+  const [paysfavorieUser, setPaysfavorieUser] = useState([]);
+
+  useEffect(() => {
+      fetchUserData(); 
+    }, []);
+
+  useEffect(() => {
+    if (userData) {
+      fetchUser();
+    }
+  }, [userData]);
+  useEffect(() => {
+    fetchData();
+   
+  }, []);
+
+  useEffect(() => {
+    if (userDC) {
+      fetchFavories();
+    }
+  }, [userDC]);
+
+ useEffect(() => {
+      if(favorie && datafetch && userDC){
+        filterPaysFavorieUser();
+      }
+      
+    }, [favorie,datafetch,userDC]);
 
   const items = fileData;
-  const fetchUserData = async () => {
-    try {
-      const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
-      const querySnapshot = await getDocs(userQuery);
-      const userData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      if (userData.length > 0) {
-        setUserData(userData[0]); 
-      } else {
-        setUserData(null); 
+    const fetchUserData = async () => {
+      try {
+        const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
+        const querySnapshot = await getDocs(userQuery);
+        const userData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (userData.length > 0) {
+          setUserData(userData[0]); 
+        } else {
+          setUserData(null); 
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
       }
+    };
+
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+      const users = response.data;
+      const email = userData?.email;
+      const currentUserData = users.find(user => user.email === email);
+      setUserDC(currentUserData);
+      // console.log('Current user data fetched:', currentUserData);
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching user:', error);
     }
   };
 
-  useEffect(() => {
-    fetchUserData(); 
-  }, []);
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${URL_BACKEND}/api/pays?populate=*&pagination[limit]=-1`);
+      const data = await response.json();
+      // console.log('Result:', data.data[0].attributes);
+      setDatafetch(data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const fetchFavories = async () => {
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/favories?populate=*&pagination[limit]=-1`);
+      const favories = response.data.data;
+      setFavorie(favories);
+      // console.log('Favories fetched:', favories);
+    } catch (error) {
+      console.error('Error fetching favories:', error);
+    }
+  };
+
+ 
+  const filterPaysFavorieUser = () => {
+    // console.log('Filtering with userDC:', userDC);
+    // console.log('Datafetch:', datafetch);
+    // console.log('Favories:', favorie);
+
+    const filteredPays = datafetch.filter(pays => {
+      if (pays.attributes.favories?.data && Array.isArray(pays.attributes.favories.data)) {
+        const isFavorite = pays.attributes.favories.data.some(fav => {
+          const favMatch = favorie.some(f => 
+            f.attributes.user?.data?.id === userDC.id &&
+            f.id === fav.id
+          );
+          if (favMatch) {
+            // console.log('Match found for pays:', pays);
+          }
+          return favMatch;
+        });
+        return isFavorite;
+      } else {
+        // console.log('favories is not an array for pays:', pays);
+      }
+      return false;
+    });
+    // console.log('Filtered pays:', filteredPays);
+    setPaysfavorieUser(filteredPays);
+  };
+
+
+
+  const handleButtonPress = () => {
+    setIsButtonPressed(true);
+  };
   
-  
+
+   
   const openModal1 = () => {
     setModalVisible1(true);
   };
@@ -75,6 +175,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
 
   const closeModal3 = () => {
       setModalVisible3(false);
+      setIsButtonPressed(false);
   };
   const handleDateSelect3 = () => {
       // Close the modal
@@ -133,18 +234,18 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
 const renderRow: ListRenderItem<any> = ({item}) => (
   
   <Animated.View style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
-      <Image source={{ uri: item.medium_url }} style={styles.imagelike} />
+      <Image source={{ uri: item.attributes?.photos.data[0].attributes?.url }} style={styles.imagelike} />
       <TouchableOpacity style={{ position: 'absolute', right: 18, top: 10 }}>
           <Ionicons name='heart' size={25} color='white' />
       </TouchableOpacity>
       
-      <View style={{ position: 'absolute',left: 10, top: 85,flexDirection:'row' }}>
+      <View style={{ position: 'absolute',left: 10, top: 105,flexDirection:'row' }}>
           <View style={{ flex:1,justifyContent:'space-between',flexDirection:'row'}}>
             <View>
-              <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.name}</Text>
+              <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.attributes?.label}</Text>
             </View>
           
-          <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:10,padding:1,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailPage', { itemId: item.id });handleDateSelect1() }}>
+          <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:10,padding:3,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailPage', { itemId: item.id });handleDateSelect1() }}>
               <Text  style={{color:'#fff',fontWeight:'700'}}>Voir l'Offre 
               </Text>
               <Ionicons name="chevron-forward" size={12} color="white" />
@@ -179,7 +280,7 @@ const renderRow: ListRenderItem<any> = ({item}) => (
               
               <View style={{justifyContent:'space-between',alignItems:'center',padding:13}}>
                  <Ionicons name="heart" size={25} color="white"/>
-                 <Text style={{color:'#C4C2C2',fontWeight:'700',}}>5 Places Like</Text>
+                 <Text style={{color:'#C4C2C2',fontWeight:'700',}}>{paysfavorieUser?.length} Places Like</Text>
                  <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:15,padding:10,width:110,alignItems:'center'}} onPress={openModal1}>
                   <Text  style={{color:'#fff',fontWeight:'800'}}>Voir</Text>
                   
@@ -283,13 +384,13 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
                     <Ionicons name="heart" size={25} color="white"/>
-                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{paysfavorieUser?.length} Places Like</Text>
                     <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect1()}>
                         <Ionicons name="close" size={26} color="white" />
                     </TouchableOpacity>
                     <FlatList
                       renderItem={renderRow}
-                      data={items}
+                      data={paysfavorieUser}
                     />
                     </View>
                 </View>
@@ -370,10 +471,10 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                     </View>
                     <View style={{width:'100%',padding:10,justifyContent:'center',alignItems:'center'}}>
                     <TouchableOpacity
-                      // onPress={ showPasswordInput ? handleLogin : handleShowPasswordInput}
+                      onPress={ handleButtonPress}
                       style={[styles.button2, isButtonPressed ? styles.buttonPressed : null]}
                     >
-                      <Text style={[styles.loginText, isButtonPressed ? {color:'black',fontSize:20,fontWeight:'900'} : null]}>Approve</Text>
+                      <Text style={[styles.loginText, isButtonPressed ? {color:'black',fontSize:15,fontWeight:'700'} : null]}>Approve</Text>
                     </TouchableOpacity>
                     </View>
                     </View>
@@ -600,7 +701,7 @@ listViewlike:{
 },
 imagelike:{
   width: 315,
-  height: 125,
+  height: 150,
   borderRadius:20,
   backgroundColor:'#000',
   opacity:0.8
@@ -610,7 +711,7 @@ imagelike:{
     borderRadius: 10,
     height: 50,
     padding: 10,
-    color: '#000',
+    color: '#EDECEC',
     backgroundColor:'#444',
     marginBottom:11,
     marginTop:10,
@@ -628,7 +729,7 @@ imagelike:{
     borderColor:'#fff',
     borderWidth:2,
     borderRadius: 15,
-    height: 40,
+    height: 45,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
@@ -639,7 +740,7 @@ imagelike:{
   },
   loginText: {
     color: 'white',
-    fontWeight:'900',
+    fontWeight:'700',
     fontSize:15
   },
 });

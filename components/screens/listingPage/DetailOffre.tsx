@@ -1040,7 +1040,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     height: "84%",
-    backgroundColor: '#666666',
+    backgroundColor: '#555555',
     opacity: 1,
     borderRadius: 20,
     padding: 10,

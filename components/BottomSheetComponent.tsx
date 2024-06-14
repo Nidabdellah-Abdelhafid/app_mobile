@@ -1,6 +1,6 @@
 // BottomSheetComponent.js
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Modal,Image, ScrollView, PanResponder ,TouchableOpacity, ImageBackground} from 'react-native';
+import { View, Text, StyleSheet, Modal,Image, ScrollView, PanResponder ,TouchableOpacity, ImageBackground, Button} from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import HomePageNav from './screens/homePage/HomePageNav';
@@ -9,7 +9,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FontAwesome5, AntDesign,MaterialCommunityIcons } from '@expo/vector-icons';
 // import { TouchableOpacity } from 'react-native-gesture-handler';
-
+import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { SvgUri } from 'react-native-svg';
 import { MaterialIcons,FontAwesome6 } from '@expo/vector-icons';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -51,6 +51,19 @@ const BottomSheetComponent = ({user}) => {
   const scrollViewRef = useRef(null);
   const snapPoints = ['100%', '100%'];
   const [userData, setUserData] = useState(null);
+  const [modalVisible0, setModalVisible0] = useState(false);
+
+  const openModal0 = () => {
+      setModalVisible0(true);
+    };
+
+  const closeModal0 = () => {
+      setModalVisible0(false);
+  };
+  const handleDateSelect0 = () => {
+      // Close the modal
+      closeModal0();
+  };
 
   const fetchUserData = async () => {
     try {
@@ -232,12 +245,8 @@ const toggleShowAll = () => {
             tabBarActiveTintColor: "#fff",
             tabBarActiveBackgroundColor:'#222',
             tabBarInactiveBackgroundColor:'#222',
-            
             tabBarStyle: { height:58 ,backgroundColor:'#222'},
-             
         }} 
-        
-        
         >
           <Tab.Screen name='Explorer' component={HomePageNav}
           initialParams={{ user: user }}
@@ -313,13 +322,13 @@ const toggleShowAll = () => {
                 // Add a bottom margin of 10
               },
               headerRight: () => (
-                <TouchableOpacity style={{marginRight:27,marginBottom:20}} onPress={()=>console.log("share profile..")}>
-                    <FontAwesome6 name="ellipsis-vertical" size={30} color="white" />
+                <TouchableOpacity style={{marginRight:35,marginBottom:20}} onPress={openModal0}>
+                    <FontAwesome6 name="ellipsis-vertical" size={35} color="white" />
                 </TouchableOpacity>
               ),
               headerLeft: () => (
                 <TouchableOpacity style={{marginLeft:20,marginBottom:20}} onPress={()=>console.log("back..")}>
-                    <Ionicons name="arrow-back" size={25} color="white" />
+                    {/* <Ionicons name="arrow-back" size={25} color="white" /> */}
                 </TouchableOpacity>
               ),
               
@@ -515,6 +524,27 @@ const toggleShowAll = () => {
                     </TouchableOpacity>
                 </View>
                 </View>
+            </Modal>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible0}
+                onRequestClose={closeModal0}
+            >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>            
+                <TouchableOpacity style={{flexDirection:'row',marginBottom:10}}  onPress={()=> FIREBASE_AUTH.signOut()}>
+                  <MaterialIcons name="logout" size={24} color="#fff" />
+                  <Text style={{color:'#fff',marginLeft:3}}>Logout</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{flexDirection:'row',marginBottom:10,alignItems:'center'}} onPress={() => handleDateSelect0()}>
+                <AntDesign name="close" size={20} color="#fff" />
+
+                    <Text style={{color:'#fff',marginLeft:3}}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             </Modal>
       </ImageBackground>
     </BottomSheetModalProvider>
@@ -716,5 +746,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+},
+modalView: {
+    position: 'absolute',
+    bottom: 710,
+    left: 250,
+    right: 10,
+    backgroundColor: '#222',
+    borderRadius: 15,
+    padding: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+        width: 0,
+        height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    opacity:0.8
+},
+
 });
 export default BottomSheetComponent;
