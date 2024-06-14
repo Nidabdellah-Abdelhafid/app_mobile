@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Ionicons, Fontisto } from '@expo/vector-icons';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { NavigationProp } from '@react-navigation/native';
-import { FlatList } from 'react-native-gesture-handler';
+import { FlatList, TextInput } from 'react-native-gesture-handler';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_DB } from "FirebaseConfig";
 import axios from 'axios';
@@ -20,12 +20,17 @@ interface Props {
 
 const ListingPage = ({ navigation, listings: items, refresh, category, user }: Props) => {
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const listRef = useRef<FlatList>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userDC, setUserDC] = useState(null);
   const [favorie, setFavorie] = useState(null);
   const [isFirstRun, setIsFirstRun] = useState(true);
+  const [title, setTitle] = useState('');
+  const [enregetrer, setEnregetrer] = useState(null);
+  const [idPays, setIdPays] = useState(null);
+
 
   useEffect(() => {
     fetchUserData();
@@ -40,6 +45,12 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
   useEffect(() => {
     if (userDC) {
       fetchFavories();
+    }
+  }, [userDC]);
+
+  useEffect(() => {
+    if (userDC) {
+      fetchenregetrers();
     }
   }, [userDC]);
 
@@ -134,7 +145,8 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
     listRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  const openModal = () => {
+  const openModal = (item) => {
+    setIdPays(item)
     setModalVisible(true);
   };
 
@@ -188,6 +200,81 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
     );
   };
 
+  const fetchenregetrers = async () => {
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/enregetrers?populate=*&pagination[limit]=-1`);
+      const enregetrers = response.data.data;
+      setEnregetrer(enregetrers);
+      // console.log('enregetrers fetched:', enregetrers);
+    } catch (error) {
+      console.error('Error fetching enregetrers:', error);
+    }
+  };
+
+  const handleSubmitenregetrer = async () => {
+    const enregetrerData = {
+      titre: title,
+      pay: idPays,
+      user: userDC.id
+    };
+
+    try {
+      const response = await axios.post(`${URL_BACKEND}/api/enregetrers`, {
+        data: enregetrerData,
+      });
+      // console.log('Favorite added:', response.data);
+      closeModal();
+      setTitle('');
+      fetchenregetrers();
+      setIdPays(null);
+      
+    } catch (error) {
+      console.log('Error adding favorite:', error.response?.data || error.message);
+    }
+  };
+
+  const deleteItemenregetrer = async (id) => {
+    const fvid = enregetrer?.find(i => i.attributes?.pay?.data.id == id);
+
+    if (!fvid) return;
+
+    const url = `${URL_BACKEND}/api/enregetrers/${fvid.id}`;
+
+    try {
+      const response = await axios.delete(url);
+      // console.log('Favorite deleted:', response.data);
+      fetchenregetrers();
+    } catch (error) {
+      console.error('Error deleting favorite:', error.response ? error.response.data : error.message);
+    }
+  };
+
+  const enregetrerItem = (item) => {
+    const isEnregetrer = () => {
+      if (!enregetrer || !userDC) return false;
+      return enregetrer.some(fav =>
+        fav.attributes.user?.data.id === userDC.id &&
+        fav.attributes.pay?.data.id === item.id
+      );
+    };
+
+    return (
+      <TouchableOpacity
+        style={{ position: 'absolute', right: 35, top: 180 }}
+        onPress={() => {
+          if (!isEnregetrer()) {
+            openModal(item?.id);
+          } else {
+            deleteItemenregetrer(item?.id);
+          }
+        }}
+      >
+      
+      <Fontisto name={isEnregetrer() ? "bookmark-alt": "bookmark"} size={24} color="#fff" />
+
+      </TouchableOpacity>
+    );
+  };
   const renderRow: ListRenderItem<any> = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate('DetailPage', { itemId: item?.id })}>
       <Animated.View style={styles.listView} entering={FadeInRight} exiting={FadeOutLeft}>
@@ -197,40 +284,64 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
           <View>
             <Text style={{ fontSize: 17, fontWeight: '900', color: '#fff' }}>{item?.attributes.label}</Text>
             <View style={{ flexDirection: 'row', gap: 4 }}>
-              <Ionicons name="star" size={16} color='orange' />
-              <Ionicons name="star" size={16} color='orange' />
-              <Ionicons name="star" size={16} color='orange' />
-              <Ionicons name="star" size={16} color='orange' />
-              <Ionicons name="star" size={16} color='orange' />
+              <StarRating reviews={item?.attributes.reviews} />
             </View>
           </View>
         </View>
-        <TouchableOpacity style={{ position: 'absolute', right: 35, top: 180 }} onPress={openModal}>
-          <Fontisto name="bookmark" size={24} color="#fff" />
-        </TouchableOpacity>
+        {enregetrerItem(item)}
       </Animated.View>
-      {modalVisible && (
+      
         <Modal
+          key={item?.id}
           animationType="fade"
           transparent={true}
           visible={modalVisible}
           onRequestClose={closeModal}
         >
           <View style={styles.modalContainer}>
+          
             <View style={styles.modalView}>
-              <TouchableOpacity onPress={closeModal}>
+              <Text style={styles.inputText}>Title</Text>
+                
+                <TextInput
+                placeholder="Title"
+                value={title}
+                onChangeText={setTitle}
+                style={styles.inputView}
+              />
+              <View style={{flexDirection:'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',}}>
+                 <TouchableOpacity onPress={closeModal}>
                 <Text style={{ color: 'gray', fontSize: 17, textDecorationLine: 'underline' }}>Close</Text>
               </TouchableOpacity>
-              <TouchableOpacity  style={[styles.button, { alignContent: 'flex-end', }]}>
+              <TouchableOpacity onPress={()=>handleSubmitenregetrer()} style={[styles.button, { alignContent: 'flex-end', }]}>
                 <Text style={styles.buttonText}>Create</Text>
               </TouchableOpacity>
+              </View>
+             
             </View>
           </View>
         </Modal>
-      )}
     </TouchableOpacity>
   );
 
+
+  const StarRating = ({ reviews }) => {
+    const stars = [];
+  
+    for (let i = 0; i < reviews; i++) {
+      stars.push(
+        <Ionicons key={i} name="star" size={16} color="orange" />
+      );
+    }
+  
+    return (
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        {stars}
+      </View>
+    );
+  };
   return (
     <View style={styles.container}>
       <FlatList
@@ -298,23 +409,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
   },
   inputView: {
-    width: '80%',
+    width: '100%',
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderRadius: 25,
+    borderRadius: 10,
     height: 50,
     marginBottom: 20,
     justifyContent: 'center',
-    padding: 20,
+    padding: 10,
   },
   inputText: {
-    height: 50,
     color: 'black',
+    marginBottom:5,
+    fontWeight:'700'
   },
   button: {
     backgroundColor: '#000',

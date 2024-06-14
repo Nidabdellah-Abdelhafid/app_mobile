@@ -17,7 +17,7 @@ interface RouterProps {
 const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const { user: currentUser } = route.params;
   const [userData, setUserData] = useState(null);
-  
+  const [refreshing, setRefreshing] = useState(false);
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible3, setModalVisible3] = useState(false);
@@ -28,9 +28,11 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const [isButtonPressed, setIsButtonPressed] = useState(false);
   const [userDC, setUserDC] = useState(null);
   const [favorie, setFavorie] = useState(null);
+  const [enregetrer, setEnregetrer] = useState(null);
   const [isFirstRun, setIsFirstRun] = useState(true);
   const [datafetch,setDatafetch]=useState([]);
   const [paysfavorieUser, setPaysfavorieUser] = useState([]);
+  const [paysenregetrerUser, setPaysenregetrerUser] = useState([]);
 
   useEffect(() => {
       fetchUserData(); 
@@ -52,12 +54,25 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
     }
   }, [userDC]);
 
+  useEffect(() => {
+    if (userDC) {
+      fetchEnregetrers();
+    }
+  }, [userDC]);
+
  useEffect(() => {
       if(favorie && datafetch && userDC){
         filterPaysFavorieUser();
       }
       
     }, [favorie,datafetch,userDC]);
+
+  useEffect(() => {
+    if(enregetrer && datafetch && userDC){
+      filterPaysEnregetrerUser();
+    }
+    
+  }, [enregetrer,datafetch,userDC]);
 
   const items = fileData;
     const fetchUserData = async () => {
@@ -110,11 +125,18 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
     }
   };
 
+  const fetchEnregetrers = async () => {
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/enregetrers?populate=*&pagination[limit]=-1`);
+      const enregetrers = response.data.data;
+      setEnregetrer(enregetrers);
+      console.log('Favories fetched:', enregetrers);
+    } catch (error) {
+      console.error('Error fetching favories:', error);
+    }
+  };
  
   const filterPaysFavorieUser = () => {
-    // console.log('Filtering with userDC:', userDC);
-    // console.log('Datafetch:', datafetch);
-    // console.log('Favories:', favorie);
 
     const filteredPays = datafetch.filter(pays => {
       if (pays.attributes.favories?.data && Array.isArray(pays.attributes.favories.data)) {
@@ -138,7 +160,29 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
     setPaysfavorieUser(filteredPays);
   };
 
+  const filterPaysEnregetrerUser = () => {
 
+    const filteredPays = datafetch.filter(pays => {
+      if (pays.attributes.enregetrers?.data && Array.isArray(pays.attributes.enregetrers?.data)) {
+        const isEnregetrer = pays.attributes.enregetrers?.data.some(fav => {
+          const favMatch = enregetrer.some(f => 
+            f.attributes.user?.data?.id === userDC.id &&
+            f.id === fav.id
+          );
+          if (favMatch) {
+            console.log('Match found for pays:', pays);
+          }
+          return favMatch;
+        });
+        return isEnregetrer;
+      } else {
+        console.log('favories is not an array for pays:', pays);
+      }
+      return false;
+    });
+    console.log('Filtered pays:', filteredPays);
+    setPaysenregetrerUser(filteredPays);
+  };
 
   const handleButtonPress = () => {
     setIsButtonPressed(true);
@@ -147,7 +191,14 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
 
    
   const openModal1 = () => {
-    setModalVisible1(true);
+    fetchUserData()
+    fetchData()
+    fetchFavories()
+    filterPaysFavorieUser();
+    setTimeout(() => {
+      setModalVisible1(true);
+    }, 500);
+    
   };
 
   const closeModal1 = () => {
@@ -158,7 +209,14 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       closeModal1();
   };
   const openModal2 = () => {
-    setModalVisible2(true);
+    fetchUserData()
+    fetchData()
+    fetchEnregetrers()
+    filterPaysEnregetrerUser();
+    setTimeout(() => {
+      setModalVisible2(true);
+    }, 500);
+    
   };
 
   const closeModal2 = () => {
@@ -230,8 +288,14 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       closeModal7();
   };
 
+  const handleRefresh=()=>{
+      
+    setRefreshing(true);
+    filterPaysFavorieUser();
+    setRefreshing(false);
 
-const renderRow: ListRenderItem<any> = ({item}) => (
+  }
+  const renderRow: ListRenderItem<any> = ({item}) => (
   
   <Animated.View style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
       <Image source={{ uri: item.attributes?.photos.data[0].attributes?.url }} style={styles.imagelike} />
@@ -257,6 +321,49 @@ const renderRow: ListRenderItem<any> = ({item}) => (
       
   </Animated.View>
 )
+const renderRowErg: ListRenderItem<any> = ({item}) => (
+  
+  <Animated.View style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
+      <Image source={{ uri: item.attributes?.photos.data[0].attributes?.url }} style={styles.imageSave} />
+      
+      <TouchableOpacity style={{position: 'absolute', right: 15, top: 10,borderColor:'#fff',borderWidth:2,borderRadius:10,padding:3,width:110,alignItems:'center',justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailPage', { itemId: item.id });handleDateSelect2() }}>
+            <Text  style={{color:'#fff',fontWeight:'700'}}>Voir l'Offre  </Text>
+          <Ionicons name="chevron-forward" size={12} color="white" />
+      </TouchableOpacity>
+      
+      <View style={{ position: 'absolute',left: 10, top: 130,flexDirection:'row' }}>
+          <View style={{ flex:1,justifyContent:'space-between',flexDirection:'row'}}>
+            <View>
+              <Text style={{ fontSize: 17, fontWeight: '900' ,color:'#fff'}}>{item.attributes?.label}</Text>
+              <View style={{ flexDirection: 'row', gap: 4 }}>
+              <StarRating reviews={item?.attributes.reviews} />
+            </View>
+            </View>
+            <Fontisto name='favorite' size={25} color='white' style={{marginRight:30}}/>
+          </View>
+          
+          
+      </View>
+      
+  </Animated.View>
+)
+
+
+const StarRating = ({ reviews }) => {
+  const stars = [];
+
+  for (let i = 0; i < reviews; i++) {
+    stars.push(
+      <Ionicons key={i} name="star" size={16} color="orange" />
+    );
+  }
+
+  return (
+    <View style={{ flexDirection: 'row', gap: 4 }}>
+      {stars}
+    </View>
+  );
+};
   return (
     <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:47:18.607875882_profile%20bg@2x.png'}} style={styles.container}>
       
@@ -391,6 +498,8 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                     <FlatList
                       renderItem={renderRow}
                       data={paysfavorieUser}
+                      refreshing={refreshing}
+                      onRefresh={handleRefresh}
                     />
                     </View>
                 </View>
@@ -409,14 +518,14 @@ const renderRow: ListRenderItem<any> = ({item}) => (
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
-                    <Ionicons name="heart" size={25} color="white"/>
-                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <Fontisto name='favorite' size={25} color='white' />
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>Enregistre dans les favoris</Text>
                     <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect2()}>
                         <Ionicons name="close" size={26} color="white" />
                     </TouchableOpacity>
                     <FlatList
-                      renderItem={renderRow}
-                      data={items}
+                      renderItem={renderRowErg}
+                      data={paysenregetrerUser}
                     />
                     </View>
                 </View>
@@ -718,6 +827,13 @@ imagelike:{
     justifyContent: 'center'
     
   },
+  imageSave:{
+    width: 315,
+    height: 180,
+    borderRadius:20,
+    backgroundColor:'#000',
+    opacity:0.8
+    },
   inputText: {
     fontSize:16,
     color: '#E1E1E1',

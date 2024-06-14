@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Modal, Alert } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, TextInput, Button, RefreshControl,StyleSheet, Modal, Alert } from 'react-native';
 import axios from 'axios';
 import socket from './socket';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -30,7 +30,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const [selectedEmojis, setSelectedEmojis] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const scrollViewRef = useRef(null);
-
+  const [refreshing, setRefreshing] = useState(false);
  
   const fetchUserData = async () => {
     try {
@@ -116,6 +116,15 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     }
   }, [userData]);
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchMessages();
+    // Simulate a network request
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }
+
   const sendMessage = () => {
     if (!userDC || !message) {
       Alert.alert("🚫 Le message est vide!");
@@ -175,7 +184,12 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         </View>
       </Modal>
       <View style={styles.container}>
-        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 25 }}>
+        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 25 }}  
+        refreshControl={
+        <RefreshControl 
+        refreshing={refreshing} 
+        onRefresh={onRefresh} />
+      }>
           {messages.map((item, index) => {
             const isSender = isCurrentUser(item?.attributes?.sender?.data?.attributes?.username);
             const isMessageFromAdmin = isAdmin(item?.attributes?.sender?.data?.id);
