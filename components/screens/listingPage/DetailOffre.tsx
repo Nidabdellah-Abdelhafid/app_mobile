@@ -118,10 +118,11 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   },[]);
   
-  useEffect(()=>{
-    fetchUser();
-  },[]);
-
+  useEffect(() => {
+    if (userData) {
+      fetchUser();
+    }
+  }, [userData]);
 
   const fetchDataPlanning = async () => {
     try {
@@ -346,8 +347,10 @@ const formatDate = (date) => {
 };
 
 const handleSubmit = async () => {
+  const refRS= new Date();
+  const refRSInSeconds = Math.floor(refRS.getTime() / 1000);
   const reservationData = {
-    reference : reference,
+    reference : 'REFRS'+refRSInSeconds+'MN4',
     destination : destination,
     nbr_voyageurs_enfants : nbr_voyageurs_enfants,
     nbr_voyageurs_adultes: nbr_voyageurs_adultes,
@@ -360,9 +363,12 @@ const handleSubmit = async () => {
     cabine : cabine,
     experience_souhaitez : experience_souhaitez,
     offre: itemId,
-    user: userDC.id
+    user: userDC.id,
+    status:false
 
 };
+
+ 
   
   try {
     const response = await axios.post(`${URL_BACKEND}/api/reservations`, {
@@ -373,7 +379,40 @@ const handleSubmit = async () => {
     '✅ Reservation created successfully!',
     [{ text: 'OK', onPress: () => {handleDateSelect3()} }],
     { cancelable: false });
-    // closeModal3();
+
+    setTimeout( async () => {
+      try {
+      if(response){
+      const resID= response?.data.data.id;
+      const responseRs = await axios.get(`${URL_BACKEND}/api/reservations/${resID}?populate=*&pagination[limit]=-1`);
+      const rf=responseRs.data;
+      const ref= new Date();
+      const refInSeconds = Math.floor(ref.getTime() / 1000);
+      const  factureData = {
+        reference: 'REF'+refInSeconds+'LP9',
+        prixTotal: Number(rf?.data.attributes.offre?.data?.attributes.prix*(rf?.data.attributes.nbr_voyageurs_enfants+rf?.data.attributes.nbr_voyageurs_adultes+rf?.data.attributes.duree)),
+        reservation: resID,
+        status: false
+      };
+      
+      const responsefacture = await axios.post(`${URL_BACKEND}/api/factures`, {
+        data: factureData,
+      });
+      // console,log(rf);
+      // console.log('Success', ' rf : ',rf?.data.attributes.duree);
+      // Alert.alert('🎉 Success! 🎉',
+      // '✅ Reservation created successfully!',
+      // [{ text: 'OK', onPress: () => {handleDateSelect3()} }],
+      // { cancelable: false });
+      // closeModal3();
+    }
+  } catch (error) {
+      console.log('Error', error.response?.data || error.message);
+    }
+    }, 500);
+    
+
+
   } catch (error) {
     console.log('Error', error.response?.data || error.message);
   }
@@ -1040,7 +1079,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     height: "84%",
-    backgroundColor: '#555555',
+    backgroundColor: '#333333',
     opacity: 1,
     borderRadius: 20,
     padding: 10,

@@ -9,6 +9,8 @@ import { FlatList, TextInput } from "react-native-gesture-handler";
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { URL_BACKEND } from "api";
 import axios from "axios";
+import { AntDesign } from '@expo/vector-icons';
+
 interface RouterProps {
   navigation: NavigationProp<any,any>;
   route
@@ -25,14 +27,23 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const [modalVisible5, setModalVisible5] = useState(false);
   const [modalVisible6, setModalVisible6] = useState(false);
   const [modalVisible7, setModalVisible7] = useState(false);
+  const [modalVisible8, setModalVisible8] = useState(false);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
+  const [isButtonPressed2, setIsButtonPressed2] = useState(false);
   const [userDC, setUserDC] = useState(null);
   const [favorie, setFavorie] = useState(null);
+  const [reservation, setReservation] = useState(null);
   const [enregetrer, setEnregetrer] = useState(null);
+  const [facture, setFacture] = useState(null);
+  const [offrebyid, setOffrebyid] = useState(null);
+  const [carte, setCarte] = useState([]);
   const [isFirstRun, setIsFirstRun] = useState(true);
   const [datafetch,setDatafetch]=useState([]);
   const [paysfavorieUser, setPaysfavorieUser] = useState([]);
   const [paysenregetrerUser, setPaysenregetrerUser] = useState([]);
+  const [filteredReservations, setFilteredReservations] = useState([]);
+  const [filteredReservationsTrue, setFilteredReservationsTrue] = useState([]);
+  const [filteredFacture, setFilteredFacture] = useState([]);
 
   useEffect(() => {
       fetchUserData(); 
@@ -59,13 +70,39 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       fetchEnregetrers();
     }
   }, [userDC]);
+  useEffect(() => {
+    if (userDC) {
+      fetchReservation();
+    }
+  }, [userDC]);
 
- useEffect(() => {
-      if(favorie && datafetch && userDC){
-        filterPaysFavorieUser();
-      }
-      
-    }, [favorie,datafetch,userDC]);
+  useEffect(() => {
+    if(favorie && datafetch && userDC){
+      filterPaysFavorieUser();
+    }
+    
+  }, [favorie,datafetch,userDC]);
+
+  useEffect(() => {
+    if(reservation && userDC){
+      filterReservations();
+    }
+    
+  }, [reservation,userDC]);
+
+  useEffect(() => {
+    if(userDC){
+      handleGetFacture();
+    }
+    
+  }, [userDC]);
+  useEffect(() => {
+    if(userDC){
+      handleGetCarte();
+    }
+    
+  }, [userDC]);
+  
 
   useEffect(() => {
     if(enregetrer && datafetch && userDC){
@@ -130,10 +167,33 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       const response = await axios.get(`${URL_BACKEND}/api/enregetrers?populate=*&pagination[limit]=-1`);
       const enregetrers = response.data.data;
       setEnregetrer(enregetrers);
-      console.log('Favories fetched:', enregetrers);
+      // console.log('Favories fetched:', enregetrers);
     } catch (error) {
       console.error('Error fetching favories:', error);
     }
+  };
+  const fetchReservation = async () => {
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/reservations?populate=*&pagination[limit]=-1`);
+      const reservations = response.data.data;
+      setReservation(reservations);
+      // console.log('Reservations fetched:', reservations);
+    } catch (error) {
+      console.error('Error fetching favories:', error);
+    }
+  };
+  
+  const filterReservations = () => {
+    const filtered = reservation.filter(reservation => 
+      reservation.attributes.user?.data.id === userDC.id && reservation.attributes.status === false
+    );
+    const filteredtrue = reservation.filter(reservation => 
+      reservation.attributes.user?.data.id === userDC.id && reservation.attributes.status === true
+    );
+
+    setFilteredReservations(filtered);
+    setFilteredReservationsTrue(filteredtrue);
+    // console.log('Filtered Reservations:', filtered[0].attributes.offre?.data);
   };
  
   const filterPaysFavorieUser = () => {
@@ -170,17 +230,17 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
             f.id === fav.id
           );
           if (favMatch) {
-            console.log('Match found for pays:', pays);
+            // console.log('Match found for pays:', pays);
           }
           return favMatch;
         });
         return isEnregetrer;
       } else {
-        console.log('favories is not an array for pays:', pays);
+        // console.log('favories is not an array for pays:', pays);
       }
       return false;
     });
-    console.log('Filtered pays:', filteredPays);
+    // console.log('Filtered pays:', filteredPays);
     setPaysenregetrerUser(filteredPays);
   };
 
@@ -188,7 +248,9 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
     setIsButtonPressed(true);
   };
   
-
+  const handleButtonPress2 = () => {
+    setIsButtonPressed2(true);
+  };
    
   const openModal1 = () => {
     fetchUserData()
@@ -241,7 +303,13 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   };
 
   const openModal4 = () => {
-    setModalVisible4(true);
+    fetchUserData()
+    fetchData()
+    fetchReservation()
+    filterReservations();
+    setTimeout(() => {
+      setModalVisible4(true);
+    }, 500);
   };
 
   const closeModal4 = () => {
@@ -282,11 +350,71 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
 
   const closeModal7 = () => {
       setModalVisible7(false);
+    setIsButtonPressed2(false);
+
   };
   const handleDateSelect7 = () => {
       // Close the modal
       closeModal7();
   };
+  const openModal8 = (itemid) => {
+    handleGetOffre(itemid);
+    filterDataFacture(itemid)
+    setModalVisible8(true);
+  };
+
+  const closeModal8 = () => {
+      setModalVisible8(false);
+  };
+  const handleDateSelect8 = () => {
+
+      closeModal8();
+  };
+  
+  const handleGetOffre = async(itemid)=>{
+    try{
+        const responseOffre = await axios.get(`${URL_BACKEND}/api/offres/${itemid}?populate=*&pagination[limit]=-1`);
+        const resesoffrebyid=responseOffre.data.data;
+        setOffrebyid(resesoffrebyid);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    
+  };
+  const handleGetFacture = async()=>{
+    try{
+        const responsefacture = await axios.get(`${URL_BACKEND}/api/factures?populate=*&pagination[limit]=-1`);
+        const factures=responsefacture.data.data;
+        setFacture(factures);
+        // console.log(factures[0].attributes.reservation.data)
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+  };
+  const handleGetCarte = async()=>{
+    try{
+        const responsecarte= await axios.get(`${URL_BACKEND}/api/cartes?populate=*&pagination[limit]=-1`);
+        const carte=responsecarte.data.data;
+        const carteFiltered = carte.filter(carte => 
+          carte.attributes.user?.data.id === userDC.id 
+        );
+        setCarte(carteFiltered);
+        // console.log(carteFiltered)
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+  };
+  const filterDataFacture =async(itemid)=> {
+    
+    const filterded = reservation.filter(reservation => 
+      reservation.attributes.user?.data.id === userDC.id && reservation.attributes.offre?.data.id === itemid
+    );
+    const filtered = facture.filter(facture => 
+        facture.attributes.reservation?.data.id === filterded[0].id
+      );
+
+    setFilteredFacture(filtered);
+  }
 
   const handleRefresh=()=>{
       
@@ -321,6 +449,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       
   </Animated.View>
 )
+
 const renderRowErg: ListRenderItem<any> = ({item}) => (
   
   <Animated.View style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
@@ -348,6 +477,55 @@ const renderRowErg: ListRenderItem<any> = ({item}) => (
   </Animated.View>
 )
 
+const renderRowResF: ListRenderItem<any> = ({item}) => (
+  
+  <Animated.View style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
+      <Image source={{ uri: item.attributes?.offre?.data.attributes?.image }} style={styles.imageSave} />
+      
+      <View style={{position: 'absolute', right: 10, top: 10,flexDirection:'row',width:'100%',justifyContent:'space-between'}}>
+        <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:10,padding:10,width:110,alignItems:'center',justifyContent:'center',flexDirection:'row',marginLeft:20}} onPress={() => openModal8(item.attributes?.offre?.data.id)}>
+              <Text  style={{color:'#fff',fontWeight:'700'}}>Paiement  </Text>
+            <Ionicons name="chevron-forward" size={12} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:10,padding:3,width:110,alignItems:'center',justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailOffre', { itemId: item.attributes?.offre?.data.id });handleDateSelect4() }}>
+              <Text  style={{color:'#fff',fontWeight:'700'}}>Voir l'Offre  </Text>
+            <Ionicons name="chevron-forward" size={12} color="white" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={{ position: 'absolute',left: 10, top: 130,flexDirection:'row' }}>
+          <View style={{ flex:1,justifyContent:'space-between',flexDirection:'row'}}>
+            <View>
+              <Text style={{ fontSize: 17, fontWeight: '800' ,color:'#fff'}}>{item.attributes?.offre?.data.attributes?.label}</Text>
+              
+            </View>
+          </View>
+          
+          
+      </View>
+      
+  </Animated.View>
+)
+
+const renderRowResT: ListRenderItem<any> = ({item}) => (
+  
+  <Animated.View style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
+      <Image source={{ uri: item.attributes?.offre?.data.attributes?.image }} style={styles.imageSave} />
+      
+      <View style={{ position: 'absolute',left: 90, top: 105,alignItems:'center',justifyContent:'center'}}>
+      <View style={{ marginBottom:5}}>
+          <View>
+            <Text style={{ fontSize: 17, fontWeight: '800' ,color:'#fff'}}>{item.attributes?.offre?.data.attributes?.label}</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={{borderColor:'#fff',borderWidth:2,borderRadius:10,padding:8,width:130,alignItems:'center',justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailOffre', { itemId: item.attributes?.offre?.data.id });handleDateSelect5() }}>
+              <Text  style={{color:'#fff',fontWeight:'700'}}>Voir l'Offre </Text>
+            <Ionicons name="chevron-forward" size={12} color="white" />
+        </TouchableOpacity>
+        
+      </View>
+  </Animated.View>
+)
 
 const StarRating = ({ reviews }) => {
   const stars = [];
@@ -363,6 +541,14 @@ const StarRating = ({ reviews }) => {
       {stars}
     </View>
   );
+};
+const formatCardNumber = (cardNumber) => {
+  // Split the card number into an array by spaces
+  const parts = cardNumber.split(' ');
+  // Get the last part (last 4 digits)
+  const lastPart = parts[parts.length - 1];
+  // Return the masked number with only the last 4 digits visible
+  return `**** **** **** ${lastPart}`;
 };
   return (
     <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:47:18.607875882_profile%20bg@2x.png'}} style={styles.container}>
@@ -422,7 +608,7 @@ const StarRating = ({ reviews }) => {
                 <View style={{flex:5,flexDirection:'row'}}>
                     <Text style={styles.loginTextOption}>Panier</Text>
                     <View style={styles.notifView}>
-                      <Text style={{color:'#000',fontWeight:'700'}}>2</Text>
+                      <Text style={{color:'#000',fontWeight:'700'}}>{filteredReservations?.length}</Text>
                     </View>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
@@ -431,7 +617,7 @@ const StarRating = ({ reviews }) => {
               <TouchableOpacity style={styles.loginBtnOption} onPress={openModal5}>
                 <MaterialCommunityIcons name="clipboard-text" size={25} color="white" style={styles.icon}/>
                 <View style={{flex:5,flexDirection:'row'}}>
-                    <Text style={styles.loginTextOption}>Historique des achats</Text>
+                    <Text style={styles.loginTextOption}>Historique</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="white" style={{marginRight:10}}/>
               </TouchableOpacity>
@@ -503,8 +689,8 @@ const StarRating = ({ reviews }) => {
                     />
                     </View>
                 </View>
-            </Modal>
-            <Modal
+      </Modal>
+      <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible2}
@@ -529,8 +715,8 @@ const StarRating = ({ reviews }) => {
                     />
                     </View>
                 </View>
-            </Modal>
-            <Modal
+      </Modal>
+      <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible3}
@@ -588,7 +774,7 @@ const StarRating = ({ reviews }) => {
                     </View>
                     </View>
                 </View>
-            </Modal>
+      </Modal>
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -603,12 +789,17 @@ const StarRating = ({ reviews }) => {
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
-                    <Ionicons name="heart" size={25} color="white"/>
-                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <View style={{flexDirection:'row'}}>
+                    <MaterialIcons name="shopping-cart" size={25} color="white" />
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginLeft:10}}>Panier</Text>
+                    </View>
                     <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect4()}>
                         <Ionicons name="close" size={26} color="white" />
                     </TouchableOpacity>
-                   <Text style={{color:'#fff'}}>4</Text>
+                    <FlatList
+                      renderItem={renderRowResF}
+                      data={filteredReservations}
+                    />
                     </View>
                 </View>
             </Modal>
@@ -626,12 +817,17 @@ const StarRating = ({ reviews }) => {
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
-                    <Ionicons name="heart" size={25} color="white"/>
-                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <View style={{flexDirection:'row'}}>
+                     <MaterialCommunityIcons name="clipboard-text" size={25} color="white" />
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginLeft:10}}>Historique</Text>
+                    </View>
                     <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect5()}>
                         <Ionicons name="close" size={26} color="white" />
                     </TouchableOpacity>
-                    <Text style={{color:'#fff'}}>5</Text>
+                    <FlatList
+                      renderItem={renderRowResT}
+                      data={filteredReservationsTrue}
+                    />
                     </View>
                 </View>
             </Modal>
@@ -649,8 +845,10 @@ const StarRating = ({ reviews }) => {
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
-                    <Ionicons name="heart" size={25} color="white"/>
-                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <View style={{flexDirection:'row'}}>
+                    <Ionicons name="notifications" size={25} color="white" />
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginLeft:10}}>Notification</Text>
+                    </View>
                     <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect6()}>
                         <Ionicons name="close" size={26} color="white" />
                     </TouchableOpacity>
@@ -672,12 +870,67 @@ const StarRating = ({ reviews }) => {
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
-                    <Ionicons name="heart" size={25} color="white"/>
-                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginTop:10}}>{items.length} Places Like</Text>
+                    <View style={{flexDirection:'row'}}>
+                    <MaterialIcons name="credit-card" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginLeft:10}}>Cartes</Text>
+                    </View>
                     <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect7()}>
                         <Ionicons name="close" size={26} color="white" />
                     </TouchableOpacity>
-                    <Text style={{color:'#fff'}}>7</Text>
+
+                    <View style={{width:"100%",height:170,padding:10,marginTop:15,backgroundColor:'#333',borderRadius:20}}>
+                    <Text style={{color:'#fff',marginBottom:20,height:20,fontWeight:'900',fontSize:17}}>Paiement</Text>
+
+                    <View style={{width:"100%",height:50,flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+                      <Image source={{uri: 'https://www.pngmart.com/files/22/Mastercard-Logo-PNG-HD.png'}} style={{width:80,height:40}}/>
+                      <View style={{width:"60%",height:50,marginLeft:5}}>
+                      <Text style={{color:'#fff'}}>Master Card</Text>
+                        <Text style={{color:'#fff',fontWeight:'900',fontSize:18}}>{carte[0]?.attributes?.numero ? formatCardNumber(carte[0].attributes.numero) : ''}</Text>
+                      </View>
+                      <AntDesign name="checkcircle" size={30} color="green" />
+                    </View>
+                    
+                    <View style={{width:'100%',justifyContent:'center',alignItems:'center'}}>
+                      <TouchableOpacity
+                      onPress={ handleButtonPress2}
+                      style={[styles.button3, isButtonPressed2 ? styles.buttonPressed : null]}
+                    >
+                      <Text style={[styles.loginText, isButtonPressed2 ? {color:'black',fontSize:15,fontWeight:'700'} : null]}>Modifier</Text>
+                    </TouchableOpacity>
+                    </View>
+                    </View>
+                    <View style={{flexDirection:'row',width:"100%"}}>
+                      <TouchableOpacity>
+                      <AntDesign name="check" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={{color:'#fff'}}></Text>
+                    </View>
+                    
+                    </View>
+                </View>
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible8}
+                onRequestClose={closeModal8}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                    <View style={styles.imageFloatM}>
+                        <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+                    </View>
+                    <View style={[styles.userInfo,{marginBottom:20}]}>
+                      <Text style={styles.userName}>{userData?.fullName}</Text>
+                    </View>
+                    <View style={{flexDirection:'row'}}>
+                    <MaterialIcons name="credit-card" size={25} color="white"/>
+                    <Text style={{color:'#C4C2C2',fontWeight:'700',marginLeft:10}}>Cartes</Text>
+                    </View>
+                    <TouchableOpacity style={{position:'absolute',bottom:595,left:330,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect8()}>
+                        <Ionicons name="close" size={26} color="white" />
+                    </TouchableOpacity>
+                    <Text style={{color:'#fff'}}>Paiement</Text>
                     </View>
                 </View>
             </Modal>
@@ -846,6 +1099,19 @@ imagelike:{
     borderWidth:2,
     borderRadius: 15,
     height: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  button3: {
+    width: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Default background color
+    padding: 0, 
+    borderColor:'#fff',
+    borderWidth:2,
+    borderRadius: 15,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
