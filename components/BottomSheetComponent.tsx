@@ -15,6 +15,7 @@ import { MaterialIcons,FontAwesome6 } from '@expo/vector-icons';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_DB } from 'FirebaseConfig';
 import MessageScreen from './screens/MessageScreen';
+import Invoice from './screens/Invoice';
 
 const Tab = createBottomTabNavigator();
 
@@ -259,7 +260,7 @@ const toggleShowAll = () => {
 
             }}
           />
-        <Tab.Screen name='Diamond' component={SettingsScreen}
+        <Tab.Screen name='Invoice' component={Invoice}
             options={{
               tabBarIcon: ({ color }) => (
                 <Ionicons name="diamond-outline" size={28} color={color} />
