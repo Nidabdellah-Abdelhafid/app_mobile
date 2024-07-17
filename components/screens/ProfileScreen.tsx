@@ -325,6 +325,10 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   };
 
   const closeModal4 = () => {
+      fetchUserData()
+      fetchData()
+      fetchReservation()
+      filterReservations();
       setModalVisible4(false);
   };
   const handleDateSelect4 = () => {
@@ -333,6 +337,10 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   };
 
   const openModal5 = () => {
+    fetchUserData()
+      fetchData()
+      fetchReservation()
+      filterReservations();
     setModalVisible5(true);
   };
 
@@ -341,6 +349,10 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   };
   const handleDateSelect5 = () => {
       // Close the modal
+      fetchUserData()
+      fetchData()
+      fetchReservation()
+      filterReservations();
       closeModal5();
   };
 
@@ -455,7 +467,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   }
 
   const handlePaiement = async()=>{
-        console.log('id f : ',filteredReservationsTrueById)
+        // console.log('id f : ',filteredReservationsTrueById)
         try {
           const ref= new Date();
           const refInSeconds = Math.floor(ref.getTime() / 1000);
@@ -472,7 +484,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
             const response = await axios.put(`${URL_BACKEND}/api/factures/${filteredFacture[0].id}`,{
               data: { status: true },
             });
-            console.log('Item updated facture :', response.data);
+            // console.log('Item updated facture :', response.data);
           } catch (error) {
             console.error('Error updating item:', error);
           }
@@ -480,7 +492,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
             const response = await axios.put(`${URL_BACKEND}/api/reservations/${filteredReservationsTrueById[0].id}`,{
               data: { status: true },
             });
-            console.log('Item updated res :', response.data);
+            // console.log('Item updated res :', response.data);
           } catch (error) {
             console.error('Error updating item:', error);
           }

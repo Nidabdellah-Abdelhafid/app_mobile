@@ -1,25 +1,26 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Button, RefreshControl,StyleSheet, Modal, Alert } from 'react-native';
+import { View, Text, TextInput, Button, RefreshControl, StyleSheet, Modal, Alert, Image } from 'react-native';
 import axios from 'axios';
 import socket from './socket';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_DB } from "FirebaseConfig";
 import { NavigationProp } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { FontAwesome6 } from '@expo/vector-icons';
+import { FontAwesome6, FontAwesome } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import EmojiSelector, { Categories } from "react-native-emoji-selector";
 import { Ionicons } from '@expo/vector-icons';
-import io from 'socket.io-client';
+import * as DocumentPicker from 'expo-document-picker';
 import { URL_BACKEND } from "api";
+import { Linking } from 'react-native';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
   route: any;
 }
 
-const ADMIN_ID = 1; // Replace with actual admin ID
+const ADMIN_ID = 1;
 
 const MessageScreen = ({ route, navigation }: RouterProps) => {
   const { user: currentUser } = route.params;
@@ -28,10 +29,11 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const [messages, setMessages] = useState([]);
   const [userDC, setUserDC] = useState(null);
   const [selectedEmojis, setSelectedEmojis] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const scrollViewRef = useRef(null);
   const [refreshing, setRefreshing] = useState(false);
- 
+
   const fetchUserData = async () => {
     try {
       const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
@@ -71,13 +73,13 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
       console.error('Error fetching messages:', error);
     }
   };
-  
- const scrollToBottom = () => {
+
+  const scrollToBottom = () => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   };
-  
+
   const fetchUser = async () => {
     if (!userData) return;
 
@@ -108,6 +110,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     if (userData) {
       socket.on('recvMsg', (message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
+        fetchMessages();
       });
 
       return () => {
@@ -123,10 +126,20 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
-  }
+  };
 
-  const sendMessage = () => {
-    if (!userDC || !message) {
+  const handleFilePicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({}); // Call to get document asynchronously
+      console.log("doc : ", result.output);
+      setSelectedFile(result); 
+    } catch (error) {
+      console.error('Error picking file:', error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!userDC || (!message && !selectedFile)) {
       Alert.alert("🚫 Le message est vide!");
       return;
     }
@@ -137,11 +150,47 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
       receiver: ADMIN_ID, // Always sending to admin
     };
 
+    // Handle file upload
+    if (selectedFile) {
+      try {
+        const formData = new FormData();
+        formData.append('files.document', {
+          uri: selectedFile.assets[0]?.uri,
+          name: selectedFile.assets[0]?.name,
+          size:selectedFile.assets[0]?.size,
+          type: selectedFile.assets[0]?.mimeType,
+        });
+        formData.append('data', JSON.stringify(newMessage));
+    
+        const fileUploadResponse = await axios.post(`${URL_BACKEND}/api/messages`, formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data',
+          },
+      });
+    
+        if (fileUploadResponse.status === 200) {
+          setMessage('');
+          setSelectedEmojis([]);
+          setSelectedFile(null);
+          fetchMessages();
+        } else {
+          throw new Error('File upload failed');
+        }
+      } catch (error) {
+        // console.error('Error uploading file:', error);
+        alert("Try again!")
+        return;
+      }
+    }
+    
+    else{
     socket.emit('sendMsg', newMessage);
 
     setMessage('');
     setSelectedEmojis([]);
+    setSelectedFile(null);
     fetchMessages();
+    }
   };
 
   const isCurrentUser = (messageSender) => {
@@ -166,6 +215,12 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     closeModel();
   };
 
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return `${formattedDate} ~ ${formattedTime}`;
+};
   return (
     <View style={{ flex: 1 }}>
       <Modal
@@ -184,12 +239,12 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         </View>
       </Modal>
       <View style={styles.container}>
-        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 25 }}  
-        refreshControl={
-        <RefreshControl 
-        refreshing={refreshing} 
-        onRefresh={onRefresh} />
-      }>
+        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 25 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh} />
+          }>
           {messages.map((item, index) => {
             const isSender = isCurrentUser(item?.attributes?.sender?.data?.attributes?.username);
             const isMessageFromAdmin = isAdmin(item?.attributes?.sender?.data?.id);
@@ -204,45 +259,55 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
                 <View style={[styles.messageContent, isMessageFromAdmin ? styles.adminMessage : styles.userMessage]}>
                   {!isSender ? <Text>~{item?.attributes?.sender?.data?.attributes?.username}~</Text> : <Text>~you~</Text>}
                   <Text style={styles.messageText}>{item?.attributes?.content}</Text>
-                  <Text style={styles.timestamp}>{item?.attributes?.createdAt}</Text>
+                  {item?.attributes?.document?.data ? (
+                    <View style={styles.messageFile}>
+                      {item.attributes.document?.data.attributes.mime.includes('image') ? (
+                        <Image
+                          source={{ uri: `${URL_BACKEND}${item.attributes.document?.data.attributes.url}` }}
+                          style={{ width: "100%", height: 200, borderRadius: 15 }}
+                          resizeMode='contain'
+                        />
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() => Linking.openURL(`${URL_BACKEND}${item.attributes.document?.data.attributes.url}`)}
+                        >
+                          <Text style={{ color: 'blue' }}>{item.attributes.document?.data.attributes.name}</Text>
+                          
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  ) : null}
+                  <Text style={styles.messageText}>{formatDateTime(item?.attributes?.createdAt)}</Text>
+
                 </View>
               </View>
             );
           })}
         </ScrollView>
-      </View>
-      <View style={{ height: 1, backgroundColor: '#999' }}></View>
-      <View style={styles.containerSender}>
-        <View style={styles.bubble}>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <FontAwesome6 name="face-laugh" size={24} color="black" style={styles.icon} />
+        <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={handleFilePicker} style={{ marginRight: 10 }}>
+            <FontAwesome6 name="file" size={24} color="#2E86C1" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setModalVisible(true)} style={{ marginRight: 10 }}>
+            <FontAwesome name="smile-o" size={24} color="#2E86C1" />
           </TouchableOpacity>
           <TextInput
             value={message}
             onChangeText={setMessage}
-            placeholder="Type a message"
+            placeholder="Message"
             style={styles.input}
           />
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <MaterialCommunityIcons name="send" size={22} color="white" />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <MaterialCommunityIcons name="send" size={24} color="white" />
-        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
+
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: 'skyblue',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 20,
-  },
-  buttonText: {
-    fontSize: 18,
-    color: 'white',
-  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -262,98 +327,63 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
-  selectedEmojiContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  selectedEmojiText: {
-    fontSize: 20,
-  },
-  clearSelection: {
-    marginTop: 10,
-    color: 'red',
-    textDecorationLine: 'underline',
-  },
-  containerSender: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    marginBottom: 15,
-  },
-  bubble: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    flex: 1,
-    alignItems: 'center',
-    borderColor: '#ccc',
-    borderWidth: 1,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
-  },
-  text: {
-    fontSize: 16,
-    color: '#000',
-  },
-  sendButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#201E1F',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  sendText: {
-    color: '#fff',
-    fontSize: 18,
-  },
   container: {
     flex: 1,
-    padding: 16,
+    padding: 10,
   },
   messageContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 8,
-  },
-  senderMessage: {
-    justifyContent: 'flex-end',
-  },
-  receiverMessage: {
-    justifyContent: 'flex-start',
-  },
-  adminMessage: {
-    backgroundColor: '#E9FFDE',
-  },
-  userMessage: {
-    backgroundColor: '#FAE9E9',
+    marginBottom: 10,
   },
   messageContent: {
-    maxWidth: '80%',
-    marginLeft: 8,
-    marginRight: 8,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#AEAEAE',
+    padding: 10,
+    borderRadius: 10,
+  },
+  senderMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#DCF8C6',
+  },
+  receiverMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FAE9E9',
+    borderRadius:10
+  },
+  adminMessage: {
+    borderColor: '#2E86C1',
+    borderWidth: 1,
+  },
+  userMessage: {
+    borderColor: '#2ECC71',
+    borderWidth: 1,
   },
   messageText: {
     fontSize: 16,
   },
-  timestamp: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
+  messageFile: {
+    marginTop: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#DDD',
   },
   input: {
-    padding: 8,
-    marginVertical: 5,
-    width: '90%',
+    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 20,
+    marginRight:10
   },
+  sendButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 30,
+    padding: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
 });
 
 export default MessageScreen;
