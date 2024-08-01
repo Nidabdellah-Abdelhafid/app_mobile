@@ -27,6 +27,7 @@ import axios from 'axios';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { URL_BACKEND } from "api";
+import * as Animatable from 'react-native-animatable';
 
 const INITIAL_REGION = {
   latitude: 33.5883100,
@@ -364,7 +365,8 @@ const handleSubmit = async () => {
     experience_souhaitez : experience_souhaitez,
     offre: itemId,
     user: userDC.id,
-    status:false
+    status:false,
+    etat: "enAttente"
 
 };
 
@@ -535,6 +537,34 @@ const videForm =()=>{
 
 };
 
+const slideInDownCustom = {
+  0: {
+    translateY: 0,
+  },
+  0.25: {
+      translateY: -20,
+  },
+  0.5: {
+      translateY: 0,
+  },
+  0.75: {
+      translateY: -10,
+  },
+  1: {
+      translateY: 0,
+  },
+};
+const fadeInSlideUp = {
+  from: {
+      opacity: 0,
+      translateY: 20,
+  },
+  to: {
+      opacity: 1,
+      translateY: 0,
+  },
+};
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -585,11 +615,14 @@ const videForm =()=>{
           </View>
 
           <Text style={styles.description}>{datafetch?.attributes.description}</Text>
-          <TouchableOpacity style={[styles.stImage, { justifyContent: 'center', alignItems: 'center', marginTop: 50 }]} onPress={openModal1}>
-            <Text style={{color:'#fff',fontSize:12}}>Voir le planning</Text>
-            <FontAwesome name="chevron-down" size={24} color="white" />
-            {/* <AntDesign name="down" size={24} color="white" /> */}
-          </TouchableOpacity>
+          <Animatable.View animation={slideInDownCustom} iterationCount="infinite" direction="alternate">
+            <TouchableOpacity style={[styles.stImage, { justifyContent: 'center', alignItems: 'center', marginTop: 50 }]} onPress={openModal1}>
+              <Text style={{color:'#fff',fontSize:12}}>Voir le planning</Text>
+              <FontAwesome name="chevron-down" size={24} color="white" />
+              {/* <AntDesign name="down" size={24} color="white" /> */}
+            </TouchableOpacity>
+          </Animatable.View>
+          
           <View style={{width:"100%",height:400,marginTop:40,borderRadius:20,overflow: 'hidden',marginBottom:18}}>
             <MapView style={styles.map} 
             ref={mapRef}
@@ -639,15 +672,16 @@ const videForm =()=>{
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            <Animatable.View animation={fadeInSlideUp} iterationCount="infinite" direction="alternate">
             <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect1()}>
               <FontAwesome name="chevron-up" size={20} color="white" />
             </TouchableOpacity>
+            </Animatable.View>
             <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
               <Text style={{ color: '#fff', fontWeight: '500', fontSize: 13 }}>Votre voyage, jour apres jour</Text>
             </View>
             <View style={{ height: "75%" }}>
-
-
+            
               <Carousel style={{ width: "100%", height: "100%" }}
                 controlsContainerStyle={styles.controlsContainerStyle}
                 controlsButtonStyle={styles.controlsButtonStyle}
@@ -656,9 +690,13 @@ const videForm =()=>{
               >
                 {datafetchPlanning?.map((item, index) => (
                   <View key={index} style={{ width: '100%', height: "100%" }}>
-
+{/* 
+                    {item.attributes.photos?.data.map((i)=>(
+                      <Image source={{uri: i.attributes.url}} style={{width:100,height:100}}/>
+                    ))} */}
 
                     <ImageBackground source={{ uri: item.attributes.photos?.data[0]?.attributes.url }} style={styles.imageOffre} imageStyle={{ borderRadius: 20, height: "100%" }}>
+                    <View style={styles.shadowOverlay}></View>
                       <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
                         
                         <View style={{ flex: 1, justifyContent: 'space-between', }}>
@@ -673,23 +711,24 @@ const videForm =()=>{
                           </View>
                           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                             <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelectProgramme(item?.id)}}>
-                              <Text style={{ color: '#fff', fontWeight: '600' }}>Voir programme
-                              </Text>
+                              <Animatable.Text animation="zoomIn" iterationCount="infinite" direction="alternate" style={{ color: '#fff', fontWeight: '600' }}>Voir programme
+                              </Animatable.Text>
                             </TouchableOpacity>
                           </View>
                         </View>
 
                       </View>
 
-                    </ImageBackground></View>
+                    </ImageBackground>
+                    </View>
                 ))}
               </Carousel>
 
             </View>
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 18 }}>
               <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "75%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { openModal3() }}>
-                <Text style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Préparez votre départ !
-                </Text>
+                <Animatable.Text animation="flash" iterationCount="infinite" direction="alternate" style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Préparez votre départ !
+                </Animatable.Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1126,6 +1165,11 @@ const styles = StyleSheet.create({
   starContainer: {
     flexDirection: 'row',
     marginLeft:5
+  },
+  shadowOverlay: {
+    ...StyleSheet.absoluteFillObject, // Cover the entire container
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Adjust the opacity as needed
+    borderRadius: 20,
   },
 });
 

@@ -33,6 +33,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const scrollViewRef = useRef(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const fetchUserData = async () => {
     try {
@@ -77,6 +78,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const scrollToBottom = () => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
+      setShowScrollToBottom(false);
     }
   };
 
@@ -131,8 +133,9 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const handleFilePicker = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({}); // Call to get document asynchronously
-      console.log("doc : ", result.output);
-      setSelectedFile(result); 
+      console.log("doc : ", result.assets[0].mimeType);
+      setSelectedFile(result.assets[0]); 
+
     } catch (error) {
       console.error('Error picking file:', error);
     }
@@ -155,10 +158,10 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
       try {
         const formData = new FormData();
         formData.append('files.document', {
-          uri: selectedFile.assets[0]?.uri,
-          name: selectedFile.assets[0]?.name,
-          size:selectedFile.assets[0]?.size,
-          type: selectedFile.assets[0]?.mimeType,
+          uri: selectedFile?.uri,
+          name: selectedFile?.name,
+          size:selectedFile?.size,
+          type: selectedFile?.mimeType,
         });
         formData.append('data', JSON.stringify(newMessage));
     
@@ -220,7 +223,15 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
     const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     return `${formattedDate} ~ ${formattedTime}`;
-};
+  };
+
+  const handleScroll = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const layoutHeight = event.nativeEvent.layoutMeasurement.height;
+    setShowScrollToBottom(offsetY < contentHeight - layoutHeight - 50); // show button if scrolled up by 50 units from bottom
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <Modal
@@ -239,7 +250,11 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         </View>
       </Modal>
       <View style={styles.container}>
-        <ScrollView ref={scrollViewRef} contentContainerStyle={{ paddingBottom: 25 }}
+        <ScrollView 
+          ref={scrollViewRef} 
+          contentContainerStyle={{ paddingBottom: 25 }}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -284,7 +299,31 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
             );
           })}
         </ScrollView>
-        <View style={styles.inputContainer}>
+        {showScrollToBottom && (
+          <TouchableOpacity
+            style={styles.scrollToBottomButton}
+            onPress={scrollToBottom}
+          >
+            <FontAwesome name="angle-double-down" size={30} color="#666" />
+          </TouchableOpacity>
+        )}
+        {selectedFile && (
+            <View style={[styles.filePreviewContainer, selectedFile? styles.borderTp: {}]}>
+              {selectedFile.mimeType.includes('image') ? (
+                <Image
+                  source={{ uri: selectedFile.uri }}
+                  style={styles.filePreviewImage}
+                />
+              ) : (
+                <Text style={styles.filePreviewText}>{selectedFile.name}</Text>
+              )}
+              <TouchableOpacity onPress={() => setSelectedFile(null)} style={styles.removeFileButton}>
+                <FontAwesome name="times" size={24} color="#ff0000" />
+              </TouchableOpacity>
+            </View>
+          )} 
+        <View style={[styles.inputContainer, selectedFile? {}: styles.borderTp]}>
+        
           <TouchableOpacity onPress={handleFilePicker} style={{ marginRight: 10 }}>
             <FontAwesome6 name="file" size={24} color="#2E86C1" />
           </TouchableOpacity>
@@ -365,7 +404,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    borderTopWidth: 1,
+  },
+  borderTp:{
+    borderTopWidth: 2,
     borderTopColor: '#DDD',
   },
   input: {
@@ -383,7 +424,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
+  scrollToBottomButton: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 30,
+    padding: 5,
+    elevation: 5,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  filePreviewContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+    paddingTop:5
+  },
+  filePreviewImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 5,
+  },
+  filePreviewText: {
+    // flex:3,
+    maxWidth: 200,
+    marginRight: 10,
+  },
+  removeFileButton: {
+    marginLeft: 10,
+  },
 });
 
 export default MessageScreen;

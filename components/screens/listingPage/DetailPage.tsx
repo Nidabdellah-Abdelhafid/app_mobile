@@ -17,6 +17,7 @@ import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import fileData from '../../../assets/data/file.json';
 import { URL_BACKEND } from "api";
+import * as Animatable from 'react-native-animatable';
 
 interface RouterProps {
   navigation: NavigationProp<any,any>;
@@ -165,6 +166,19 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
       </View>
     );
   };
+  const lightSpeedOut = {
+    from: {
+        translateX: -18,
+        skewX: '0deg',
+        opacity: 1,
+    },
+    to: {
+        translateX: 5,
+        skewX: '300deg',
+        opacity: .7,
+    },
+};
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -210,12 +224,14 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
                       <View style={{backgroundColor: 'rgba(0, 0, 0, 0.5)',borderRadius:10,padding:5,width:115,alignItems:'center',marginRight:20,justifyContent:'center'}}>
                         <Text style={{ fontSize: 10, fontWeight: '900' ,color:'#fff',textAlign:'center'}}>{item?.attributes.label}</Text>
                       </View>
-                    
-                    <TouchableOpacity style={{borderColor:'#fff',borderWidth:1.5,borderRadius:10,padding:4,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailOffre', { itemId: item.id }) }}>
+                    <Animatable.View animation={lightSpeedOut} iterationCount="infinite" direction="alternate">
+                      <TouchableOpacity style={{borderColor:'#fff',borderWidth:1.5,borderRadius:10,padding:4,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailOffre', { itemId: item.id }) }}>
                         <Text  style={{color:'#fff',fontWeight:'600'}}>Voir l'Offre 
                         </Text>
                         <Ionicons name="chevron-forward" size={12} color="white" />
                     </TouchableOpacity>
+                    </Animatable.View>
+                    
                     </View>
                     
                     

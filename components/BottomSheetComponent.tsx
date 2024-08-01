@@ -16,7 +16,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_DB } from 'FirebaseConfig';
 import MessageScreen from './screens/MessageScreen';
 import Invoice from './screens/Invoice';
-
+import * as Animatable from 'react-native-animatable';
 const Tab = createBottomTabNavigator();
 
 const CustonTabbarButton = ({children, onPress}) => (
@@ -194,6 +194,14 @@ const toggleCheckbox = (index) => {
 const toggleShowAll = () => {
     setShowAll(prevState => !prevState);
 };
+const slideInDownCustom = {
+  from: {
+      translateY: -18, // Adjust this value to control the start position
+  },
+  to: {
+      translateY: 14,
+  },
+};
 
   return (
     <BottomSheetModalProvider>
@@ -228,7 +236,10 @@ const toggleShowAll = () => {
 
       <View style={styles.btnsheet}>
         <TouchableOpacity onPress={openBottomSheet} style={styles.upBtn}>
-            <FontAwesome5 name="chevron-up" size={26} color="white" />
+          
+            <Animatable.View animation={slideInDownCustom} iterationCount="infinite" direction="alternate">
+            <FontAwesome5 name="angle-double-up" size={24} color="white" /> 
+            </Animatable.View>
         </TouchableOpacity>
 
         <BottomSheetModal
@@ -294,8 +305,21 @@ const toggleShowAll = () => {
                 <MaterialCommunityIcons name="email-outline" size={28} color={color} />
             ),
             //   tabBarBadge: 3,
+            headerTitleStyle: {
+              marginBottom: 20,
+            },
               headerTintColor: "#000",
               headerShown: true,
+              headerTitle: 'Atlas Voyages',
+              
+              headerLeft: () => (
+                <View style={{marginLeft:30,marginBottom:20}}> 
+                  <View>
+                  <Image source={{ uri: 'https://is1-ssl.mzstatic.com/image/thumb/Purple116/v4/75/cc/7c/75cc7cf2-516f-b0f4-a8ed-3baccc1abcbf/source/512x512bb.jpg' }} style={styles.msgImageNav} />
+                    {/* <View style={{position:'absolute',backgroundColor:'orange',width:7,height:7,borderRadius:7,left:21}}></View> */}
+                  </View>
+                </View>
+              ),
             }}
           />
           <Tab.Screen name='Profil' component={ProfileScreen}
@@ -311,7 +335,7 @@ const toggleShowAll = () => {
             ),
             //   tabBarBadge: 3,
               headerTintColor: "#fff",
-              headerShown: true,
+              headerShown: true, 
               headerTransparent: true,
               headerTitle: 'Votre profil',
               headerTitleAlign: 'center',
@@ -583,6 +607,12 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         borderRadius: 30,
+      },
+      msgImageNav: {
+        width: 50,
+        height: 50,
+        borderRadius: 50,
+        // marginBottom:10
       },
       btnsheet:{
         flex:1,
