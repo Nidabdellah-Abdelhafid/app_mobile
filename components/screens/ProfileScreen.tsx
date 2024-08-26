@@ -56,6 +56,10 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const [show1View, setShow1View] = useState(true);
   const [show2View, setShow2View] = useState(true);
   const [show3View, setShow3View] = useState(true);
+  const [hideIntrfece,setHideInterface] = useState(false);
+  const [hideIntrfecepaie,setHideInterfacepaie] = useState(false);
+  const [hideIntrfececarte,setHideInterfacecarte] = useState(false);
+
   useEffect(() => {
       fetchUserData(); 
     }, []);
@@ -262,9 +266,11 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const handleButtonPress2 = () => {
     setIsButtonPressed2(true);
     openModal9();
+
   };
    
   const openModal1 = () => {
+    setHideInterface(true);
     fetchUserData()
     fetchData()
     fetchFavories()
@@ -280,9 +286,11 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   };
   const handleDateSelect1 = () => {
       // Close the modal
+      setHideInterface(false);
       closeModal1();
   };
   const openModal2 = () => {
+    setHideInterface(true);
     fetchUserData()
     fetchData()
     fetchEnregetrers()
@@ -297,11 +305,13 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       setModalVisible2(false);
   };
   const handleDateSelect2 = () => {
+    setHideInterface(false);
       // Close the modal
       closeModal2();
   };
 
   const openModal3 = () => {
+    setHideInterface(true);
     setModalVisible3(true);
   };
 
@@ -310,11 +320,13 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       setIsButtonPressed(false);
   };
   const handleDateSelect3 = () => {
+    setHideInterface(false);
       // Close the modal
       closeModal3();
   };
 
   const openModal4 = () => {
+    setHideInterface(true);
     fetchUserData()
     fetchData()
     fetchReservation()
@@ -332,11 +344,13 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       setModalVisible4(false);
   };
   const handleDateSelect4 = () => {
+    setHideInterface(false);
       // Close the modal
       closeModal4();
   };
 
   const openModal5 = () => {
+    setHideInterface(true);
     fetchUserData()
       fetchData()
       fetchReservation()
@@ -348,6 +362,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       setModalVisible5(false);
   };
   const handleDateSelect5 = () => {
+    setHideInterface(false);
       // Close the modal
       fetchUserData()
       fetchData()
@@ -357,6 +372,7 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   };
 
   const openModal6 = () => {
+    setHideInterface(true);
     setModalVisible6(true);
   };
 
@@ -364,11 +380,13 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
       setModalVisible6(false);
   };
   const handleDateSelect6 = () => {
+    setHideInterface(false);
       // Close the modal
       closeModal6();
   };
 
   const openModal7 = () => {
+    setHideInterface(true);
     setModalVisible7(true);
   };
 
@@ -378,11 +396,13 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
 
   };
   const handleDateSelect7 = () => {
+    setHideInterface(false);
       // Close the modal
       closeModal7();
   };
 
   const openModal8 = (itemid) => {
+    setHideInterfacepaie(true);
     handleGetOffre(itemid);
     filterDataFacture(itemid)
     setModalVisible8(true);
@@ -394,18 +414,22 @@ const ProfileScreen = ({ route ,navigation }:RouterProps) => {
   const handleDateSelect8 = () => {
       setCurrentStep(1);
       closeModal8();
+      setHideInterfacepaie(false);
   };
 
   const openModal9 = () => {
+    setHideInterfacecarte(true);
     setModalVisible9(true);
   };
 
   const closeModal9 = () => {
       setModalVisible9(false);
   };
-  const handleDateSelect9 = () => {
+  const handleDateSelect9 = () => {  
     setIsButtonPressed2(false);
-      closeModal9();
+    closeModal9();
+    setHideInterfacecarte(false);
+
   };
 
   const openModal10 = () => {
@@ -714,7 +738,7 @@ const [currentStep, setCurrentStep] = useState(1);
     <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:47:18.607875882_profile%20bg@2x.png'}} style={styles.container}>
       
         {userData ? (
-        <View style={{marginTop:75}}>
+        <View style={hideIntrfece ? styles.hidden :[{marginTop:75}]}>
             <View style={styles.imageFloat}>
             <Image source={{ uri: userData?.image }} style={styles.profileImage} />
             </View>
@@ -813,14 +837,10 @@ const [currentStep, setCurrentStep] = useState(1);
           </View>
           )}
           
-          <View style={{margin:30,justifyContent:'flex-end',alignContent:'flex-end',alignSelf:'center',alignItems:'center'}}>
-              
-          </View>
-      {/* <View style={{backgroundColor:"white",margin:30,justifyContent:'center',alignContent:'flex-end',alignSelf:'center',alignItems:'center'}}>
-          <TouchableOpacity onPress={()=> FIREBASE_AUTH.signOut()} style={styles.button}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+          {/* <View style={{margin:30,justifyContent:'flex-end',alignContent:'flex-end',alignSelf:'center',alignItems:'center'}}>
+               
           </View> */}
+      
 
       <Modal
                 animationType="fade"
@@ -829,10 +849,11 @@ const [currentStep, setCurrentStep] = useState(1);
                 onRequestClose={closeModal1}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -857,10 +878,11 @@ const [currentStep, setCurrentStep] = useState(1);
                 onRequestClose={closeModal2}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -883,10 +905,11 @@ const [currentStep, setCurrentStep] = useState(1);
                 onRequestClose={closeModal3}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -935,17 +958,22 @@ const [currentStep, setCurrentStep] = useState(1);
                     </View>
                 </View>
       </Modal>
-            <Modal
+      {/* panier */}
+      {
+        hideIntrfecepaie? <View></View>:
+        <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible4}
                 onRequestClose={closeModal4}
+                // style={hideIntrfece? styles.hidden:{} }
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -963,6 +991,8 @@ const [currentStep, setCurrentStep] = useState(1);
                     </View>
                 </View>
             </Modal>
+      }
+            
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -970,10 +1000,11 @@ const [currentStep, setCurrentStep] = useState(1);
                 onRequestClose={closeModal5}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -998,10 +1029,11 @@ const [currentStep, setCurrentStep] = useState(1);
                 onRequestClose={closeModal6}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -1016,6 +1048,9 @@ const [currentStep, setCurrentStep] = useState(1);
                     </View>
                 </View>
             </Modal>
+            {/* hona pay */}
+            {
+              hideIntrfececarte? <View></View>:
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -1023,10 +1058,11 @@ const [currentStep, setCurrentStep] = useState(1);
                 onRequestClose={closeModal7}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -1069,17 +1105,20 @@ const [currentStep, setCurrentStep] = useState(1);
                     </View>
                 </View>
             </Modal>
+            }
             <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible8}
                 onRequestClose={closeModal8}
+                
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -1206,17 +1245,19 @@ const [currentStep, setCurrentStep] = useState(1);
                 </View>
             </Modal>
 
-            <Modal
+            
+              <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible9}
                 onRequestClose={closeModal9}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -1285,6 +1326,9 @@ const [currentStep, setCurrentStep] = useState(1);
                     </View>
                 </View>
             </Modal>
+            
+
+            
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -1292,10 +1336,11 @@ const [currentStep, setCurrentStep] = useState(1);
                 onRequestClose={closeModal10}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                    <View style={styles.imageFloatM}>
+                  <View style={styles.imageFloatM}>
                         <Image source={{ uri: userData?.image }} style={styles.profileImage} />
                     </View>
+                    <View style={styles.modalView}>
+                    
                     <View style={[styles.userInfo,{marginBottom:20}]}>
                       <Text style={styles.userName}>{userData?.fullName}</Text>
                     </View>
@@ -1447,8 +1492,8 @@ const styles = StyleSheet.create({
     position:'absolute',
     alignItems: 'center',
     zIndex:1,
-    left:'43.42%',
-    bottom:583
+    left:'42%',
+    bottom:660
   },
   userInfo: {
 
@@ -1495,6 +1540,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
+    
 },
 modalView: {
     position: 'absolute',
@@ -1503,7 +1549,7 @@ modalView: {
     right: 20,
     height:"78%",
     backgroundColor: '#000',
-    opacity:1,
+    opacity:0.8, 
     borderRadius: 20,
     padding: 10,
     alignItems: 'center',
@@ -1516,6 +1562,7 @@ modalView: {
     shadowRadius: 4,
     elevation: 5,
 },
+
 listViewlike:{
   gap: 10,
   marginTop:10
@@ -1705,6 +1752,9 @@ imagelike:{
   footerTextf: {
     fontSize: 16,
     color: '#FF9800',
+  },
+  hidden: {
+    display: 'none',
   },
 });
 

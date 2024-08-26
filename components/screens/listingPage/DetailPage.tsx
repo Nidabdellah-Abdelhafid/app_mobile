@@ -17,6 +17,8 @@ import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import fileData from '../../../assets/data/file.json';
 import { URL_BACKEND } from "api";
+import { rgbaColor } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
+
 import * as Animatable from 'react-native-animatable';
 
 interface RouterProps {
@@ -151,6 +153,19 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
     );
   };
 
+  const lightSpeedOut = {
+    from: {
+        translateX: -18,
+        skewX: '0deg',
+        opacity: 1,
+    },
+    to: {
+        translateX: 5,
+        skewX: '300deg',
+        opacity: .7,
+    },
+  };
+
   const StarRating = ({ reviews }) => {
     const stars = [];
   
@@ -166,21 +181,8 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
       </View>
     );
   };
-  const lightSpeedOut = {
-    from: {
-        translateX: -18,
-        skewX: '0deg',
-        opacity: 1,
-    },
-    to: {
-        translateX: 5,
-        skewX: '300deg',
-        opacity: .7,
-    },
-};
-
   return (
-    <View style={styles.container}>
+    <View style={styles.container}> 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         ref={scrollRef}
@@ -191,6 +193,7 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
           style={[styles.image, imageAnimatedStyle]}
           resizeMode="cover"
         />
+        <View style={styles.shadowOverlay}></View>
         <View style={{flexDirection:'row',position:'absolute',top:240,left:"30%"}}>
           <Image source={{uri: datafetch?.attributes.photos?.data[0]?.attributes.url}} style={styles.stImage}/>
           <Image source={{uri: datafetch?.attributes.photos?.data[1]?.attributes.url}} style={styles.stImage}/>
@@ -218,12 +221,13 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
            {dataOffres?.map((item, index) => (
           <Animated.View key={index} style={styles.listViewOffre} entering={FadeInRight} exiting={FadeOutLeft}>
                 <Image source={{ uri: item?.attributes.image }} style={styles.imageOffre} />
-                
+                <View style={styles.shadowOverlay}></View>
                 <View style={{ position: 'absolute',left: 10, top: 110,flexDirection:'row' }}>
                     <View style={{ flex:1,justifyContent:'space-between',flexDirection:'row'}}>
                       <View style={{backgroundColor: 'rgba(0, 0, 0, 0.5)',borderRadius:10,padding:5,width:115,alignItems:'center',marginRight:20,justifyContent:'center'}}>
                         <Text style={{ fontSize: 10, fontWeight: '900' ,color:'#fff',textAlign:'center'}}>{item?.attributes.label}</Text>
                       </View>
+                    
                     <Animatable.View animation={lightSpeedOut} iterationCount="infinite" direction="alternate">
                       <TouchableOpacity style={{borderColor:'#fff',borderWidth:1.5,borderRadius:10,padding:4,width:110,alignItems:'center',marginRight:20,justifyContent:'center',flexDirection:'row'}} onPress={() => {navigation.navigate('DetailOffre', { itemId: item.id }) }}>
                         <Text  style={{color:'#fff',fontWeight:'600'}}>Voir l'Offre 
@@ -231,7 +235,6 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
                         <Ionicons name="chevron-forward" size={12} color="white" />
                     </TouchableOpacity>
                     </Animatable.View>
-                    
                     </View>
                     
                     
@@ -257,9 +260,18 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
             >
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                <TouchableOpacity style={{position:'absolute',bottom:646,left:331,backgroundColor:'#000',borderRadius:26,opacity:0.5}} onPress={() => handleDateSelect1()}>
-                    <Ionicons name="close" size={26} color="white" />
-                </TouchableOpacity>
+                <TouchableOpacity style={{
+                  position: 'absolute',
+                  bottom: height * 0.85,
+                  left: width * 0.9,
+                  backgroundColor: '#000',
+                  borderRadius: width * 0.065,
+                  opacity: 0.5
+                  }}
+                  onPress={() => handleDateSelect1()}
+                >
+                <Ionicons name="close" size={width * 0.068} color="white" />
+              </TouchableOpacity>
                 <View style={{justifyContent:'center',alignItems:'center',marginBottom:10}}>
                     <Text style={{color:'#fff',fontWeight:'700',fontSize:18}}>Galerie</Text>
                 </View>
@@ -277,11 +289,20 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
   );
 };
 
+const {height} = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#222',
   },
+
+  shadowOverlay: {
+    ...StyleSheet.absoluteFillObject, // Cover the entire container
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Adjust the opacity as needed
+    borderRadius: 0,
+  },
+
   image: {
     height: IMG_HEIGHT,
     width: width,
@@ -379,16 +400,15 @@ const styles = StyleSheet.create({
   stImage:{
     width:30,
     height:30,
-    marginLeft:10,
+    marginLeft: 10,
     borderRadius:7,
     backgroundColor:'#000',
     opacity:0.9
   },
-  stImageModal:{
-    width:160,
-    height:220,
-    borderRadius:15,
-    
+  stImageModal: {
+    width: width * 0.43, // 40% of screen width
+    height: height * 0.3, // 30% of screen height
+    borderRadius: width * 0.02, // 4% of screen width for border radius
   },
   centeredView: {
     flex: 1,
@@ -397,25 +417,25 @@ const styles = StyleSheet.create({
     marginTop: 22,
 },
 modalView: {
-    position: 'absolute',
-    top: 58,
-    left: 20,
-    right: 20,
-    height:"85%",
-    backgroundColor: '#000',
-    opacity:0.85,
-    borderRadius: 20,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-        width: 0,
-        height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    
+  position: 'absolute',
+  top: height * 0.01, // 6% of screen height
+  left: width * 0.01, // 1.25% of screen width
+  right: width * 0.01, // 5% of screen width
+  height: height * 0.87, // 85% of screen height
+  backgroundColor: '#000',
+  opacity: 0.85,
+  borderRadius: width * 0.05, // 5% of screen width for rounded corners
+  padding: width * 0.025, // 2.5% of screen width
+  shadowColor: '#14141473',
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5,
 },
+
 listViewOffre:{
   gap: 10,
   marginTop:30

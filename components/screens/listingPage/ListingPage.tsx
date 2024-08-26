@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ListRenderItem, TouchableOpacity, Modal, Image } from 'react-native';
+import { View, Text, StyleSheet, ListRenderItem, TouchableOpacity, Modal, Image, Dimensions } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Ionicons, Fontisto } from '@expo/vector-icons';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
@@ -9,6 +9,7 @@ import { FIREBASE_DB } from "FirebaseConfig";
 import axios from 'axios';
 import { URL_BACKEND } from "api";
 import LottieView from 'lottie-react-native';
+
 
 interface Props {
   listings: any[];
@@ -357,42 +358,45 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
 export default ListingPage;
 
+
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   heartLottie: {
-    width: 80,
-    height: 80,
+    width: width * 0.21,  // 20% of screen width
+    height: width * 0.21, // Maintain square aspect ratio
   },
   container: {
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingLeft: width * 0.025,  // 2.5% of screen width
+    paddingRight: width * 0.025, // 2.5% of screen width
     backgroundColor: '#222',
-    marginVertical: 0,
+    marginVertical: height * 0.01, // 1% of screen height
   },
   listView: {
-    paddingLeft: 15,
-    paddingRight: 20,
-    paddingBottom: 20,
-    paddingEnd: 20,
-    paddingStart: 20,
-    gap: 10,
+    paddingLeft: width * 0.0125,   // 1.25% of screen width
+    paddingRight: width * 0.05,    // 5% of screen width
+    paddingBottom: height * 0.025, // 2.5% of screen height
+    paddingEnd: width * 0.05,      // 5% of screen width
+    paddingStart: width * 0.05,    // 5% of screen width
+    gap: height * 0.0125,          // 1.25% of screen height
   },
   image: {
-    width: 340,
-    height: 220,
-    borderRadius: 20,
+    width: width * 0.93,    // 85% of screen width
+    height: height * 0.28,   // 30% of screen height
+    borderRadius: 10,
     backgroundColor: '#000',
     opacity: 0.85,
   },
   info: {
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: width * 0.04, // 4% of screen width
     fontWeight: '500',
   },
   modalContainer: {
     position: 'absolute',
-    bottom: 80,
-    left: 10,
-    right: 10,
+    bottom: height * 0.1,   // 10% of screen height
+    left: width * 0.025,    // 2.5% of screen width
+    right: width * 0.025,   // 2.5% of screen width
     backgroundColor: '#fff',
     padding: 0,
     borderRadius: 20,
@@ -408,32 +412,34 @@ const styles = StyleSheet.create({
   modalView: {
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
+    padding: width * 0.09,   // 9% of screen width
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
   },
   inputView: {
-    width: '100%',
+    width: '80%',           // Stays the same as it uses percentage
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderRadius: 10,
-    height: 50,
-    marginBottom: 20,
+    borderRadius: 25,
+    height: height * 0.07,  // 7% of screen height
+    marginBottom: height * 0.025, // 2.5% of screen height
     justifyContent: 'center',
-    padding: 10,
+    padding: width * 0.05,  // 5% of screen width
   },
   inputText: {
+    height: height * 0.07,  // 7% of screen height
     color: 'black',
-    marginBottom:5,
-    fontWeight:'700'
   },
   button: {
     backgroundColor: '#000',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingVertical: height * 0.02, // 2% of screen height
+    paddingHorizontal: width * 0.05, // 5% of screen width
     borderRadius: 5,
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: width * 0.04,  // 4% of screen width
     fontWeight: 'bold',
   },
 });

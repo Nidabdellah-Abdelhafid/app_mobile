@@ -1,4 +1,4 @@
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, Image, Platform, Alert, ToastAndroid, Button, ImageBackground } from 'react-native'
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, ScrollView, Image, Platform, Alert, ToastAndroid, Button, ImageBackground } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { FIREBASE_AUTH, FIREBASE_DB  } from '../../FirebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -22,6 +22,10 @@ const LoginScreen = ({ navigation }: RouterProps) => {
   const [password, setPassword] = useState("");
   const [showEmailInput, setShowEmailInput] = useState(true);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
+
+  const [hasPasswordInputStarted, setHasPasswordInputStarted] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   const auth = FIREBASE_AUTH;
   const [exitingEmail, setExitingEmail] = useState(false);
   const [exitingPassword, setExitingPassword] = useState(false);
@@ -87,6 +91,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
       setExitingEmail(false);
     }
   };
+
   const handleInputPasswordChange = (text) => {
     setPassword(text);
     if (text==="") {
@@ -96,6 +101,10 @@ const LoginScreen = ({ navigation }: RouterProps) => {
     }
   };
 
+  const handlePasswordChange = (text) => {
+    setHasPasswordInputStarted(true);
+    handleInputPasswordChange(text);
+  };
 
   const handleShowPasswordInput = () => {
     if(exitingEmail){
@@ -104,6 +113,16 @@ const LoginScreen = ({ navigation }: RouterProps) => {
     handleButtonPress();
     }
   };
+
+  const resetPasswordInput = () => {
+    setPassword("");
+    setHasPasswordInputStarted(false);
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+  
 
   const handleLogin = async () => {
     handleButtonPress();
@@ -150,6 +169,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
           setShowPasswordInput(false);
           setExitingEmail(false);
           setExitingPassword(false);
+          resetPasswordInput();
         } else {
           Alert.alert('Sign-in failed', 'The email or password is incorrect!');
         }
@@ -198,7 +218,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
       <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:37:53.426190693_login%20g@2x.png'}} style={styles.containerBg}>
 
       <KeyboardAvoidingView behavior='padding' style={styles.kybcontainer}>
-          
+        {/* <ScrollView contentContainerStyle={styles.scrollContainer}> */}
           <SvgUri
         width="140"
         height="140"
@@ -239,27 +259,35 @@ const LoginScreen = ({ navigation }: RouterProps) => {
       {showPasswordInput && (
         
       <View style={styles.inputViewO}>
-        {exitingPassword ? 
+        {exitingPassword && hasPasswordInputStarted ?
           <Text style={{ color:'green',marginBottom:10,marginLeft:35,fontWeight:'600',fontSize:16}}> </Text> 
-          :
-          <Text style={{ color:'red',marginBottom:10,marginLeft:35,fontWeight:'500',fontSize:16}}>Inserez votre mot de passe </Text>
+          : hasPasswordInputStarted ?
+          <Text style={{ color:'red',marginBottom:10,marginLeft:35,fontWeight:'500',fontSize:16}}> Veuillez insérer votre mot de passe </Text>
+          : null
           }
         <View style={styles.parentView}>
           <View style={styles.inputView}>
-          <TextInput
-            secureTextEntry
-            onFocus={handleInputFocus}
-            style={[styles.inputText,isInputFocused && styles.inputFocused]}
-            placeholder="Mot de passe"
-            placeholderTextColor="#444"
-            onChangeText={handleInputPasswordChange}
-          />
-          
+            <TextInput
+              secureTextEntry={!isPasswordVisible}
+              onFocus={handleInputFocus}
+              style={[styles.inputText,isInputFocused && styles.inputFocused]}
+              placeholder="Mot de passe"
+              placeholderTextColor="#444"
+              onChangeText={handlePasswordChange}
+            />
+            <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconView}>
+              {isPasswordVisible ? (
+                <FontAwesome6 name="eye-slash" size={20} color="black" />
+              ) : (
+                <FontAwesome6 name="eye" size={20} color="black" />
+              )}
+            </TouchableOpacity>
           </View>
-          {exitingPassword ? 
-          <AntDesign name="check" size={20} color="green" style={styles.iconv}/>
-           :
+          {exitingPassword && hasPasswordInputStarted ?
+          <AntDesign/>
+           : hasPasswordInputStarted ?
           <FontAwesome6 name="xmark" size={20} color="red" style={styles.iconv}/>
+          : null
           }
         </View>
         </View>
@@ -304,7 +332,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
         <Entypo name="facebook-with-circle" size={24} color={isButtonPressedFacebook ? "black" : "white"} style={styles.icon} />
           <Text style={isButtonPressedFacebook ? styles.loginTextOption2 : styles.loginTextOption}>Continue with Facebook</Text>
         </TouchableOpacity>
-
+      {/* </ScrollView> */}
     </KeyboardAvoidingView>
 
       </ImageBackground>
@@ -316,6 +344,15 @@ const LoginScreen = ({ navigation }: RouterProps) => {
 };
 
 const styles = StyleSheet.create({
+  // keyboardAvoidingView: {
+  //   flex: 1,
+  // },
+  // scrollContainer: {
+  //   flexGrow: 1,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  // },
+
   container: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -359,11 +396,13 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     height: 56,
     justifyContent: 'center',
-    padding: 20,
+    padding: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
     
   },
   iconv:{
-    marginRight:15
+    marginRight: 15,
   },
   inputViewO: {
     width: '90%',
@@ -371,8 +410,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   inputText: {
+    flex: 1,
     height: 50,
     color: 'white',
+  },
+  iconView: {
+    marginBottom: 1,
   },
   loginBtnOption: {
     width: '80%',

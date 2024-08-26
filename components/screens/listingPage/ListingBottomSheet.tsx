@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import ListingPage from './ListingPage';
@@ -9,20 +9,32 @@ interface Props {
   listings: any[];
   category: string;
   navigation: NavigationProp<any, any>;
-  user
+  user: any;
 }
 
-const ListingsBottomSheet = ({ navigation, listings, category ,user}: Props) => {
+const ListingsBottomSheet = ({ navigation, listings, category, user }: Props) => {
   const snapPoints = useMemo(() => ['21%', '82%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [refresh, setRefresh] = useState<number>(0);
 
   const onShowMap = () => {
-    bottomSheetRef.current?.collapse();
+    bottomSheetRef.current?.collapse(); // Collapse to 21%
+    setRefresh(refresh + 1);
+  };
+
+  const onShowFullList = () => {
+    bottomSheetRef.current?.expand(); // Expand to 82%
     setRefresh(refresh + 1);
   };
 
   return (
+    <>
+    <View style={styles.absoluteViewList}>
+    <TouchableOpacity onPress={onShowFullList} style={[styles.btn, { marginTop: 10 }]}>
+            <Text style={{ color: '#fff' }}>List</Text>
+            <Ionicons name="list" size={20} style={{ marginLeft: 10 }} color={'#fff'} />
+    </TouchableOpacity>
+    </View>
     <BottomSheet
       ref={bottomSheetRef}
       index={1}
@@ -31,18 +43,21 @@ const ListingsBottomSheet = ({ navigation, listings, category ,user}: Props) => 
       handleIndicatorStyle={{ backgroundColor: '#222' }}
       style={styles.sheetContainer}
       backgroundComponent={({ style }) => <View style={[style, { backgroundColor: '#222' }]} />}
-      >
+    >
       <View style={styles.contentContainer}>
         <ListingPage listings={listings} navigation={navigation} refresh={refresh} category={category} user={user} />
-        
+
         <View style={styles.absoluteView}>
           <TouchableOpacity onPress={onShowMap} style={styles.btn}>
             <Text style={{ color: '#fff' }}>Map</Text>
             <Ionicons name="map" size={20} style={{ marginLeft: 10 }} color={'#fff'} />
           </TouchableOpacity>
+          
         </View>
       </View>
     </BottomSheet>
+    </>
+    
   );
 };
 
@@ -56,6 +71,13 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
+  absoluteViewList: {
+    position: 'absolute',
+    top: 180,
+    right:140,
+    width: '100%',
+    alignItems: 'center',
+  },
   btn: {
     backgroundColor: '#000',
     padding: 14,
@@ -66,7 +88,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sheetContainer: {
-    flex:1,
+    flex: 1,
     backgroundColor: '#fff',
     elevation: 4,
     shadowColor: '#000',

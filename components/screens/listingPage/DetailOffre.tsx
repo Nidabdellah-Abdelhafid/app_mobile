@@ -27,6 +27,11 @@ import axios from 'axios';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { URL_BACKEND } from "api";
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import { LinearGradient } from 'react-native-linear-gradient';
+
 import * as Animatable from 'react-native-animatable';
 
 const INITIAL_REGION = {
@@ -60,7 +65,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const [userDC, setUserDC] = useState(null);
   
 
-
+  const outerCarouselRef = useRef(null);
  
 
 
@@ -124,6 +129,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
       fetchUser();
     }
   }, [userData]);
+  
 
   const fetchDataPlanning = async () => {
     try {
@@ -537,6 +543,25 @@ const videForm =()=>{
 
 };
 
+// const [currentIndex, setCurrentIndex] = useState(0);
+// const carouselRef = useRef(null);
+
+// const handleIndexChange = (index) => {
+//   setCurrentIndex(index);
+// };
+
+// const handlePrev = () => {
+//   if (carouselRef.current && currentIndex > 0) {
+//     carouselRef.current.scrollTo({ index: currentIndex - 1 });
+//   }
+// };
+
+// const handleNext = () => {
+//   if (carouselRef.current) {
+//     carouselRef.current.scrollTo({ index: currentIndex + 1 });
+//   }
+// };
+
 const slideInDownCustom = {
   0: {
     translateY: 0,
@@ -565,6 +590,7 @@ const fadeInSlideUp = {
   },
 };
 
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -577,6 +603,7 @@ const fadeInSlideUp = {
           style={[styles.image, imageAnimatedStyle]}
           resizeMode="cover"
         />
+        <View style={styles.shadowOverlay}></View>
         <View style={{ position: 'absolute', top: 180, left: "25%", justifyContent: 'center', alignItems: 'center' }}>
           {/* <Image source={{uri: datafetch?.attributes.photos?.data[0]?.attributes.url}} style={styles.stImage}/> */}
           <View style={{ flexDirection: 'row', justifyContent: 'center', backgroundColor: '#000', opacity: 0.5, width: 120, borderRadius: 10, padding: 2 }}>
@@ -596,7 +623,7 @@ const fadeInSlideUp = {
 
             <View style={{ justifyContent: 'space-between', alignSelf: 'center', paddingBottom: 5 }}>
               <Text style={[styles.location]}>
-                8 jour
+                {datafetch?.attributes.planings?.data.length} jour
               </Text>
 
             </View>
@@ -622,7 +649,6 @@ const fadeInSlideUp = {
               {/* <AntDesign name="down" size={24} color="white" /> */}
             </TouchableOpacity>
           </Animatable.View>
-          
           <View style={{width:"100%",height:400,marginTop:40,borderRadius:20,overflow: 'hidden',marginBottom:18}}>
             <MapView style={styles.map} 
             ref={mapRef}
@@ -650,10 +676,11 @@ const fadeInSlideUp = {
       </MapView>
       
           </View>
-          <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { animateToRegion() }}>
-                <Text style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Afficher sur la carte
-                </Text>
-              </TouchableOpacity>
+          <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "65%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { animateToRegion() }}>
+            <Text style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Afficher sur la carte
+            </Text>
+          </TouchableOpacity>
+
 {/* 
           
           <View style={{ height: 300, backgroundColor: '#222' }}>
@@ -673,66 +700,111 @@ const fadeInSlideUp = {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Animatable.View animation={fadeInSlideUp} iterationCount="infinite" direction="alternate">
-            <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect1()}>
-              <FontAwesome name="chevron-up" size={20} color="white" />
-            </TouchableOpacity>
+              <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect1()}>
+                <FontAwesome name="chevron-up" size={20} color="white" />
+              </TouchableOpacity>
             </Animatable.View>
             <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
               <Text style={{ color: '#fff', fontWeight: '500', fontSize: 13 }}>Votre voyage, jour apres jour</Text>
             </View>
             <View style={{ height: "75%" }}>
-            
-              <Carousel style={{ width: "100%", height: "100%" }}
-                controlsContainerStyle={styles.controlsContainerStyle}
-                controlsButtonStyle={styles.controlsButtonStyle}
-                dotStyle={styles.doStyle}
-                activeDotStyle={[styles.doStyle,{backgroundColor:'#fff'}]}
-              >
-                {datafetchPlanning?.map((item, index) => (
-                  <View key={index} style={{ width: '100%', height: "100%" }}>
-{/* 
-                    {item.attributes.photos?.data.map((i)=>(
-                      <Image source={{uri: i.attributes.url}} style={{width:100,height:100}}/>
-                    ))} */}
 
-                    <ImageBackground source={{ uri: item.attributes.photos?.data[0]?.attributes.url }} style={styles.imageOffre} imageStyle={{ borderRadius: 20, height: "100%" }}>
-                    <View style={styles.shadowOverlay}></View>
-                      <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
-                        
-                        <View style={{ flex: 1, justifyContent: 'space-between', }}>
-                        <View style={{  marginLeft: 15,backgroundColor: '#74D0F8', borderRadius: 8, padding: 5, width: "25%", alignItems: 'center', justifyContent: 'center', marginBottom: 15 }}>
-                        <Text style={{ color: '#fff', fontWeight: '600' }}>Jour {item?.attributes.jourNumero}</Text>
-                      </View>
-                          <View style={{ width: "50%", marginLeft: 15 }}>
-                            <Text style={{ fontSize: 16, fontWeight: '900', color: '#fff', }}>{item?.attributes.titre}</Text>
-                          </View>
-                          <View style={{ width: "90%", marginLeft: 15, marginTop: 10 }}>
-                            <Text style={{ fontSize: 13, fontWeight: '500', color: '#fff', }}>{item?.attributes.description}</Text>
-                          </View>
-                          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelectProgramme(item?.id)}}>
-                              <Animatable.Text animation="zoomIn" iterationCount="infinite" direction="alternate" style={{ color: '#fff', fontWeight: '600' }}>Voir programme
-                              </Animatable.Text>
-                            </TouchableOpacity>
+
+              <Carousel 
+                  style={{ width: "100%", height: "100%" }}
+                  ref={outerCarouselRef}
+                  // onIndexChanged={handleIndexChange}
+
+                  controlsContainerStyle={styles.controlsContainerStyle}
+                  controlsButtonStyle={styles.controlsButtonStyle}
+
+                  renderPrev={() => (
+                    <TouchableOpacity onPress={() => outerCarouselRef.current.scrollToPrev()}>
+                      <Icon name="chevron-left" size={30} color="black" style={styles.controlsButtonStyle} />
+                    </TouchableOpacity>
+                  )}
+                  renderNext={() => (
+                    <TouchableOpacity onPress={() => outerCarouselRef.current.scrollToNext()}>
+                      <Icon name="chevron-right" size={30} color="black" style={styles.controlsButtonStyle} />
+                    </TouchableOpacity>
+                  )}
+
+                  dotStyle={styles.hidden}
+                  activeDotStyle={styles.hidden}
+                  scrollEnabled={false}
+
+                  // activeDotStyle={[styles.controlsButtonStyle1,{backgroundColor:'#fff'}]}
+                >
+                  {datafetchPlanning?.map((item, index) => (
+                    <View key={index} style={{ width: '100%', height: "100%" }}>
+
+                  <Carousel 
+                    style={{ width: '100%', height: '100%' }}
+                    controlsButtonStyle={styles.hidden}
+                    dotStyle={[styles.controlsButtonStyle2]}
+                    activeDotStyle={[styles.controlsButtonStyle2, {backgroundColor:'#fff'}]}
+                    scrollEnabled={true}
+                  >
+                    {item.attributes.photos?.data.map((photo, photoIndex) => (
+                      <ImageBackground 
+                        key={photoIndex}
+                        source={{ uri: photo.attributes.url }} 
+                        style={styles.imageOffre} 
+                        imageStyle={{ borderRadius: 20, height: "100%" }}
+                      >
+
+                      {/* {item.attributes.photos?.data.map((i)=>(
+                        <Image source={{uri: i.attributes.url}} style={{width:100,height:100}}/>
+                      ))}
+                      <ImageBackground 
+                        source={{ uri: item.attributes.photos?.data[0]?.attributes.url }} 
+                        style={styles.imageOffre} 
+                        imageStyle={{ borderRadius: 20, height: "100%" }}> */}
+
+                        <View style={styles.shadowOverlay}>
+                          <View style={{ marginLeft: 15, backgroundColor: '#74D0F8', borderRadius: 8, padding: 5, width: "25%", alignItems: 'center', justifyContent: 'center', marginTop: 15}}>
+                              <Text style={{ color: '#fff', fontWeight: '600' }}> Jour {item?.attributes.jourNumero}</Text>
                           </View>
                         </View>
+                        <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
+                            
+                          <View style={{ flex: 1, justifyContent: 'space-between', }}>
+                            
+                            <View style={{ width: "50%", marginLeft: 15 }}>
+                              <Text style={{ fontSize: 16, fontWeight: '900', color: '#fff', }}>{item?.attributes.titre}</Text>
+                            </View>
+                            <View style={{ width: "90%", marginLeft: 15, marginTop: 10 }}>
+                              <Text style={{ fontSize: 13, fontWeight: '500', color: '#fff', }}>{item?.attributes.description}</Text>
+                            </View>
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                              <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelectProgramme(item?.id)}}>
+                                <Animatable.Text animation="zoomIn" iterationCount="infinite" direction="alternate" style={{ color: '#fff', fontWeight: '600' }}>Voir programme
+                                </Animatable.Text>
+                              </TouchableOpacity>
+                            </View>
+                          </View>
 
-                      </View>
+                        </View>
 
-                    </ImageBackground>
+                      </ImageBackground>
+                      ))}
+                    </Carousel>
                     </View>
-                ))}
+                  ))}
+                  
               </Carousel>
+
 
             </View>
             <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 18 }}>
-              <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "75%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { openModal3() }}>
-                <Animatable.Text animation="flash" iterationCount="infinite" direction="alternate" style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Préparez votre départ !
-                </Animatable.Text>
-              </TouchableOpacity>
+            <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 5, width: "75%", alignItems: 'center', justifyContent: 'center', marginBottom: 20 }} onPress={() => { openModal3() }}>
+              <Animatable.Text animation="flash" iterationCount="infinite" direction="alternate" style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Préparez votre départ !
+              </Animatable.Text>
+            </TouchableOpacity>
             </View>
           </View>
         </View>
+
       </Modal>
       <Modal
         animationType="fade"
@@ -923,6 +995,70 @@ const fadeInSlideUp = {
 };
 
 const styles = StyleSheet.create({
+
+  controlsContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  controlButton: {
+    padding: 10,
+    marginLeft: 5,
+    backgroundColor: 'white',
+    borderRadius: 5,
+  },
+  controlButtonText: {
+    color: 'black',
+    fontSize: 14,
+  },
+  controlsButtonStyle: {
+    width: 30,
+    height: 30,
+    margin: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+  },
+
+  controlsButtonStyle1: {
+    width: 10,
+    height: 10,
+    margin: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 10,
+  },
+
+  controlsButtonStyle2: {
+    bottom: 245,
+    left: -125,
+    transform: [{translateX: -5}, {translateY: -5 }],
+    width: 8,
+    height: 8,
+    margin: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 10,
+  },
+
+  hidden: {
+    display: 'none',
+  },
+
+  arrowButton: {
+    position: 'absolute',
+    top: '50%',
+    zIndex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 50,
+    padding: 10,
+  },
+
   map: {
     width: '100%',
     height: '100%',
@@ -949,25 +1085,17 @@ const styles = StyleSheet.create({
   contentContainer: {
     justifyContent: 'center',
   },
-    controlsContainerStyle: {
-        position: 'absolute',
-        top: "0%",
-        left: 0,
-        right: 0,
-        height: 50,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 10
-    },
-    controlsButtonStyle: {
-        width: 20,
-        height: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        borderRadius: 15
-    },
+  controlsContainerStyle: {
+    position: 'absolute',
+    top: "0%",
+    left: 0,
+    right: 0,
+    height: 60,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 10
+  },
   doStyle:{ 
     width: 20,
     height: 2,
@@ -979,6 +1107,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#222',
   },
+
+  gradient: {
+    flex: 1,
+  },
+
+
   image: {
     height: IMG_HEIGHT,
     width: width,
@@ -1112,6 +1246,29 @@ const styles = StyleSheet.create({
     elevation: 5,
 
   },
+
+  modalView1: {
+    position: 'absolute',
+    top: 58,
+    left: 20,
+    right: 20,
+    height: "84%",
+    backgroundColor: '#000',
+    opacity: 1,
+    borderRadius: 20,
+    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+
+  },
+
+
   modalViewRs: {
     position: 'absolute',
     top: 58,
@@ -1166,10 +1323,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginLeft:5
   },
+
+  shadowContainer: {
+    position: 'relative', // Ensure the overlay positions correctly within the container
+    height: '100%',
+    width: '100%',
+    borderRadius: 20,
+  },
   shadowOverlay: {
     ...StyleSheet.absoluteFillObject, // Cover the entire container
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Adjust the opacity as needed
-    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Adjust the opacity as needed
   },
 });
 
