@@ -143,15 +143,62 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
   const data = datafetch?.attributes.photos?.data;
   const dataOffres = datafetch?.attributes.offres?.data;
 
+  
   // console.log("hona : ",dataOffres)
-  const renderItemImage = ({ item, index }) => {
-    // Change numColumns dynamically
+  const renderItemImage = () => {
+    let skipNext = false; // Flag to skip the next item
+    
     return (
-      <View style={{ flex: 1 , margin: 5 }}>
-      <Image source={{uri:item?.attributes.url}} style={styles.stImageModal}/>
-    </View>
+      <ScrollView>
+        {/* Render the images dynamically */}
+        {data?.map((item, index) => {
+          // If skipNext is true, skip this iteration and reset the flag
+          if (skipNext) {
+            skipNext = false;
+            return null;
+          }
+  
+          if (index % 3 === 0) {
+            // Large image for indices divisible by 3 (0, 3, 6...)
+            return (
+              <Image
+                key={`large-${index}`}
+                source={{ uri: item?.attributes?.url }}
+                style={styles.largeImage}
+              />
+            );
+          } else if (index % 3 !== 0) {
+            // Small images for indices 1, 2, 4, 5, 7, 8, etc.
+            return (
+              <View key={`row-${index}`} style={styles.smallImagesRow}>
+                {/* First small image in the pair */}
+                <View style={styles.smallImageWrapper}>
+                  <Image
+                    source={{ uri: item?.attributes?.url }}
+                    style={styles.smallImage}
+                  />
+                </View>
+                {/* Second small image in the pair (if exists) */}
+                {data[index + 1] && (
+                  <View style={styles.smallImageWrapper}>
+                    <Image
+                      source={{ uri: data[index + 1]?.attributes?.url }}
+                      style={styles.smallImage}
+                    />
+                  </View>
+                )}
+                {/* Set the skipNext flag to true, to skip the next item */}
+                {skipNext = true}
+              </View>
+            );
+          }
+          
+          return null; // Return null for unhandled cases
+        })}
+      </ScrollView>
     );
   };
+  
 
   const lightSpeedOut = {
     from: {
@@ -275,13 +322,9 @@ const DetailPage = ({ route ,navigation }:RouterProps) => {
                 <View style={{justifyContent:'center',alignItems:'center',marginBottom:10}}>
                     <Text style={{color:'#fff',fontWeight:'700',fontSize:18}}>Galerie</Text>
                 </View>
-            {/* FlatList with dynamic number of columns */}
-            <FlatList
-              data={data}
-              renderItem={renderItemImage}
-              keyExtractor={(item) => item.id}
-              numColumns={2} // Number of columns based on the state
-      />
+
+            
+             {renderItemImage()}
                 </View>
             </View>
         </Modal>
@@ -295,6 +338,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#222',
+  },
+  largeImage: {
+    width: '100%',
+    height: 400, // Full-width image height
+    marginBottom: 1,
+    borderRadius: 10,
+    resizeMode: 'contain',
+  },
+  smallImagesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 1,
+  },
+  smallImageWrapper: {
+    flex: 1,
+    marginHorizontal: 5, // Small margin between images
+  },
+  smallImage: {
+    width: '100%',
+    height: 180, // Smaller images height
+    borderRadius: 10,
+    resizeMode: 'contain',
   },
 
   shadowOverlay: {

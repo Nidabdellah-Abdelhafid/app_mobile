@@ -84,7 +84,8 @@
     "react-native-webview": "13.8.6",
     "socket.io-client": "^4.7.5",
     "typescript": "~5.3.3",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "expo-dev-client": "~4.0.26"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0"

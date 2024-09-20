@@ -4,7 +4,7 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import ListingPage from './ListingPage';
 import { NavigationProp } from '@react-navigation/native';
-
+import AntDesign from '@expo/vector-icons/AntDesign';
 interface Props {
   listings: any[];
   category: string;
@@ -31,8 +31,7 @@ const ListingsBottomSheet = ({ navigation, listings, category, user }: Props) =>
     <>
     <View style={styles.absoluteViewList}>
     <TouchableOpacity onPress={onShowFullList} style={[styles.btn, { marginTop: 10 }]}>
-            <Text style={{ color: '#fff' }}>List</Text>
-            <Ionicons name="list" size={20} style={{ marginLeft: 10 }} color={'#fff'} />
+            <AntDesign name="back" size={24}  color={'#fff'} />
     </TouchableOpacity>
     </View>
     <BottomSheet
