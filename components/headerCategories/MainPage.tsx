@@ -1,19 +1,58 @@
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Button, ScrollView, PanResponder } from 'react-native'
-import React, { useRef, useState } from 'react'
-import { FontAwesome6 } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, PanResponder, TextInput,FlatList,TouchableWithoutFeedback, Image } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { AntDesign } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
+import { URL_BACKEND } from 'api';
 
 
 
-
-export default function MainPage() {  
+export default function MainPage({ onSearchChanged }) {  
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible1, setModalVisible1] = useState(false);
     const scrollViewRef = useRef(null);
-    
 
+//
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchInit, setSearchInit] = useState('');
+    const [hideSearch, setHideSearch] = useState(true);
+    const [editable, setEditable] = useState(true);
+    const [pays, setPays] = useState([]);
+    const [filteredPays, setFilteredPays] = useState([]);
+
+    // Fetch pays data from the backend
+    const fetchPays = async () => {
+        try {
+            const response = await fetch(`${URL_BACKEND}/api/pays?populate=*&pagination[limit]=-1`);
+            const data = await response.json();
+            setPays(data.data); // Assuming data.data contains the array of pays
+        } catch (error) {
+            console.error('Error fetching pays:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchPays();
+    }, []);
+
+    useEffect(() => {
+        // Filter pays whenever the search query changes
+        if (searchQuery.length > 0) {
+            const filtered = pays.filter(paysItem => 
+                paysItem.attributes.label.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredPays(filtered);
+            // console.log("inpu v : ",filtered)
+        } else {
+            setFilteredPays([]); // Clear suggestions when input is empty
+        }
+    }, [searchQuery, pays]);
+
+    // Handle selecting a suggested pays
+    const handleSelect = (label) => {
+        setSearchQuery(label);
+        setFilteredPays([]); // Clear suggestions after selection
+    };
+//
     const openModal = () => {
         setModalVisible(true);
     };
@@ -131,216 +170,65 @@ export default function MainPage() {
     const toggleShowAll = () => {
         setShowAll(prevState => !prevState);
     };
+    
 
     return (
         <View style={styles.container}>
             <View style={{flexDirection:'row',justifyContent:'center',alignContent:'center',alignItems:'center'}}>
             
-            <TouchableOpacity onPress={openModal}>
-                <View style={styles.searchBar}>
-                    <View>
-                        <Text style={{ fontSize: 17, color: '#999', fontWeight: '600' ,fontFamily: 'Roboto'}}>Chercher une destination</Text>
-                        
-                    </View>
-                    <Ionicons name="search" color="#fff" size={33} style={{ marginLeft: 45  }} />
+                <View style={[styles.searchBar,searchQuery? {marginBottom:20}:{marginBottom:20}]}>
+                    {searchQuery && 
+                    <TouchableOpacity onPress={() => {onSearchChanged(searchInit),setSearchQuery(''),setHideSearch(true), setEditable(true)}}>
+                        <Ionicons name="arrow-back-outline" size={20} color="#fff" />
+                    </TouchableOpacity>
+                   }
+                    <TextInput
+                        style={{color:'#fff',fontFamily: 'Roboto'}}
+                        placeholder="Chercher une destination"
+                        placeholderTextColor="#999"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        editable={editable} 
+                    />
+                    {hideSearch && 
+                    <TouchableOpacity onPress={() => {onSearchChanged(searchQuery),setHideSearch(false), setEditable(false)}}>
+                    <Ionicons name="search" color="#fff" size={33} style={{ marginLeft: 10 }} />
+                </TouchableOpacity>
+                    }
                     
+
                 </View>
-            </TouchableOpacity>
+                {/* Display filtered pays */}
+              
 
             <TouchableOpacity onPress={openModal1}>
-                <View style={styles.searchBarbtn}>
+                <View style={[styles.searchBarbtn,searchQuery? {marginBottom:20}:{marginBottom:20}]}>
                     <AntDesign name="filter" size={35} color="#fff" />
                 </View>
             </TouchableOpacity>
+            
             </View>
+            {searchQuery.length > 0 && (
+                  <FlatList
+                      data={filteredPays}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => (
+                          <TouchableWithoutFeedback onPress={() => handleSelect(item.attributes.label)}>
+                              <View style={styles.resultItem}>
+                              <Image source={{ uri: item?.attributes.photos?.data[0]?.attributes.url }} style={styles.profileImage} />
 
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={closeModal}
-            >
-                <View style={styles.modalContainer} {...panResponder.panHandlers}>
-                {/* Header */}
-                <View style={styles.header}>
-                <TouchableOpacity onPress={closeModal} style={{flexDirection:'row',alignItems:'center'}}>
-                    <AntDesign name="close" size={20} color="black" />
-                    <Text style={{fontSize:18,fontWeight:'600',marginLeft:12}}>Filters</Text>
-                </TouchableOpacity>
-                </View>
-
-                {/* Content */}
-                <View style={styles.content} >
-                    <ScrollView 
-                    ref={scrollViewRef}
-                    style={{flex:1}}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    >
-                    <Text style={styles.textFilter}>Type de logement</Text>
-                    <View style={styles.viewFilter}>
-                     {options.map((option) => (
-                            <TouchableOpacity
-                                key={option.id}
-                                 style= {option.style==="op1" ? [styles.option,styles.op1,selectedOption?.id === option.id && styles.selectedOption ] : (option.style==="op3" ? [styles.option,styles.op3,selectedOption?.id === option.id && styles.selectedOption ]:[styles.option,selectedOption?.id === option.id && styles.selectedOption ])}
-                                onPress={() => handleOptionSelect(option)}
-                            >
-                                <Text
-                                style={[ selectedOption?.id === option.id && styles.textdOption]} 
-                                >{option.label}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                    <Text style={styles.textFilter}>Chambres et lits</Text>
-                    <Text style={{}}>Chambres</Text>
-
-                    <View style={styles.viewFilter}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                     {optionsNbr.map((option) => (
-                            <TouchableOpacity
-                                key={option.id}
-                                 style= {[styles.optionNbrc,selectedOptionNbrc?.id === option.id && styles.selectedOptionNbrc ]}
-                                onPress={() => handleOptionSelectNbrc(option)}
-                            >
-                                <Text
-                                style={[ selectedOptionNbrc?.id === option.id && styles.textdOption]} 
-                                >{option.label}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                    </View>
-                    <Text style={styles.textFilter}>Type de propriete</Text>
-                    <View style={styles.viewFilter}>
-                        <View style={{width:"46%"}}>
-                        <TouchableOpacity
-                                 style={activeTprM ? [styles.optionTpr, styles.selectedOptionTpr] :[styles.optionTpr]}
-                            onPress={() => {
-                                setActiveTprM(!activeTprM)
-                                if(activeTprM===false){
-                                handleOptionSelectTprM('Maison')
-                                   
-                            }else if(activeTprM===true){
-                                 handleOptionSelectTprM('')
-                            }
-                            }}
-                        >
-                            <AntDesign name="home" size={28} color="black" />
-                            <Text
-                                style={{fontWeight:'500',marginTop:32}}
-                            >Maison</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                                 style={activeTprMh ? [styles.optionTpr, styles.selectedOptionTpr] :[styles.optionTpr]}
-                            onPress={() => 
-                                {
-                                    setActiveTprMh(!activeTprMh) 
-                                    if(activeTprMh===false){
-                                    handleOptionSelectTprMh(`Maison d'hôtes`)
-                                      
-                                }else if(activeTprMh===true){
-                                    handleOptionSelectTprMh('')
-                            }
-                            }
-                            }
-                        >
-                            <Ionicons name="bed" color="#000" size={28} />
-                            <Text
-                                style={{fontWeight:'500',marginTop:32}}
-                            >Maison d'hôtes</Text>
-                        </TouchableOpacity>
-                        </View>
-                            
-                        <View style={{marginLeft:20,width:"46%"}}>
-                            <TouchableOpacity
-                                style={activeTprAp ? [styles.optionTpr, styles.selectedOptionTpr] :[styles.optionTpr]}
-                            onPress={() =>{
-                                setActiveTprAp(!activeTprAp)
-                                if(activeTprAp===false){
-                                    handleOptionSelectTprAp('Appatement')
-                                    
-                                }else if(activeTprAp===true){
-                                    handleOptionSelectTprAp('')
-                            }
-                            } 
-                        }
-                        >
-                            <MaterialIcons name="apartment" size={28} color="black" />
-                            <Text
-                                style={{fontWeight:'500',marginTop:32}}
-                            >Appatement</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                                style={activeTprH ? [styles.optionTpr, styles.selectedOptionTpr] : [styles.optionTpr]}
-                            onPress={() => {
-                                setActiveTprH(!activeTprH)
-                                if(activeTprH===false){
-                                handleOptionSelectTprH('Hôtel')
-                                    
-                            }else if(activeTprH===true){
-                                handleOptionSelectTprH('')
-                            }
-                        }}
-                        >
-                            <FontAwesome6 name="hotel" size={28} color="black" />
-                            <Text
-                                style={{fontWeight:'500',marginTop:32}}
-                            >Hôtel</Text>
-                        </TouchableOpacity>
-                        </View>
-                        
-                        
-                    
-                    </View>
-                    <Text style={styles.textFilter}>Type de propriete 2</Text>
-                    <View style={styles.viewFilterCk}>
-                        {/* Render first three checkboxes */}
-                        {checkboxes.slice(0, showAll ? checkboxes.length : 3).map((isChecked, index) => (
-                            <TouchableOpacity
-                            key={index}
-                            style={{ flexDirection: 'row',justifyContent: 'space-between', alignItems: 'center',  marginBottom: 10 }}
-                            onPress={() => toggleCheckbox(index)}
-                            >
-                            
-                            <Text  style={isChecked ? ({alignSelf:'center',fontSize:15,color:'black'}):({alignSelf:'center',fontSize:15,color:'#555'})}>Checkbox {index + 1}</Text>
-                            <View >
-                                
-                                <Ionicons
-                                name={isChecked ? 'checkbox' : 'square-outline'}
-                                size={28}
-                                color={isChecked ? 'black' : '#999'}
-                                style={{marginLeft:10,alignSelf:'flex-end'}}
-                                
-                            />
-                            </View>
-                            </TouchableOpacity>
-                        ))}
-
-                        {/* Render "Show More" button */}
-                        {checkboxes.length > 3 && (
-                            <TouchableOpacity onPress={toggleShowAll} style={{flexDirection:'row',alignItems:'center',alignContent:'center'}}>
-                            <Text style={{ color: 'black' ,fontWeight:'700',textDecorationLine: 'underline'}}>
-                                {showAll ? 'Show Less' : 'Show More'}
-                                
-                            </Text>
-                            {showAll ? <MaterialIcons name="expand-less" size={24} color="black" /> : <MaterialIcons name="expand-more" size={24} color="black" />}
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                    </ScrollView>
-                    
-                </View>
-
-                {/* Footer */}
-                <View style={[styles.footer,]}>
-                    <TouchableOpacity onPress={closeModal} >
-                        <Text style={{fontWeight:'700'}}>Tout effacer</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={closeModal} style={[styles.button,{alignContent: 'flex-end',}]}>
-                        <Text style={styles.buttonText}>Afficher les logements</Text>
-                    </TouchableOpacity>
-                </View>
-                </View>
-            </Modal>
+                                  <Text style={styles.resultText}>
+                                      {item.attributes.label}
+                                  </Text>
+                              </View>
+                          </TouchableWithoutFeedback>
+                      )}
+                      style={styles.resultsContainer}
+        // Add additional styles for absolute positioning
+        contentContainerStyle={styles.resultsContent}
+                  />
+              )}
+            
 
             <Modal
                 animationType="fade"
@@ -357,22 +245,18 @@ export default function MainPage() {
                             <View style={{marginTop:5,height:2,width:65,backgroundColor:'#fff'}}></View> 
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.textFilter2}>
-                            <Text style={{color:'#fff'}}>Croisiere</Text>
+                            <Text style={{color:'#fff'}}>Nos coups de coeur</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.textFilter2}>
-                            <Text style={{color:'#fff'}}>Honeymoon</Text>
+                            <Text style={{color:'#fff'}}>Tendance</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.textFilter2}>
-                            <Text style={{color:'#fff'}}>Family</Text>
+                            <Text style={{color:'#fff'}}>Top Seller</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity  style={styles.textFilter2}>
-                            <Text style={{color:'#fff'}}>Ski</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity  style={styles.textFilter2}>
-                            <Text style={{color:'#fff'}}>Plage</Text>
-                        </TouchableOpacity >
-                        <TouchableOpacity style={styles.textFilter2} onPress={() => handleDateSelect1()}>
-                            <Text style={{color:'#fff'}}>close</Text>
+                        <TouchableOpacity style={[styles.textFilter2,{flexDirection:'row'}]} onPress={() => handleDateSelect1()}>
+                            <Ionicons name="backspace-outline" size={24} color="#fff" />
+                            <Text style={{color:'#fff',marginLeft:5}} >Close</Text>
+
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -405,6 +289,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+        width:'75%'
     },
     textFilter2:{
         paddingBottom:15,
@@ -418,7 +303,6 @@ const styles = StyleSheet.create({
         borderColor:'#999',
         padding: 10,
         marginLeft: 10,
-        marginBottom:20,
         alignSelf:'flex-start',
         shadowColor: '#000',
         shadowOffset: {
@@ -580,5 +464,32 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  resultsContainer: {
+    position: 'absolute', // Make the results container absolute
+    top: 50, // Adjust based on your search bar height
+    left: 30,
+    right:75,
+    backgroundColor: '#444', // Background color for results
+    borderRadius: 5,
+    zIndex: 1000, // Ensure it floats above other components
+},
+resultsContent: {
+    paddingVertical: 0, // Optional: add padding for aesthetics
+},
+resultItem: {
+    padding: 8,
+  flexDirection:'row',
+  alignItems:'center'
+},
+resultText: {
+    fontSize: 16,
+    color: '#fff',
+    marginLeft:10
+},
+profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
   },
 })

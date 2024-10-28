@@ -7,39 +7,37 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 const categories = [
     {
-      name: 'Tiny homes',
+      name: 'Sur Mesures',
+      icon: 'nature-people',
+    },
+    {
+      name: 'Croisières',
       icon: 'home',
     },
     {
-      name: 'Cabins',
-      icon: 'house-siding',
+      name: 'Famille',
+      icon: 'people',
     },
     {
-      name: 'Trending',
+      name: 'Honeymoon',
       icon: 'local-fire-department',
     },
     {
-      name: 'Play',
+      name: 'Plages',
       icon: 'videogame-asset',
     },
     {
-      name: 'City',
+      name: 'Ski',
       icon: 'apartment',
-    },
-    {
-      name: 'Beachfront',
-      icon: 'beach-access',
-    },
-    {
-      name: 'Countryside',
-      icon: 'nature-people',
-    },
+    }
   ];
   
 interface Props {
     onCategoryChanged: (category: string) => void;
+    onSearchChanged: (label: string) => void;
+  
 }
-const ExploreHeader = ({ onCategoryChanged }: Props) => {
+const ExploreHeader = ({ onCategoryChanged,onSearchChanged }: Props) => {
     const scrollRef = useRef<ScrollView>(null);
     const itemsRef = useRef<Array<TouchableOpacity | null>>([]);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -57,11 +55,16 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onCategoryChanged(categories[index].name);
       };
-  
-    return (
-      <View style={{backgroundColor: '#555'}}>
 
-      <MainPage/>
+      
+      const handleSearchSubmit = (searchQuery) => {
+        // Call the onSearchChanged prop to pass the searchQuery to HomePage
+        onSearchChanged(searchQuery);
+    };
+    return (
+      <View style={{backgroundColor: '#555',zIndex: 1000,}}>
+
+      <MainPage onSearchChanged={handleSearchSubmit}/>
 
       <SafeAreaView style={{ backgroundColor: '#222',
             borderTopLeftRadius:30,

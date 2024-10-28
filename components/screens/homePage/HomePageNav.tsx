@@ -14,12 +14,13 @@ interface RouterProps {
 }
 
 const HomePageNav = ({ route ,navigation }:RouterProps) => {
-  const { user } = route.params || {}; 
+  const { user ,searchQuery} = route.params || {}; 
+  
   return (
     <View style={styles.container}>
       <Stack.Navigator>
         <Stack.Screen name='HomePage' component={HomePage}
-        initialParams={{ user }}  
+        initialParams={{ user,searchQuery }}  
           options={{
             headerShown: false,
 

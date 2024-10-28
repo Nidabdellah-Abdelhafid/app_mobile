@@ -1,6 +1,6 @@
 // BottomSheetComponent.js
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Modal,Image, ScrollView, PanResponder ,TouchableOpacity, ImageBackground, Button} from 'react-native';
+import { View, Text, StyleSheet, Modal,Image, ScrollView, PanResponder ,TouchableOpacity, ImageBackground, Button, TextInput, FlatList, TouchableWithoutFeedback} from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomSheetModal, BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import HomePageNav from './screens/homePage/HomePageNav';
@@ -17,6 +17,7 @@ import { FIREBASE_DB } from 'FirebaseConfig';
 import MessageScreen from './screens/MessageScreen';
 import Invoice from './screens/Invoice';
 import * as Animatable from 'react-native-animatable';
+import { URL_BACKEND } from 'api';
 const Tab = createBottomTabNavigator();
 
 const CustonTabbarButton = ({children, onPress}) => (
@@ -95,6 +96,7 @@ const BottomSheetComponent = ({user}) => {
 
   const openBottomSheet = () => {
     bottomSheetModalRef.current.present();
+    setSearchQuery("")
   };
 
   const closeBottomSheet = () => {
@@ -203,6 +205,46 @@ const slideInDownCustom = {
   },
 };
 
+      const [searchQuery, setSearchQuery] = useState('');
+      const [searchQueryBtm, setSearchQueryBtm] = useState('');
+      const [pays, setPays] = useState([]);
+      const [filteredPays, setFilteredPays] = useState([]);
+  
+      // Fetch pays data from the backend
+      const fetchPays = async () => {
+          try {
+              const response = await fetch(`${URL_BACKEND}/api/pays?populate=*&pagination[limit]=-1`);
+              const data = await response.json();
+              setPays(data.data); // Assuming data.data contains the array of pays
+          } catch (error) {
+              console.error('Error fetching pays:', error);
+          }
+      };
+  
+      useEffect(() => {
+          fetchPays();
+      }, []);
+  
+      useEffect(() => {
+          // Filter pays whenever the search query changes
+          if (searchQuery.length > 0) {
+              const filtered = pays.filter(paysItem => 
+                  paysItem.attributes.label.toLowerCase().includes(searchQuery.toLowerCase())
+              );
+              setFilteredPays(filtered);
+          } else {
+              setFilteredPays([]); // Clear suggestions when input is empty
+          }
+      }, [searchQuery, pays]);
+  
+      // Handle selecting a suggested pays
+      const handleSelect = (label) => {
+          setSearchQuery(label);
+          setSearchQueryBtm(label);
+          setFilteredPays([]); // Clear suggestions after selection
+      };
+  
+
   return (
     <BottomSheetModalProvider>
       <ImageBackground source={{uri:'https://s3.eu-west-1.amazonaws.com/fractalitetest/2024-06-10T10:44:57.261240285_home%20bg@2x.png'}}  style={styles.container}>
@@ -223,16 +265,41 @@ const slideInDownCustom = {
       <Text style={{color:'white',fontSize:40,fontWeight:'600'}}>signature</Text>
       <Text style={{color:'white',fontSize:18,fontWeight:'400',marginTop:15}}>Concevez votre</Text>
       <Text style={{color:'white',fontSize:18,fontWeight:'400',marginBottom:20}}>voyage 100% sur mesure</Text>
-      <TouchableOpacity onPress={openModal}>
-                <View style={styles.searchBar}>
-                    <View>
-                        <Text style={{ marginLeft: 17 ,fontSize: 17, color: '#666', fontWeight: '700' ,fontFamily: 'Roboto'}}>Distination</Text>
-                        
-                    </View>
-                    <Ionicons name="search" color="#666" size={25} style={{ marginLeft: 17 }} />
-                </View>
+      
+      <View style={styles.searchBar}>
+          <View style={{flex:1}}>
+              {/* <Text style={{ marginLeft: 17 ,fontSize: 17, color: '#666', fontWeight: '700' ,fontFamily: 'Roboto'}}>Distination</Text> */}
+              <TextInput
+            style={styles.input}
+            placeholder="Distination"
+            placeholderTextColor="#999"
+            value={searchQuery}
+            onChangeText={setSearchQuery} // Update search query on change
+        />
+          </View>
+          {/* <Ionicons name="search" color="#666" size={25} style={{ marginLeft: 17 }} /> */}
+          <TouchableOpacity onPress={openBottomSheet}>
+            <Ionicons name="search" color="#666" size={28} style={styles.searchIcon} />
         </TouchableOpacity>
+      </View>
+        {searchQuery.length > 0 && (
+                  <FlatList
+                      data={filteredPays}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => (
+                          <TouchableWithoutFeedback onPress={() => handleSelect(item.attributes.label)}>
+                              <View style={styles.resultItem}>
+                                <Image source={{ uri: item?.attributes.photos?.data[0]?.attributes.url }} style={styles.profileImage} />
 
+                                  <Text style={styles.resultText}>
+                                      {item.attributes.label}
+                                  </Text>
+                              </View>
+                          </TouchableWithoutFeedback>
+                      )}
+                      style={styles.resultsContainer}
+                  />
+              )}
 
       <View style={styles.btnsheet}>
         <TouchableOpacity onPress={openBottomSheet} style={styles.upBtn}>
@@ -261,7 +328,7 @@ const slideInDownCustom = {
         }} 
         >
           <Tab.Screen name='Explorer' component={HomePageNav}
-          initialParams={{ user: user }}
+          initialParams={{ user: user,searchQuery:searchQueryBtm }}
             options={{
               tabBarIcon: ({ color }) => (
                 <Ionicons name="filter" size={28} color={color} />
@@ -549,28 +616,30 @@ const slideInDownCustom = {
                     </TouchableOpacity>
                 </View>
                 </View>
-            </Modal>
+      </Modal>
 
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={modalVisible0}
-                onRequestClose={closeModal0}
-            >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>            
-                <TouchableOpacity style={{flexDirection:'row',marginBottom:10}}  onPress={()=> FIREBASE_AUTH.signOut()}>
-                  <MaterialIcons name="logout" size={24} color="#fff" />
-                  <Text style={{color:'#fff',marginLeft:3}}>Logout</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{flexDirection:'row',marginBottom:10,alignItems:'center'}} onPress={() => handleDateSelect0()}>
-                <AntDesign name="close" size={20} color="#fff" />
 
-                    <Text style={{color:'#fff',marginLeft:3}}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            </Modal>
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible0}
+            onRequestClose={closeModal0}
+        >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>            
+            <TouchableOpacity style={{flexDirection:'row',marginBottom:10}}  onPress={()=> FIREBASE_AUTH.signOut()}>
+              <MaterialIcons name="logout" size={24} color="#fff" />
+              <Text style={{color:'#fff',marginLeft:3}}>Logout</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{flexDirection:'row',marginBottom:10,alignItems:'center'}} onPress={() => handleDateSelect0()}>
+            <AntDesign name="close" size={20} color="#fff" />
+
+                <Text style={{color:'#fff',marginLeft:3}}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        </Modal>
+
       </ImageBackground>
     </BottomSheetModalProvider>
   );
@@ -801,6 +870,33 @@ modalView: {
     elevation: 5,
     opacity:0.8
 },
-
+input: {
+  flex: 1,
+  marginLeft: 17 ,
+  fontSize: 17, 
+  color: '#666', 
+  fontWeight: '700',
+  fontFamily: 'Roboto'
+},
+searchIcon: {
+  marginLeft: 17,
+},
+resultsContainer: {
+  marginTop: 10,
+  backgroundColor: '#444', // Background color for results
+  borderRadius: 5,
+  zIndex: 1000,
+  height:200
+},
+resultItem: {
+  padding: 10,
+  flexDirection:'row',
+  alignItems:'center'
+},
+resultText: {
+  fontSize: 16,
+  color: '#fff',
+  marginLeft:10
+},
 });
 export default BottomSheetComponent;

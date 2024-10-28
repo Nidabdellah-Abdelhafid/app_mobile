@@ -62,6 +62,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
   }, [refresh]);
 
   useEffect(() => {
+    // console.log("ctg: ",category)
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
