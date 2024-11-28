@@ -13,7 +13,7 @@ interface Props {
 }
 
 const ListingsBottomSheet = ({ navigation, listings, category, user }: Props) => {
-  const snapPoints = useMemo(() => ['21%', '82%'], []);
+  const snapPoints = useMemo(() => ['1%', '77%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [refresh, setRefresh] = useState<number>(0);
 
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   },
   absoluteView: {
     position: 'absolute',
-    bottom: 210,
+    bottom: 40,
     width: '100%',
     alignItems: 'center',
   },

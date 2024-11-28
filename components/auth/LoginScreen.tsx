@@ -230,7 +230,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
         {exitingEmail ? 
           <Text style={{ color: 'green' ,marginBottom:10,marginLeft:35,fontWeight:'600',fontSize:17}}>Correct </Text> 
           :
-          // <Text style={{ color: 'red' ,marginBottom:10,marginLeft:35,fontWeight:'600',fontSize:17}}>Incorrect </Text>
+          
           <Text></Text>
           }
         <View style={styles.parentView}>
@@ -247,8 +247,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
           {exitingEmail ? 
           <AntDesign name="check" size={20} color="green" style={styles.iconv}/>
            :
-          // <FontAwesome6 name="xmark" size={20} color="red" style={styles.iconv}/>
-          <Text></Text>
+          <></>
           }
           
           

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Button, RefreshControl, StyleSheet, Modal, Alert, Image } from 'react-native';
+import { View, Text, TextInput, Button, RefreshControl, StyleSheet, Modal, Alert, Image, Platform, Dimensions } from 'react-native';
 import axios from 'axios';
 import socket from './socket';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -250,7 +250,8 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         </View>
       </Modal>
       <View style={styles.container}>
-        <ScrollView 
+      
+        <ScrollView  
           ref={scrollViewRef} 
           contentContainerStyle={{ paddingBottom: 25 }}
           onScroll={handleScroll}
@@ -299,6 +300,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
             );
           })}
         </ScrollView>
+        
         {showScrollToBottom && (
           <TouchableOpacity
             style={styles.scrollToBottomButton}
@@ -426,17 +428,19 @@ const styles = StyleSheet.create({
   },
   scrollToBottomButton: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 20, // Reduced from 80 to ensure it's closer to the screen bottom
     right: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Red background for visibility
     borderRadius: 30,
-    padding: 5,
-    elevation: 5,
+    padding: 10,
+    elevation: 10,
+    zIndex: 100,
     shadowColor: 'black',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+
   filePreviewContainer: {
     flexDirection: 'row',
     alignItems: 'center',

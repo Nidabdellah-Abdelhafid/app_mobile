@@ -16,22 +16,18 @@ import Animated, {
 import Colors from '../../../constants/Colors';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Entypo } from '@expo/vector-icons';
-import { FlatList, ScrollView, Switch, TextInput } from 'react-native-gesture-handler';
-import { MaterialCommunityIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
+import { ScrollView, Switch, TextInput } from 'react-native-gesture-handler';
+import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import fileData from '../../../assets/data/file.json';
 import Carousel from 'pinar';
-import  {  Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { URL_BACKEND } from "api";
-
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-import { LinearGradient } from 'react-native-linear-gradient';
-
 import * as Animatable from 'react-native-animatable';
 
 const INITIAL_REGION = {
@@ -55,59 +51,66 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible3, setModalVisible3] = useState(false);
   const items = fileData;
-
   const [datafetch, setDatafetch] = useState(null);
   const [datafetchPlanning, setDatafetchPlanning] = useState(null);
   const [datafetchProgramme, setDatafetchProgramme] = useState(null);
-  // const [currentUser,setcurrentUser]=useState('hafidnid909@gmail.com')
   const { user: currentUser } = route.params;
   const [userData, setUserData] = useState(null);
   const [userDC, setUserDC] = useState(null);
-  
+  const [reference, setReference] = useState('');
+  const [destination, setDestination] = useState('');
+  const [nbr_voyageurs_adultes, setNbr_voyageurs_adultes] = useState(0);
+  const [nbr_voyageurs_enfants, setNbr_voyageurs_enfants] = useState(0);
+  const [pourquoi_voyagez_vous, setPourquoi_voyagez_vous] = useState('');
+  const [date_partir, setDate_partir] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [date_fixe, setDate_fixe] = useState(false);
+  const [duree, setDuree] = useState(0);
+  const [duree_modifiable, setDuree_modifiable] = useState(false);
+  const [categorie_hebergement, setCategorie_hebergement] = useState('');
+  const [cabine, setCabine] = useState('');
+  const [experience_souhaitez, setExperience_souhaitez] = useState('');
 
   const outerCarouselRef = useRef(null);
- 
 
 
-    const fetchUserData = async () => {
-      // console.log(currentUser)
-      try {
-        const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
-        const querySnapshot = await getDocs(userQuery);
-        const userData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (userData.length > 0) {
-          setUserData(userData[0]);
-        } else {
-          setUserData(null);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
+
+  const fetchUserData = async () => {
+    // console.log(currentUser)
+    try {
+      const userQuery = query(collection(FIREBASE_DB, 'users'), where('email', '==', currentUser));
+      const querySnapshot = await getDocs(userQuery);
+      const userData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (userData.length > 0) {
+        setUserData(userData[0]);
+      } else {
+        setUserData(null);
       }
-    };
-  
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
   const fetchUser = async () => {
-      try {
-        const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
-        const users = response.data;
-  
-        const email = userData?.email;
-  
-        const currentUserData = users.find(user => user.email === email);
-        setUserDC(currentUserData);
-        // console.log(currentUserData.id)
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      }
-    };
-  
-    
+    try {
+      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+      const users = response.data;
 
+      const email = userData?.email;
+
+      const currentUserData = users.find(user => user.email === email);
+      setUserDC(currentUserData);
+      // console.log(currentUserData.id)
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
 
   const fetchData = async () => {
     try {
       const response = await fetch(`${URL_BACKEND}/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
       const data = await response.json();
-        // console.log('Result5:', data.data.attributes);
+      // console.log('Result5:', data.data.attributes);
       setDatafetch(data.data);
 
     } catch (error) {
@@ -115,21 +118,20 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchUserData();
-  },[]);
+  }, []);
 
- useEffect(()=>{
+  useEffect(() => {
     fetchData();
 
-  },[]);
-  
+  }, []);
+
   useEffect(() => {
     if (userData) {
       fetchUser();
     }
   }, [userData]);
-  
 
   const fetchDataPlanning = async () => {
     try {
@@ -146,9 +148,9 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   };
 
   useEffect(() => {
-    
+
     if (itemId) {
-     
+
       fetchDataPlanning();
     }
   }, []);
@@ -160,6 +162,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const closeModal1 = () => {
     setModalVisible1(false);
   };
+
   const handleDateSelect1 = () => {
     // Close the modal
     closeModal1();
@@ -184,13 +187,12 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const closeModal3 = () => {
     setModalVisible3(false);
   };
+
   const handleDateSelect3 = () => {
     // Close the modal
     videForm();
     closeModal3();
   };
-
-
 
   const shareListing = async () => {
     try {
@@ -263,263 +265,248 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   // const sd = datafetchPlanning[0]?.attributes.programmes?.data;
 
   // console.log("hona : ",datafetchPlanning)
-  const handleDateSelectProgramme = async (id)=>{
-      try {
-        // console.log('id :', id);
+  const handleDateSelectProgramme = async (id) => {
+    try {
+      // console.log('id :', id);
 
-        const response = await fetch(`${URL_BACKEND}/api/programmes?populate=*&pagination[limit]=-1`);
-        const data = await response.json();
-        // console.log('Result5--:', data.data);
-        const filteredData = data.data.filter(item => item.attributes.planing?.data.id === id);
-        // console.log('Result5:', filteredData);
-        setDatafetchProgramme(filteredData);
-        openModal2();
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-  
+      const response = await fetch(`${URL_BACKEND}/api/programmes?populate=*&pagination[limit]=-1`);
+      const data = await response.json();
+      // console.log('Result5--:', data.data);
+      const filteredData = data.data.filter(item => item.attributes.planing?.data.id === id);
+      // console.log('Result5:', filteredData);
+      setDatafetchProgramme(filteredData);
+      openModal2();
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+
   }
-const mapRef = useRef();
+  const mapRef = useRef();
 
-const animateToRegion = () => {
-  let region = {
-    latitude: +datafetch?.attributes.latitude,
-    longitude: +datafetch?.attributes.longitude,
-    latitudeDelta: 7.5,
-    longitudeDelta: 7.5,
+  const animateToRegion = () => {
+    let region = {
+      latitude: +datafetch?.attributes.latitude,
+      longitude: +datafetch?.attributes.longitude,
+      latitudeDelta: 7.5,
+      longitudeDelta: 7.5,
+    };
+
+    mapRef.current.animateToRegion(region, 2000);
+  };
+  
+  // const [offre, setOffre] = useState(null);
+  const handleAdultChange = (text) => {
+    const num = parseInt(text, 10);
+    if (!isNaN(num) && num >= 0) {
+      setNbr_voyageurs_adultes(num);
+    } else {
+      setNbr_voyageurs_adultes(0);
+    }
   };
 
-  mapRef.current.animateToRegion(region, 2000);
-};
-const [reference, setReference] = useState('');
-const [destination, setDestination] = useState('');
-const [nbr_voyageurs_adultes, setNbr_voyageurs_adultes] = useState(0);
-const [nbr_voyageurs_enfants, setNbr_voyageurs_enfants] = useState(0);
-const [pourquoi_voyagez_vous, setPourquoi_voyagez_vous] = useState('');
-const [date_partir, setDate_partir] = useState(new Date());
-const [showDatePicker, setShowDatePicker] = useState(false);
-const [date_fixe, setDate_fixe] = useState(false);
-const [duree, setDuree] = useState(0);
-const [duree_modifiable, setDuree_modifiable] = useState(false);
-const [categorie_hebergement, setCategorie_hebergement] = useState('');
-const [cabine, setCabine] = useState('');
-const [experience_souhaitez, setExperience_souhaitez] = useState('');
-// const [offre, setOffre] = useState(null);
-const handleAdultChange = (text) => {
-  const num = parseInt(text, 10);
-  if (!isNaN(num) && num >= 0) {
-    setNbr_voyageurs_adultes(num);
-  } else {
-    setNbr_voyageurs_adultes(0);
-  }
-};
-
-const handleChildrenChange = (text) => {
-  const num = parseInt(text, 10);
-  if (!isNaN(num) && num >= 0) {
-    setNbr_voyageurs_enfants(num);
-  } else {
-    setNbr_voyageurs_enfants(0);
-  }
-};
-const handleDureeChange = (text) => {
-  const num = parseInt(text, 10);
-  if (!isNaN(num) && num >= 0) {
-    setDuree(num);
-  } else {
-    setDuree(0);
-  }
-};
-
-
-useEffect(() => {
-  if (datafetch?.attributes?.pay?.data?.attributes?.label) {
-    setDestination(datafetch.attributes.pay.data.attributes.label);
-  }
-}, [datafetch]);
-
-
-
-const onChangeDate = (event, selectedDate) => {
-  const currentDate = selectedDate || date_partir;
-  setShowDatePicker(false);
-  setDate_partir(currentDate);
-};
-
-const formatDate = (date) => {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  return `${year}-${month}-${day}`;
-};
-
-const handleSubmit = async () => {
-  const refRS= new Date();
-  const refRSInSeconds = Math.floor(refRS.getTime() / 1000);
-  const reservationData = {
-    reference : 'REFRS'+refRSInSeconds+'MN4',
-    destination : destination,
-    nbr_voyageurs_enfants : nbr_voyageurs_enfants,
-    nbr_voyageurs_adultes: nbr_voyageurs_adultes,
-    pourquoi_voyagez_vous : pourquoi_voyagez_vous,
-    date_partir : date_partir,      
-    date_fixe : date_fixe,
-    duree : duree,
-    duree_modifiable : duree_modifiable,
-    categorie_hebergement : categorie_hebergement,
-    cabine : cabine,
-    experience_souhaitez : experience_souhaitez,
-    offre: itemId,
-    user: userDC.id,
-    status:false,
-    etat: "enAttente"
-
-};
-
- 
-  
-  try {
-    const response = await axios.post(`${URL_BACKEND}/api/reservations`, {
-      data: reservationData,
-    });
-    // console.log('Success', 'Reservation created successfully!', response.data);
-    Alert.alert('🎉 Success! 🎉',
-    '✅ Reservation created successfully!',
-    [{ text: 'OK', onPress: () => {handleDateSelect3()} }],
-    { cancelable: false });
-
-    setTimeout( async () => {
-      try {
-      if(response){
-      const resID= response?.data.data.id;
-      const responseRs = await axios.get(`${URL_BACKEND}/api/reservations/${resID}?populate=*&pagination[limit]=-1`);
-      const rf=responseRs.data;
-      const ref= new Date();
-      const refInSeconds = Math.floor(ref.getTime() / 1000);
-      const  factureData = {
-        reference: 'REF'+refInSeconds+'LP9',
-        prixTotal: Number(rf?.data.attributes.offre?.data?.attributes.prix*(rf?.data.attributes.nbr_voyageurs_enfants+rf?.data.attributes.nbr_voyageurs_adultes+rf?.data.attributes.duree)),
-        reservation: resID,
-        status: false
-      };
-      
-      const responsefacture = await axios.post(`${URL_BACKEND}/api/factures`, {
-        data: factureData,
-      });
-      // console,log(rf);
-      // console.log('Success', ' rf : ',rf?.data.attributes.duree);
-      // Alert.alert('🎉 Success! 🎉',
-      // '✅ Reservation created successfully!',
-      // [{ text: 'OK', onPress: () => {handleDateSelect3()} }],
-      // { cancelable: false });
-      // closeModal3();
+  const handleChildrenChange = (text) => {
+    const num = parseInt(text, 10);
+    if (!isNaN(num) && num >= 0) {
+      setNbr_voyageurs_enfants(num);
+    } else {
+      setNbr_voyageurs_enfants(0);
     }
-  } catch (error) {
+  };
+  const handleDureeChange = (text) => {
+    const num = parseInt(text, 10);
+    if (!isNaN(num) && num >= 0) {
+      setDuree(num);
+    } else {
+      setDuree(0);
+    }
+  };
+
+  useEffect(() => {
+    if (datafetch?.attributes?.pay?.data?.attributes?.label) {
+      setDestination(datafetch.attributes.pay.data.attributes.label);
+    }
+  }, [datafetch]);
+
+  const onChangeDate = (event, selectedDate) => {
+    const currentDate = selectedDate || date_partir;
+    setShowDatePicker(false);
+    setDate_partir(currentDate);
+  };
+
+  const formatDate = (date) => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleSubmit = async () => {
+    const refRS = new Date();
+    const refRSInSeconds = Math.floor(refRS.getTime() / 1000);
+    const reservationData = {
+      reference: 'REFRS' + refRSInSeconds + 'MN4',
+      destination: destination,
+      nbr_voyageurs_enfants: nbr_voyageurs_enfants,
+      nbr_voyageurs_adultes: nbr_voyageurs_adultes,
+      pourquoi_voyagez_vous: pourquoi_voyagez_vous,
+      date_partir: date_partir,
+      date_fixe: date_fixe,
+      duree: duree,
+      duree_modifiable: duree_modifiable,
+      categorie_hebergement: categorie_hebergement,
+      cabine: cabine,
+      experience_souhaitez: experience_souhaitez,
+      offre: itemId,
+      user: userDC.id,
+      status: false,
+      etat: "enAttente"
+
+    };
+
+
+
+    try {
+      const response = await axios.post(`${URL_BACKEND}/api/reservations`, {
+        data: reservationData,
+      });
+      // console.log('Success', 'Reservation created successfully!', response.data);
+      Alert.alert('🎉 Success! 🎉',
+        '✅ Reservation created successfully!',
+        [{ text: 'OK', onPress: () => { handleDateSelect3() } }],
+        { cancelable: false });
+
+      setTimeout(async () => {
+        try {
+          if (response) {
+            const resID = response?.data.data.id;
+            const responseRs = await axios.get(`${URL_BACKEND}/api/reservations/${resID}?populate=*&pagination[limit]=-1`);
+            const rf = responseRs.data;
+            const ref = new Date();
+            const refInSeconds = Math.floor(ref.getTime() / 1000);
+            const factureData = {
+              reference: 'REF' + refInSeconds + 'LP9',
+              prixTotal: Number(rf?.data.attributes.offre?.data?.attributes.prix * (rf?.data.attributes.nbr_voyageurs_enfants + rf?.data.attributes.nbr_voyageurs_adultes + rf?.data.attributes.duree)),
+              reservation: resID,
+              status: false
+            };
+
+            const responsefacture = await axios.post(`${URL_BACKEND}/api/factures`, {
+              data: factureData,
+            });
+            // console,log(rf);
+            // console.log('Success', ' rf : ',rf?.data.attributes.duree);
+            // Alert.alert('🎉 Success! 🎉',
+            // '✅ Reservation created successfully!',
+            // [{ text: 'OK', onPress: () => {handleDateSelect3()} }],
+            // { cancelable: false });
+            // closeModal3();
+          }
+        } catch (error) {
+          console.log('Error', error.response?.data || error.message);
+        }
+      }, 500);
+
+
+
+    } catch (error) {
       console.log('Error', error.response?.data || error.message);
     }
-    }, 500);
-    
+
+  };
+  const handleSubmit1 = () => {
+    // Handle form submission
+    console.log('Form Data Submitted ---:');
+    // Here you can send formData to your server
+  };
+  const [options, setOptions] = useState([
+    { label: 'Hôtel 4 etoils', value: false, star: 4 },
+    { label: 'Hôtel 5 etoils', value: false, star: 5 },
+    { label: 'Hôtel de luxe', value: false },
+    { label: 'Un Resort', value: false },
+    { label: 'Un ecolodge', value: false },
+    // Add more options as needed
+  ]);
+  const [options1, setOptions1] = useState([
+    { label: 'Économique', value: false },
+    { label: 'Business', value: false },
+    // Add more options as needed
+  ]);
+  const [options2, setOptions2] = useState([
+    { label: 'Culturelle', value: false },
+    { label: 'Nature', value: false },
+    { label: 'Foodie', value: false },
+    { label: 'Shopping', value: false },
+    { label: 'Romantique', value: false },
+    { label: 'Spa', value: false },
+
+    { label: 'Soleil', value: false },
+    { label: 'Fête', value: false },
+    { label: 'Famille', value: false },
+    { label: 'Luxe', value: false },
+    { label: 'Casino', value: false },
+    { label: 'Plage', value: false },
+
+    // Add more options as needed
+  ]);
 
 
-  } catch (error) {
-    console.log('Error', error.response?.data || error.message);
-  }
-  
-};
-const handleSubmit1 = () => {
-  // Handle form submission
-  console.log('Form Data Submitted ---:');
-  // Here you can send formData to your server
-};
-const [options, setOptions] = useState([
-  { label: 'Hôtel 4 etoils', value: false ,star:4},
-  { label: 'Hôtel 5 etoils', value: false ,star:5},
-  { label: 'Hôtel de luxe', value: false },
-  { label: 'Un Resort', value: false },
-  { label: 'Un ecolodge', value: false },
-  // Add more options as needed
-]);
-const [options1, setOptions1] = useState([
-  { label: 'Économique', value: false },
-  { label: 'Business', value: false },
-  // Add more options as needed
-]);
-const [options2, setOptions2] = useState([
-  { label: 'Culturelle', value: false },
-  { label: 'Nature', value: false },
-  { label: 'Foodie', value: false },
-  { label: 'Shopping', value: false },
-  { label: 'Romantique', value: false },
-  { label: 'Spa', value: false },
-  
-  { label: 'Soleil', value: false },
-  { label: 'Fête', value: false },
-  { label: 'Famille', value: false },
-  { label: 'Luxe', value: false },
-  { label: 'Casino', value: false },
-  { label: 'Plage', value: false },
+  // useEffect(() => {
+  //   console.log(categorie_hebergement);
+  // }, [categorie_hebergement]);
+  // useEffect(() => {
+  //   console.log(cabine);
+  // }, [cabine]);
 
-  // Add more options as needed
-]);
-
-
-// useEffect(() => {
-//   console.log(categorie_hebergement);
-// }, [categorie_hebergement]);
-// useEffect(() => {
-//   console.log(cabine);
-// }, [cabine]);
-
-const toggleOption = (index) => {
-  const updatedOptions = options.map((option, i) => {
-    if (i === index) {
-      setCategorie_hebergement(option.label);
-      return { ...option, value: !option.value };
-    } else {
-      return { ...option, value: false };
+  const toggleOption = (index) => {
+    const updatedOptions = options.map((option, i) => {
+      if (i === index) {
+        setCategorie_hebergement(option.label);
+        return { ...option, value: !option.value };
+      } else {
+        return { ...option, value: false };
+      }
+    });
+    setOptions(updatedOptions);
+  };
+  const toggleOption1 = (index) => {
+    const updatedOptions = options1.map((option, i) => {
+      if (i === index) {
+        setCabine(option.label);
+        return { ...option, value: !option.value };
+      } else {
+        return { ...option, value: false };
+      }
+    });
+    setOptions1(updatedOptions);
+  };
+  const renderStars = (star) => {
+    const stars = [];
+    for (let i = 0; i < star; i++) {
+      stars.push(<Text key={i}>⭐</Text>);
     }
-  });
-  setOptions(updatedOptions);
-};
-const toggleOption1 = (index) => {
-  const updatedOptions = options1.map((option, i) => {
-    if (i === index) {
-      setCabine(option.label);
-      return { ...option, value: !option.value };
-    } else {
-      return { ...option, value: false };
-    }
-  });
-  setOptions1(updatedOptions);
-};
-const renderStars = (star) => {
-  const stars = [];
-  for (let i = 0; i < star; i++) {
-    stars.push(<Text key={i}>⭐</Text>);
-  }
-  return stars;
-};
-const toggleOption2 = (index) => {
-  const updatedOptions = options2.map((option, i) => {
-    if (i === index) {
-      return { ...option, value: !option.value };
-    }
-    return option;
-  });
-  setOptions2(updatedOptions);
+    return stars;
+  };
+  const toggleOption2 = (index) => {
+    const updatedOptions = options2.map((option, i) => {
+      if (i === index) {
+        return { ...option, value: !option.value };
+      }
+      return option;
+    });
+    setOptions2(updatedOptions);
 
-  const selectedLabels = updatedOptions
-    .filter(option => option.value)
-    .map(option => option.label)
-    .join(', ');
+    const selectedLabels = updatedOptions
+      .filter(option => option.value)
+      .map(option => option.label)
+      .join(', ');
 
-  setExperience_souhaitez(selectedLabels);
-};
-// useEffect(() => {
-//   console.log(experience_souhaitez);
-// }, [experience_souhaitez]);
+    setExperience_souhaitez(selectedLabels);
+  };
+  // useEffect(() => {
+  //   console.log(experience_souhaitez);
+  // }, [experience_souhaitez]);
 
-const videForm =()=>{
+  const videForm = () => {
     setReference('')
     setNbr_voyageurs_adultes(0)
     setNbr_voyageurs_enfants(0)
@@ -531,64 +518,64 @@ const videForm =()=>{
     setCabine('')
     setCategorie_hebergement('')
     setExperience_souhaitez('')
-    options.map((i)=>{
-      i.value=false
+    options.map((i) => {
+      i.value = false
     })
-    options1.map((i)=>{
-      i.value=false
+    options1.map((i) => {
+      i.value = false
     })
-    options2.map((i)=>{
-      i.value=false
+    options2.map((i) => {
+      i.value = false
     })
 
-};
+  };
 
-// const [currentIndex, setCurrentIndex] = useState(0);
-// const carouselRef = useRef(null);
+  // const [currentIndex, setCurrentIndex] = useState(0);
+  // const carouselRef = useRef(null);
 
-// const handleIndexChange = (index) => {
-//   setCurrentIndex(index);
-// };
+  // const handleIndexChange = (index) => {
+  //   setCurrentIndex(index);
+  // };
 
-// const handlePrev = () => {
-//   if (carouselRef.current && currentIndex > 0) {
-//     carouselRef.current.scrollTo({ index: currentIndex - 1 });
-//   }
-// };
+  // const handlePrev = () => {
+  //   if (carouselRef.current && currentIndex > 0) {
+  //     carouselRef.current.scrollTo({ index: currentIndex - 1 });
+  //   }
+  // };
 
-// const handleNext = () => {
-//   if (carouselRef.current) {
-//     carouselRef.current.scrollTo({ index: currentIndex + 1 });
-//   }
-// };
+  // const handleNext = () => {
+  //   if (carouselRef.current) {
+  //     carouselRef.current.scrollTo({ index: currentIndex + 1 });
+  //   }
+  // };
 
-const slideInDownCustom = {
-  0: {
-    translateY: 0,
-  },
-  0.25: {
+  const slideInDownCustom = {
+    0: {
+      translateY: 0,
+    },
+    0.25: {
       translateY: -20,
-  },
-  0.5: {
+    },
+    0.5: {
       translateY: 0,
-  },
-  0.75: {
+    },
+    0.75: {
       translateY: -10,
-  },
-  1: {
+    },
+    1: {
       translateY: 0,
-  },
-};
-const fadeInSlideUp = {
-  from: {
+    },
+  };
+  const fadeInSlideUp = {
+    from: {
       opacity: 0,
       translateY: 20,
-  },
-  to: {
+    },
+    to: {
       opacity: 1,
       translateY: 0,
-  },
-};
+    },
+  };
 
 
   return (
@@ -642,75 +629,75 @@ const fadeInSlideUp = {
           </View>
 
           <Text style={styles.description}>{datafetch?.attributes.description}</Text>
-          <Animatable.View animation={slideInDownCustom} iterationCount="infinite" direction="alternate">
+          <Animatable.View >
             <TouchableOpacity style={[styles.stImage, { justifyContent: 'center', alignItems: 'center', marginTop: 50 }]} onPress={openModal1}>
-              <Text style={{color:'#fff',fontSize:12}}>Voir le planning</Text>
+              <Text style={{ color: '#fff', fontSize: 12 }}>Voir le planning</Text>
               <FontAwesome name="chevron-down" size={24} color="white" />
               {/* <AntDesign name="down" size={24} color="white" /> */}
             </TouchableOpacity>
           </Animatable.View>
-          <View style={{width:"100%",height:400,marginTop:40,borderRadius:20,overflow: 'hidden',marginBottom:18}}>
-            <MapView style={styles.map} 
-            ref={mapRef}
-            showsUserLocation
-            showsMyLocationButton
-            provider={PROVIDER_GOOGLE}
-            initialRegion={INITIAL_REGION}
-            clusterColor='#fff'
-            clusterTextColor='#000'
-      >
-            <Marker
-            
+          <View style={{ width: "100%", height: 400, marginTop: 40, borderRadius: 20, overflow: 'hidden', marginBottom: 18 }}>
+            <MapView style={styles.map}
+              ref={mapRef}
+              showsUserLocation
+              showsMyLocationButton
+              provider={PROVIDER_GOOGLE}
+              initialRegion={INITIAL_REGION}
+              clusterColor='#fff'
+              clusterTextColor='#000'
+            >
+              <Marker
+
                 key={datafetch?.id}
                 coordinate={{
-                    latitude: +datafetch?.attributes.latitude,
-                    longitude: +datafetch?.attributes.longitude
+                  latitude: +datafetch?.attributes.latitude,
+                  longitude: +datafetch?.attributes.longitude
                 }}
-            >
+              >
                 <View style={styles.marker}>
-                    <MaterialIcons name="pin-drop" size={24} color="red" />
-                    <Text style={styles.markerText}>{datafetch?.attributes.pay?.data?.attributes.label}</Text>
+                  <MaterialIcons name="pin-drop" size={24} color="red" />
+                  <Text style={styles.markerText}>{datafetch?.attributes.pay?.data?.attributes.label}</Text>
                 </View>
-          </Marker>
+              </Marker>
 
-      </MapView>
-      
+            </MapView>
+
           </View>
           <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "65%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { animateToRegion() }}>
             <Text style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Afficher sur la carte
             </Text>
           </TouchableOpacity>
 
-{/* 
+          {/* 
           
           <View style={{ height: 300, backgroundColor: '#222' }}>
             <Text></Text>
           </View> */}
         </View>
-{/* <Button title='press' onPress={handleSubmit}/> */}
+        {/* <Button title='press' onPress={handleSubmit}/> */}
       </ScrollView>
 
+      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible1}
+          onRequestClose={closeModal1}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Animatable.View>
+                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect1()}>
+                  <FontAwesome name="chevron-up" size={20} color="white" />
+                </TouchableOpacity>
+              </Animatable.View>
+              <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                <Text style={{ color: '#fff', fontWeight: '500', fontSize: 13 }}>Votre voyage, jour apres jour</Text>
+              </View>
+              <View style={{ height: "75%" }}>
 
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible1}
-        onRequestClose={closeModal1}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Animatable.View animation={fadeInSlideUp} iterationCount="infinite" direction="alternate">
-              <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect1()}>
-                <FontAwesome name="chevron-up" size={20} color="white" />
-              </TouchableOpacity>
-            </Animatable.View>
-            <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-              <Text style={{ color: '#fff', fontWeight: '500', fontSize: 13 }}>Votre voyage, jour apres jour</Text>
-            </View>
-            <View style={{ height: "75%" }}>
 
-
-              <Carousel 
+                <Carousel
                   style={{ width: "100%", height: "100%" }}
                   ref={outerCarouselRef}
                   // onIndexChanged={handleIndexChange}
@@ -733,27 +720,27 @@ const fadeInSlideUp = {
                   activeDotStyle={styles.hidden}
                   scrollEnabled={false}
 
-                  // activeDotStyle={[styles.controlsButtonStyle1,{backgroundColor:'#fff'}]}
+                // activeDotStyle={[styles.controlsButtonStyle1,{backgroundColor:'#fff'}]}
                 >
                   {datafetchPlanning?.map((item, index) => (
                     <View key={index} style={{ width: '100%', height: "100%" }}>
 
-                  <Carousel 
-                    style={{ width: '100%', height: '100%' }}
-                    controlsButtonStyle={styles.hidden}
-                    dotStyle={[styles.controlsButtonStyle2]}
-                    activeDotStyle={[styles.controlsButtonStyle2, {backgroundColor:'#fff'}]}
-                    scrollEnabled={true}
-                  >
-                    {item.attributes.photos?.data.map((photo, photoIndex) => (
-                      <ImageBackground 
-                        key={photoIndex}
-                        source={{ uri: photo.attributes.url }} 
-                        style={styles.imageOffre} 
-                        imageStyle={{ borderRadius: 20, height: "100%" }}
+                      <Carousel
+                        style={{ width: '100%', height: '100%' }}
+                        controlsButtonStyle={styles.hidden}
+                        dotStyle={[styles.controlsButtonStyle2]}
+                        activeDotStyle={[styles.controlsButtonStyle2, { backgroundColor: '#fff' }]}
+                        scrollEnabled={true}
                       >
+                        {item.attributes.photos?.data.map((photo, photoIndex) => (
+                          <ImageBackground
+                            key={photoIndex}
+                            source={{ uri: photo.attributes.url }}
+                            style={styles.imageOffre}
+                            imageStyle={{ borderRadius: 20, height: "100%" }}
+                          >
 
-                      {/* {item.attributes.photos?.data.map((i)=>(
+                            {/* {item.attributes.photos?.data.map((i)=>(
                         <Image source={{uri: i.attributes.url}} style={{width:100,height:100}}/>
                       ))}
                       <ImageBackground 
@@ -761,141 +748,144 @@ const fadeInSlideUp = {
                         style={styles.imageOffre} 
                         imageStyle={{ borderRadius: 20, height: "100%" }}> */}
 
-                        <View style={styles.shadowOverlay}>
-                          <View style={{ marginLeft: 15, backgroundColor: '#74D0F8', borderRadius: 8, padding: 5, width: "25%", alignItems: 'center', justifyContent: 'center', marginTop: 15}}>
-                              <Text style={{ color: '#fff', fontWeight: '600' }}> Jour {item?.attributes.jourNumero}</Text>
-                          </View>
-                        </View>
-                        <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
-                            
-                          <View style={{ flex: 1, justifyContent: 'space-between', }}>
-                            
-                            <View style={{ width: "50%", marginLeft: 15 }}>
-                              <Text style={{ fontSize: 16, fontWeight: '900', color: '#fff', }}>{item?.attributes.titre}</Text>
+                            <View style={styles.shadowOverlay}>
+                              <View style={{ marginLeft: 15, backgroundColor: '#74D0F8', borderRadius: 8, padding: 5, width: "25%", alignItems: 'center', justifyContent: 'center', marginTop: 15 }}>
+                                <Text style={{ color: '#fff', fontWeight: '600' }}> Jour {item?.attributes.jourNumero}</Text>
+                              </View>
                             </View>
-                            <View style={{ width: "90%", marginLeft: 15, marginTop: 10 }}>
-                              <Text style={{ fontSize: 13, fontWeight: '500', color: '#fff', }}>{item?.attributes.description}</Text>
-                            </View>
-                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                              <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelectProgramme(item?.id)}}>
-                                <Animatable.Text animation="zoomIn" iterationCount="infinite" direction="alternate" style={{ color: '#fff', fontWeight: '600' }}>Voir programme
-                                </Animatable.Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
+                            <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
 
-                        </View>
+                              <View style={{ flex: 1, justifyContent: 'space-between', }}>
 
-                      </ImageBackground>
-                      ))}
-                    </Carousel>
+                                <View style={{ width: "50%", marginLeft: 15 }}>
+                                  <Text style={{ fontSize: 16, fontWeight: '900', color: '#fff', }}>{item?.attributes.titre}</Text>
+                                </View>
+                                <View style={{ width: "90%", marginLeft: 15, marginTop: 10 }}>
+                                  <Text style={{ fontSize: 13, fontWeight: '500', color: '#fff', }}>{item?.attributes.description}</Text>
+                                </View>
+                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                  <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "55%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelectProgramme(item?.id) }}>
+                                    <Animatable.Text style={{ color: '#fff', fontWeight: '600' }}>Voir programme
+                                    </Animatable.Text>
+                                  </TouchableOpacity>
+                                </View>
+                              </View>
+
+                            </View>
+
+                          </ImageBackground>
+                        ))}
+                      </Carousel>
                     </View>
                   ))}
-                  
-              </Carousel>
+
+                </Carousel>
 
 
-            </View>
-            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 18 }}>
-            <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 5, width: "75%", alignItems: 'center', justifyContent: 'center', marginBottom: 20 }} onPress={() => { openModal3() }}>
-              <Animatable.Text animation="flash" iterationCount="infinite" direction="alternate" style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Préparez votre départ !
-              </Animatable.Text>
-            </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-      </Modal>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible2}
-        onRequestClose={closeModal2}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect2()}>
-              <AntDesign name="close" size={24} color="white" />
-            </TouchableOpacity>
-            <ScrollView
-            contentContainerStyle={styles.contentContainer}
-            >
-              {datafetchProgramme?.map((item, index) => {
-                const isLastItem = index === datafetchProgramme.length - 1;
-                return (
-                  <View key={index} style={{padding:20,justifyContent:'center',alignContent:'center',alignItems:'center'}}>
-                    <Image source={{uri: item?.attributes.photos?.data[0]?.attributes.url}} style={{height:140,width:"100%",borderRadius:20,marginBottom:10}}/>
-                    <Text style={{color:'#fff',alignItems:'center',textAlign:'center',marginBottom:8}}>{item?.attributes.heure}</Text>
-                    <Text style={{color:'#fff',alignItems:'center',textAlign:'center'}}>{item?.attributes.description}</Text>
-                    {!isLastItem && (
-                      <View style={{justifyContent:'center',alignItems:'center',padding:1,height:50,backgroundColor:'#fff'}}></View>
-                    )}
-                  </View>
-                );
-              })}
-              <View style={{justifyContent: 'center',alignItems: 'center'}}>
-                
-              <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "50%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelect2() }}>
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Super, Merci!
-                </Text>
-              </TouchableOpacity>
               </View>
-            </ScrollView>
+              <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 18 }}>
+                <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 5, width: "75%", alignItems: 'center', justifyContent: 'center', marginBottom: 20 }} onPress={() => { openModal3() }}>
+                  <Animatable.Text style={{ color: '#000', fontWeight: '700', fontSize: 18 }}>Préparez votre départ !
+                  </Animatable.Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
-      </Modal>
 
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible3}
-        onRequestClose={closeModal3}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalViewRs}>
-          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect3()}>
-              <FontAwesome name="chevron-up" size={20} color="white" />
-            </TouchableOpacity>
-            <ProgressSteps>
-              <ProgressStep label='Step 1'>
-                <Text style={styles.inputText}>Destination</Text>
-                
+        </Modal>
+      </View>
+      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible2}
+          onRequestClose={closeModal2}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect2()}>
+                <AntDesign name="close" size={24} color="white" />
+              </TouchableOpacity>
+              <ScrollView
+                contentContainerStyle={styles.contentContainer}
+              >
+                {datafetchProgramme?.map((item, index) => {
+                  const isLastItem = index === datafetchProgramme.length - 1;
+                  return (
+                    <View key={index} style={{ padding: 20, justifyContent: 'center', alignContent: 'center', alignItems: 'center' }}>
+                      <Image source={{ uri: item?.attributes.photos?.data[0]?.attributes.url }} style={{ height: 140, width: "100%", borderRadius: 20, marginBottom: 10 }} />
+                      <Text style={{ color: '#fff', alignItems: 'center', textAlign: 'center', marginBottom: 8 }}>{item?.attributes.heure}</Text>
+                      <Text style={{ color: '#fff', alignItems: 'center', textAlign: 'center' }}>{item?.attributes.description}</Text>
+                      {!isLastItem && (
+                        <View style={{ justifyContent: 'center', alignItems: 'center', padding: 1, height: 50, backgroundColor: '#fff' }}></View>
+                      )}
+                    </View>
+                  );
+                })}
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+
+                  <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "50%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { handleDateSelect2() }}>
+                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Super, Merci!
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      </View>
+      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible3}
+          onRequestClose={closeModal3}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalViewRs}>
+              <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect3()}>
+                <FontAwesome name="chevron-up" size={20} color="white" />
+              </TouchableOpacity>
+              <ProgressSteps>
+                <ProgressStep label='Step 1'>
+                  <Text style={styles.inputText}>Destination</Text>
+
                   <TextInput
-                  placeholder="Destination"
-                  value={destination}
-                  onChangeText={setDestination}
-                  style={styles.inputView}
-                  readOnly={true}
-                />
-                
-                <Text style={styles.inputText}>Nombre de voyageurs adultes</Text>
-                <TextInput
-                  value={nbr_voyageurs_adultes.toString()}
-                  onChangeText={handleAdultChange}
-                  style={styles.inputView}
-                  keyboardType="numeric"
-                />
-                <Text style={styles.inputText}>Nombre d’enfants</Text>
-                <TextInput
-                  value={nbr_voyageurs_enfants.toString()}
-                  onChangeText={handleChildrenChange}
-                  style={styles.inputView}
-                  keyboardType="numeric"
-                />
-              </ProgressStep>
-              <ProgressStep label='Step 2'>
-              <Text style={styles.inputText}>Pourquoi voyagez-vous ?</Text>
-                
-                <TextInput
-                placeholder="Aventure, Culture, détente …"
-                value={pourquoi_voyagez_vous}
-                onChangeText={setPourquoi_voyagez_vous}
-                style={styles.inputView}
-              />
-              
-              <Text style={styles.inputText}>Quand souhaitez-vous partir ?</Text>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputView}>
-                <Text>{formatDate(date_partir)}</Text>
+                    placeholder="Destination"
+                    value={destination}
+                    onChangeText={setDestination}
+                    style={styles.inputView}
+                    readOnly={true}
+                  />
+
+                  <Text style={styles.inputText}>Nombre de voyageurs adultes</Text>
+                  <TextInput
+                    value={nbr_voyageurs_adultes.toString()}
+                    onChangeText={handleAdultChange}
+                    style={styles.inputView}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.inputText}>Nombre d’enfants</Text>
+                  <TextInput
+                    value={nbr_voyageurs_enfants.toString()}
+                    onChangeText={handleChildrenChange}
+                    style={styles.inputView}
+                    keyboardType="numeric"
+                  />
+                </ProgressStep>
+                <ProgressStep label='Step 2'>
+                  <Text style={styles.inputText}>Pourquoi voyagez-vous ?</Text>
+
+                  <TextInput
+                    placeholder="Aventure, Culture, détente …"
+                    value={pourquoi_voyagez_vous}
+                    onChangeText={setPourquoi_voyagez_vous}
+                    style={styles.inputView}
+                  />
+
+                  <Text style={styles.inputText}>Quand souhaitez-vous partir ?</Text>
+                  <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputView}>
+                    <Text>{formatDate(date_partir)}</Text>
                   </TouchableOpacity>
                   {showDatePicker && (
                     <DateTimePicker
@@ -905,91 +895,95 @@ const fadeInSlideUp = {
                       onChange={onChangeDate}
                     />
                   )}
-              <View style={{flexDirection:'row',alignItems:'center'}}>  
-              <Switch
-                value={date_fixe}
-                onValueChange={setDate_fixe}
-              />
-              <Text style={styles.inputTextSwitch}>Mes dates sont fixes</Text>
-              </View>  
-              <Text style={styles.inputText}>Quelle est la durée de votre séjour ?</Text>
-                <TextInput
-                  value={duree.toString()}
-                  onChangeText={handleDureeChange}
-                  style={styles.inputView}
-                  keyboardType="numeric"
-                />
-              <View style={{flexDirection:'row',alignItems:'center'}}>  
-              <Switch
-                value={duree_modifiable}
-                onValueChange={setDuree_modifiable}
-              />
-              <Text style={styles.inputTextSwitch}> durée de mon voyage est non modifiable</Text>
-              </View> 
-              </ProgressStep>
-              <ProgressStep label='Step 3'>
-              <Text style={styles.inputText}>Vous êtes intéressés par quelle catégorie d’hébergement ?</Text>
-              
-              {options.map((option, index) => (
-                <View key={index} style={{flexDirection:'row',alignItems:'center'}}>
-                  
-                  <Switch
-                    value={option.value}
-                    onValueChange={() => toggleOption(index)}
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Switch
+                      value={date_fixe}
+                      onValueChange={setDate_fixe}
+                    />
+                    <Text style={styles.inputTextSwitch}>Mes dates sont fixes</Text>
+                  </View>
+                  <Text style={styles.inputText}>Quelle est la durée de votre séjour ?</Text>
+                  <TextInput
+                    value={duree.toString()}
+                    onChangeText={handleDureeChange}
+                    style={styles.inputView}
+                    keyboardType="numeric"
                   />
-                  <Text style={styles.inputTextSwitch}>{option.label}</Text>
-                  <View style={styles.starContainer}>
-                    {renderStars(option?.star)}
-                  </View>
-                </View>
-              ))}
-              <Text style={styles.inputText}>Choix de cabine</Text>
-              <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',padding:10,margin:5}}>
-                {options1.map((option, index) => (
-                  <View key={index} style={{flexDirection:'row',alignItems:'center'}}>
-                    
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Switch
-                      value={option.value}
-                      onValueChange={() => toggleOption1(index)}
+                      value={duree_modifiable}
+                      onValueChange={setDuree_modifiable}
                     />
-                    <Text style={styles.inputTextSwitch}>{option.label}</Text>
+                    <Text style={styles.inputTextSwitch}> durée de mon voyage est non modifiable</Text>
                   </View>
-                ))}
-              </View>
-              
-              </ProgressStep>
-              <ProgressStep label='Step 4' onSubmit={handleSubmit}>
-              <Text style={styles.inputText}>Quelle expérience vous souhaitez vivre ?</Text>
-              <View style={{flexDirection: 'row',
-                            flexWrap: 'wrap',
-                            justifyContent: 'center',
-                            padding: 4,
-                            alignContent:'center',
-                            }}>
-                {options2.map((option, index) => (
-                  <View key={index} style={{flexDirection: 'row',
-                  alignItems: 'center',
-                  width: '45%', // Ensure two items per row
-                  marginBottom: 2.5}}>
-                    
-                    <Switch
-                      value={option.value}
-                      onValueChange={() => toggleOption2(index)}
-                    />
-                    <Text style={styles.inputTextSwitch}>{option.label}</Text>
-                  </View>
-                ))}
-              <Text style={[styles.inputText,{textAlign:'center'}]}>« cliquez pour sélectionner des expériences » Vous pouvez choisir plusieurs expériences</Text>
+                </ProgressStep>
+                <ProgressStep label='Step 3'>
+                  <Text style={styles.inputText}>Vous êtes intéressés par quelle catégorie d’hébergement ?</Text>
 
-              </View>
-              </ProgressStep>
-              {/* <ProgressStep label='Step 5' onSubmit={handleSubmit1}>
+                  {options.map((option, index) => (
+                    <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+
+                      <Switch
+                        value={option.value}
+                        onValueChange={() => toggleOption(index)}
+                      />
+                      <Text style={styles.inputTextSwitch}>{option.label}</Text>
+                      <View style={styles.starContainer}>
+                        {renderStars(option?.star)}
+                      </View>
+                    </View>
+                  ))}
+                  <Text style={styles.inputText}>Choix de cabine</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, margin: 5 }}>
+                    {options1.map((option, index) => (
+                      <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+
+                        <Switch
+                          value={option.value}
+                          onValueChange={() => toggleOption1(index)}
+                        />
+                        <Text style={styles.inputTextSwitch}>{option.label}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                </ProgressStep>
+                <ProgressStep label='Step 4' onSubmit={handleSubmit}>
+                  <Text style={styles.inputText}>Quelle expérience vous souhaitez vivre ?</Text>
+                  <View style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    padding: 4,
+                    alignContent: 'center',
+                  }}>
+                    {options2.map((option, index) => (
+                      <View key={index} style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        width: '45%', // Ensure two items per row
+                        marginBottom: 2.5
+                      }}>
+
+                        <Switch
+                          value={option.value}
+                          onValueChange={() => toggleOption2(index)}
+                        />
+                        <Text style={styles.inputTextSwitch}>{option.label}</Text>
+                      </View>
+                    ))}
+                    <Text style={[styles.inputText, { textAlign: 'center' }]}>« cliquez pour sélectionner des expériences » Vous pouvez choisir plusieurs expériences</Text>
+
+                  </View>
+                </ProgressStep>
+                {/* <ProgressStep label='Step 5' onSubmit={handleSubmit1}>
                 <Text style={{color:'#fff'}}>Step final</Text>
               </ProgressStep> */}
-            </ProgressSteps>
+              </ProgressSteps>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      </View>
     </View>
   );
 };
@@ -1036,7 +1030,7 @@ const styles = StyleSheet.create({
   controlsButtonStyle2: {
     bottom: 245,
     left: -125,
-    transform: [{translateX: -5}, {translateY: -5 }],
+    transform: [{ translateX: -5 }, { translateY: -5 }],
     width: 8,
     height: 8,
     margin: 3,
@@ -1062,7 +1056,7 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '100%',
-    borderRadius:20
+    borderRadius: 20
   },
   marker: {
     padding: 8,
@@ -1096,12 +1090,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10
   },
-  doStyle:{ 
+  doStyle: {
     width: 20,
     height: 2,
-    backgroundColor: 'silver', 
-    marginHorizontal: 3, 
-    borderRadius: 3 
+    backgroundColor: 'silver',
+    marginHorizontal: 3,
+    borderRadius: 3
   },
   container: {
     flex: 1,
@@ -1121,7 +1115,7 @@ const styles = StyleSheet.create({
 
   },
   infoContainer: {
-    width:"100%",
+    width: "100%",
     padding: 24,
     backgroundColor: '#222',
     justifyContent: 'center',
@@ -1225,13 +1219,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
+    width: Dimensions.get('window').width,
+
   },
   modalView: {
     position: 'absolute',
     top: 58,
     left: 20,
     right: 20,
-    height: "84%",
+    height: Dimensions.get('window').height * 0.8,
     backgroundColor: '#000',
     opacity: 1,
     borderRadius: 20,
@@ -1305,23 +1301,23 @@ const styles = StyleSheet.create({
     height: 50,
     padding: 10,
     color: '#000',
-    backgroundColor:'#e8f5e9',
-    marginBottom:11,
-    marginTop:10,
+    backgroundColor: '#e8f5e9',
+    marginBottom: 11,
+    marginTop: 10,
     justifyContent: 'center'
-    
+
   },
   inputText: {
-    fontSize:16,
+    fontSize: 16,
     color: 'white',
   },
-  inputTextSwitch:{
-    fontSize:14,
+  inputTextSwitch: {
+    fontSize: 14,
     color: 'white',
   },
   starContainer: {
     flexDirection: 'row',
-    marginLeft:5
+    marginLeft: 5
   },
 
   shadowContainer: {

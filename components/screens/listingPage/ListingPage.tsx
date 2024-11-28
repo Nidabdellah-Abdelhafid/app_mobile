@@ -350,8 +350,8 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
         renderItem={renderRow}
         data={loading ? [] : items}
         ref={listRef}
-        contentContainerStyle={{ paddingBottom: 120 }}
-        ListFooterComponent={<View style={{ height: 120 }} />}
+        contentContainerStyle={{ paddingBottom: 50 }}
+        ListFooterComponent={<View style={{ height: 50 }} />}
       />
     </View>
   );
@@ -368,18 +368,13 @@ const styles = StyleSheet.create({
     height: width * 0.21, // Maintain square aspect ratio
   },
   container: {
-    paddingLeft: width * 0.025,  // 2.5% of screen width
-    paddingRight: width * 0.025, // 2.5% of screen width
+    justifyContent:'center',
+    alignItems:'center',
     backgroundColor: '#222',
     marginVertical: height * 0.01, // 1% of screen height
   },
   listView: {
-    paddingLeft: width * 0.0125,   // 1.25% of screen width
-    paddingRight: width * 0.05,    // 5% of screen width
-    paddingBottom: height * 0.025, // 2.5% of screen height
-    paddingEnd: width * 0.05,      // 5% of screen width
-    paddingStart: width * 0.05,    // 5% of screen width
-    gap: height * 0.0125,          // 1.25% of screen height
+    paddingBottom: 25,          // 1.25% of screen height
   },
   image: {
     width: width * 0.93,    // 85% of screen width
