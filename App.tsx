@@ -1,5 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack'; // Using Stack from '@react-navigation/stack'
 import LoginScreen from './components/auth/LoginScreen';
 import { useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
@@ -9,19 +9,14 @@ import SplashScreen from 'components/splash/SplashScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import MainComponent from 'components/MainComponent';
-// import registerNNPushToken from 'native-notify';
-import {
-  configureReanimatedLogger,
-  ReanimatedLogLevel,
-} from 'react-native-reanimated';
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();  // Use createStackNavigator instead
 
 export default function App() {
-  // registerNNPushToken(21747, 'spLw6CdkKa0b9OuXBZH7ba');
   configureReanimatedLogger({
     level: ReanimatedLogLevel.warn,
-    strict: false, // Reanimated runs in strict mode by default
+    strict: false,
   });
 
   const [user, setUser] = useState<User | null>(null);
@@ -43,36 +38,30 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <NavigationContainer>
           {user ? (
-            <Stack.Navigator
-              initialRouteName="MainComponent"
-              id="MainComponent" // Added the id prop here
-            >
-              <Stack.Screen 
-                name="MainComponent" 
-                component={MainComponent} 
-                options={{ headerShown: false }} 
-                initialParams={{ user: user?.email }} 
+            <Stack.Navigator initialRouteName="MainComponent">
+              <Stack.Screen
+                name="MainComponent"
+                component={MainComponent}
+                options={{ headerShown: false }}
+                initialParams={{ user: user?.email || '' }}
               />
             </Stack.Navigator>
           ) : (
-            <Stack.Navigator
-              initialRouteName="SplashScr"
-              id="authNavigator" // Added the id prop here as well
-            >
-              <Stack.Screen 
-                name="SplashScr" 
-                component={SplashScreen} 
-                options={{ headerShown: false }} 
+            <Stack.Navigator initialRouteName="SplashScr">
+              <Stack.Screen
+                name="SplashScr"
+                component={SplashScreen}
+                options={{ headerShown: false }}
               />
-              <Stack.Screen 
-                name="LoginScreen" 
-                component={LoginScreen} 
-                options={{ headerShown: false }} 
+              <Stack.Screen
+                name="LoginScreen"
+                component={LoginScreen}
+                options={{ headerShown: false }}
               />
-              <Stack.Screen 
-                name="RegisterScreen" 
-                component={RegisterScreen} 
-                options={{ headerShown: false }} 
+              <Stack.Screen
+                name="RegisterScreen"
+                component={RegisterScreen}
+                options={{ headerShown: false }}
               />
             </Stack.Navigator>
           )}

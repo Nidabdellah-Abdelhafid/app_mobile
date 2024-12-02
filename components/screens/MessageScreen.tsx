@@ -133,7 +133,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const handleFilePicker = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({}); // Call to get document asynchronously
-      console.log("doc : ", result.assets[0].mimeType);
+      // console.log("doc : ", result.assets[0].mimeType);
       setSelectedFile(result.assets[0]); 
 
     } catch (error) {

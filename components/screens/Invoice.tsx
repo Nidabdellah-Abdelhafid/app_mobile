@@ -39,7 +39,6 @@ const Invoice = () => {
     return (
         <View style={styles.container}>
 
-        <View style={{ }}>
         <ScrollView  
           ref={scrollViewRef} 
           contentContainerStyle={{ paddingBottom: 25 }}
@@ -171,7 +170,6 @@ const Invoice = () => {
             <FontAwesome name="angle-double-down" size={30} color="#666" />
           </TouchableOpacity>
         )}
-        </View>
         <View style={[styles.inputContainer]}>
         
         <TouchableOpacity onPress={()=>{}} style={{ marginRight: 10 }}>
@@ -266,7 +264,7 @@ const styles = StyleSheet.create({
       },
     scrollToBottomButton: {
         position: 'absolute',
-        bottom: 20, // Reduced from 80 to ensure it's closer to the screen bottom
+        bottom: 100, // Reduced from 80 to ensure it's closer to the screen bottom
         right: 20,
         backgroundColor: 'rgba(255, 255, 255, 0.7)', // Red background for visibility
         borderRadius: 30,

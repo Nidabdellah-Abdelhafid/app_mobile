@@ -78,42 +78,7 @@ const ListingMapPage = ({ navigation, listing, category }: Props) => {
 
   return (
     <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        onPress={closeModal}
-        showsUserLocation
-        showsMyLocationButton
-        provider={PROVIDER_GOOGLE}
-        initialRegion={INITIAL_REGION}
-        clusterColor="#fff"
-        clusterTextColor="#000"
-      >
-        <Marker
-          coordinate={{
-            latitude: 33.58831,
-            longitude: -7.61138,
-          }}
-          title="Debug Marker"
-        />
-        {listing?.map((item) => (
-          <Marker
-            onPress={() => onMarketSelected(item)}
-            key={item.id}
-            coordinate={{
-              latitude: +item?.attributes.latitude,
-              longitude: +item?.attributes.longitude,
-            }}
-          >
-            {/* Custom Marker View */}
-            <View style={styles.marker}>
-              <MaterialIcons name="pin-drop" size={24} color="red" />
-              <Text style={styles.markerText}>{item?.attributes.label}</Text>
-            </View>
-          </Marker>
-        ))}
-      </MapView>
-
+     
 
       {/* Zoom Buttons */}
       <View style={styles.zoomContainer}>

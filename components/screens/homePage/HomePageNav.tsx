@@ -1,11 +1,11 @@
 import { View, StyleSheet } from "react-native";
 import React, { useEffect } from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from '@react-navigation/stack';
 import HomePage from "./HomePage";
 import DetailPage from "../listingPage/DetailPage";
 import DetailOffre from "../listingPage/DetailOffre";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const HomePageNav = ({ route, navigation }) => {
   const { user, searchQuery } = route.params || {};
@@ -20,7 +20,7 @@ const HomePageNav = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName="HomePage">
         <Stack.Screen
           name="HomePage"
           component={HomePage}

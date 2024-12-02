@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ListRenderItem, TouchableOpacity, Modal, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ListRenderItem, TouchableOpacity, Modal, Image, Dimensions, RefreshControl, Platform, TouchableHighlight } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Ionicons, Fontisto } from '@expo/vector-icons';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
@@ -31,7 +31,6 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
   const [title, setTitle] = useState('');
   const [enregetrer, setEnregetrer] = useState(null);
   const [idPays, setIdPays] = useState(null);
-
 
   useEffect(() => {
     fetchUserData();
@@ -277,6 +276,19 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
       </TouchableOpacity>
     );
   };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Add any code here to fetch or reload the data
+      await fetchUserData(); // This is an example, adjust as per your data needs.
+      setRefreshing(false);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      setRefreshing(false); // Stop the loading state in case of error
+    }
+  };
+
   const renderRow: ListRenderItem<any> = ({ item }) => (
     <TouchableOpacity onPress={() => navigation.navigate('DetailPage', { itemId: item?.id })}>
       <Animated.View style={styles.listView} entering={FadeInRight} exiting={FadeOutLeft}>
@@ -352,6 +364,9 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
         ref={listRef}
         contentContainerStyle={{ paddingBottom: 50 }}
         ListFooterComponent={<View style={{ height: 50 }} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       />
     </View>
   );

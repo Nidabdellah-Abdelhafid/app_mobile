@@ -1,4 +1,3 @@
-// BottomSheetComponent.js
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Modal, Image, ScrollView, PanResponder, TouchableOpacity, ImageBackground, Button, TextInput, FlatList, TouchableWithoutFeedback } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,7 +7,6 @@ import SettingsScreen from './screens/SettingsScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FontAwesome5, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
-// import { TouchableOpacity } from 'react-native-gesture-handler';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { SvgUri } from 'react-native-svg';
 import { MaterialIcons, FontAwesome6 } from '@expo/vector-icons';
@@ -18,6 +16,7 @@ import MessageScreen from './screens/MessageScreen';
 import Invoice from './screens/Invoice';
 import * as Animatable from 'react-native-animatable';
 import { URL_BACKEND } from 'api';
+
 const Tab = createBottomTabNavigator();
 
 const CustonTabbarButton = ({ children, onPress }) => (
@@ -320,7 +319,7 @@ const BottomSheetComponent = ({ user }) => {
             clearSearchQuery();
           }} style={styles.upBtn}>
 
-            <Animatable.View animation={slideInDownCustom} iterationCount="infinite" direction="alternate">
+            <Animatable.View >
               <FontAwesome5 name="angle-double-up" size={24} color="white" />
             </Animatable.View>
           </TouchableOpacity>
@@ -334,6 +333,7 @@ const BottomSheetComponent = ({ user }) => {
 
           >
             <Tab.Navigator
+            id='tabId'
               screenOptions={{
                 tabBarLabelPosition: "below-icon",
                 tabBarShowLabel: false,
@@ -342,7 +342,6 @@ const BottomSheetComponent = ({ user }) => {
                 tabBarInactiveBackgroundColor: '#222',
                 tabBarStyle: { height: 58, backgroundColor: '#222' },
               }}
-              id='tabId'
             >
               <Tab.Screen name='Explorer' component={HomePageNav}
                 initialParams={{ user: user, searchQuery: searchQueryBtm }}

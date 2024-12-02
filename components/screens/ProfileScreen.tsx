@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Button, ActivityIndicator, Modal, ListRenderItem, ImageBackground } from "react-native";
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_AUTH, FIREBASE_DB } from "FirebaseConfig";
-import { NavigationProp, useIsFocused } from '@react-navigation/native';
+import { NavigationProp } from '@react-navigation/native';
 import { Ionicons, Fontisto, MaterialCommunityIcons, MaterialIcons, FontAwesome6 } from '@expo/vector-icons';
 import fileData from '../../assets/data/file.json';
 import { FlatList, TextInput } from "react-native-gesture-handler";
@@ -15,7 +15,6 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Card, Title, Paragraph } from 'react-native-paper';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
-import * as MailComposer from 'expo-mail-composer';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;

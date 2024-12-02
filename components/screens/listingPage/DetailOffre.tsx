@@ -637,7 +637,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
             </TouchableOpacity>
           </Animatable.View>
           <View style={{ width: "100%", height: 400, marginTop: 40, borderRadius: 20, overflow: 'hidden', marginBottom: 18 }}>
-            <MapView style={styles.map}
+            {/* <MapView style={styles.map}
               ref={mapRef}
               showsUserLocation
               showsMyLocationButton
@@ -660,7 +660,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
                 </View>
               </Marker>
 
-            </MapView>
+            </MapView> */}
 
           </View>
           <TouchableOpacity style={{ borderColor: '#fff', backgroundColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 10, width: "65%", alignItems: 'center', justifyContent: 'center', marginBottom: 50 }} onPress={() => { animateToRegion() }}>
