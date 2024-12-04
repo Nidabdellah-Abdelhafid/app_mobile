@@ -273,7 +273,7 @@ const DetailPage = ({ route, navigation }: RouterProps) => {
                     <Text style={{ fontSize: 10, fontWeight: '900', color: '#fff', textAlign: 'center' }}>{item?.attributes.label}</Text>
                   </View>
 
-                  <Animatable.View animation={lightSpeedOut} iterationCount="infinite" direction="alternate">
+                  <Animatable.View >
                     <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 1.5, borderRadius: 10, padding: 4, width: 110, alignItems: 'center', marginRight: 20, justifyContent: 'center', flexDirection: 'row' }} onPress={() => { navigation.navigate('DetailOffre', { itemId: item.id }) }}>
                       <Text style={{ color: '#fff', fontWeight: '600' }}>Voir l'Offre
                       </Text>
