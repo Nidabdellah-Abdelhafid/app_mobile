@@ -343,7 +343,7 @@ const BottomSheetComponent = ({ user }) => {
                 tabBarStyle: { height: 58, backgroundColor: '#222' },
               }}
             >
-              <Tab.Screen name='Explorer' component={HomePageNav}
+              <Tab.Screen name='HomePageNav' component={HomePageNav}
                 initialParams={{ user: user, searchQuery: searchQueryBtm }}
                 options={{
                   tabBarIcon: ({ color }) => (
