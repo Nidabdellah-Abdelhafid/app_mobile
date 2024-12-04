@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity, Modal, PanResponder, TextInput, FlatList, TouchableWithoutFeedback, Image } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { AntDesign } from '@expo/vector-icons';
 import { URL_BACKEND } from 'api';
+import { UsesContext } from 'components/Context/UsesContext';
 
 
 
@@ -13,7 +14,9 @@ export default function MainPage({ onSearchChanged }) {
 
     //
     const [searchQuery, setSearchQuery] = useState('');
+    
     const [searchInit, setSearchInit] = useState('');
+    const {search,setSearch} = useContext(UsesContext);
     const [hideSearch, setHideSearch] = useState(true);
     const [editable, setEditable] = useState(true);
     const [pays, setPays] = useState([]);
@@ -178,7 +181,7 @@ export default function MainPage({ onSearchChanged }) {
 
                 <View style={[styles.searchBar, searchQuery ? { marginBottom: 20 } : { marginBottom: 20 }]}>
                     {searchQuery &&
-                        <TouchableOpacity onPress={() => { onSearchChanged(searchInit), setSearchQuery(''), setHideSearch(true), setEditable(true) }}>
+                        <TouchableOpacity onPress={() => { setSearch(''), setSearchQuery(''), setHideSearch(true), setEditable(true) }}>
                             <Ionicons name="arrow-back-outline" size={20} color="#fff" />
                         </TouchableOpacity>
                     }

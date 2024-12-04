@@ -358,6 +358,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
   };
   return (
     <View style={styles.container}>
+      
       <FlatList
         renderItem={renderRow}
         data={loading ? [] : items}
@@ -368,6 +369,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       />
+      
     </View>
   );
 };

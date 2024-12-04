@@ -16,7 +16,7 @@ import MessageScreen from './screens/MessageScreen';
 import Invoice from './screens/Invoice';
 import * as Animatable from 'react-native-animatable';
 import { URL_BACKEND } from 'api';
-
+import  { UsesContext } from './Context/UsesContext';
 const Tab = createBottomTabNavigator();
 
 const CustonTabbarButton = ({ children, onPress }) => (
@@ -323,7 +323,7 @@ const BottomSheetComponent = ({ user }) => {
               <FontAwesome5 name="angle-double-up" size={24} color="white" />
             </Animatable.View>
           </TouchableOpacity>
-
+          
           <BottomSheetModal
             ref={bottomSheetModalRef}
             snapPoints={snapPoints}
@@ -444,6 +444,7 @@ const BottomSheetComponent = ({ user }) => {
 
             </Tab.Navigator>
           </BottomSheetModal>
+          
         </View>
         <Modal
           animationType="slide"

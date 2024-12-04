@@ -13,6 +13,7 @@ import ListingMapPage from "../listingPage/ListingMapPage";
 import ListingsBottomSheet from "../listingPage/ListingBottomSheet";
 import { URL_BACKEND } from "api";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { UsesContext } from "components/Context/UsesContext";
 
 interface Props {
   navigation: NavigationProp<any, any>;
@@ -139,6 +140,8 @@ const HomePage = ({ route, navigation }: Props) => {
 
   return (
     <View style={{ flex: 1 }}>
+
+      <UsesContext.Provider value={{search,setSearch}}>
       <ExploreHeader
         onCategoryChanged={onDataChange}
         onSearchChanged={onSearchChange}
@@ -164,6 +167,7 @@ const HomePage = ({ route, navigation }: Props) => {
         category={category}
         user={user}
       />
+      </UsesContext.Provider>
     </View>
   );
 };
