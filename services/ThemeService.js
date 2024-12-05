@@ -16,7 +16,6 @@ class ThemeService {
         return axios.get(`${URL_BACKEND}/api/themes/${theme_id}?populate=*&pagination[limit]=-1`);
     }
 
-
 }
 
 export default new ThemeService();

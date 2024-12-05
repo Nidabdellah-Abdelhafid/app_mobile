@@ -1,15 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Easing,
-  Text,
-  Modal,
-  Button,
-} from "react-native";
-import { NavigationProp, useFocusEffect } from "@react-navigation/native";
+import { View, StyleSheet, TouchableOpacity, Animated, Easing, Text, Modal, Button } from "react-native";
+import { NavigationProp } from "@react-navigation/native";
 import ExploreHeader from "components/headerCategories/ExploreHeader";
 import ListingMapPage from "../listingPage/ListingMapPage";
 import ListingsBottomSheet from "../listingPage/ListingBottomSheet";

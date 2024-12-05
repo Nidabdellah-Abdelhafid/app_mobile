@@ -18,6 +18,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import fileData from '../../../assets/data/file.json';
 import { URL_BACKEND } from "api";
 import * as Animatable from 'react-native-animatable';
+import PaysService from 'services/PaysService';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -31,17 +32,14 @@ const DetailPage = ({ route, navigation }: RouterProps) => {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [modalVisible1, setModalVisible1] = useState(false);
   const items = fileData;
-  const [modalVisible, setModalVisible] = useState(false);
   const [datafetch, setDatafetch] = useState(null);
-  const [datafetchOffre, setDatafetchOffre] = useState(null);
 
 
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${URL_BACKEND}/api/pays/${itemId}?populate=*&pagination[limit]=-1`);
+      const response = await PaysService.getPaysById(itemId);
       const data = await response.json();
-      // console.log('Result5:', data);
       setDatafetch(data.data);
 
     } catch (error) {
@@ -472,9 +470,9 @@ const styles = StyleSheet.create({
     opacity: 0.9
   },
   stImageModal: {
-    width: width * 0.43, 
-    height: height * 0.3, 
-    borderRadius: width * 0.02, 
+    width: width * 0.43,
+    height: height * 0.3,
+    borderRadius: width * 0.02,
   },
   centeredView: {
     flex: 1,
@@ -485,14 +483,14 @@ const styles = StyleSheet.create({
   },
   modalView: {
     position: 'absolute',
-    top: height * 0.01, 
-    left: width * 0.01, 
-    right: width * 0.01, 
-    height: height * 0.87, 
+    top: height * 0.01,
+    left: width * 0.01,
+    right: width * 0.01,
+    height: height * 0.87,
     backgroundColor: '#000',
     opacity: 0.85,
-    borderRadius: width * 0.05, 
-    padding: width * 0.02, 
+    borderRadius: width * 0.05,
+    padding: width * 0.02,
     shadowColor: '#14141473',
     shadowOffset: {
       width: 0,

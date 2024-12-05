@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Button, RefreshControl, StyleSheet, Modal, Alert, Image, Platform, Dimensions } from 'react-native';
-import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TextInput, RefreshControl, StyleSheet, Modal, Alert, Image } from 'react-native';
 import socket from './socket';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_DB } from "FirebaseConfig";
@@ -14,7 +13,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { URL_BACKEND } from "api";
 import { Linking } from 'react-native';
-
+import MessageService from 'services/MessageService';
+import UserService from 'services/UserService';
+import * as MediaLibrary from 'expo-media-library';
 interface RouterProps {
   navigation: NavigationProp<any, any>;
   route: any;
@@ -34,6 +35,8 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
   const scrollViewRef = useRef(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const messageInputRef = useRef(null);
+
 
   const fetchUserData = async () => {
     try {
@@ -54,7 +57,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     if (!userData) return;
 
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/messages?populate=*&pagination[limit]=-1`);
+      const response = await MessageService.getMessage();
       const messages = response.data.data;
 
       const currentUserEmail = userData?.email;
@@ -65,7 +68,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         const receiverEmail = message?.attributes.receiver?.data?.attributes.email;
 
         return (senderEmail === currentUserEmail && receiverEmail === adminEmail) ||
-              (senderEmail === adminEmail && receiverEmail === currentUserEmail);
+          (senderEmail === adminEmail && receiverEmail === currentUserEmail);
       });
 
       setMessages(filteredMessages);
@@ -86,7 +89,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     if (!userData) return;
 
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+      const response = await UserService.getUser();
       const users = response.data;
 
       const email = userData?.email;
@@ -130,20 +133,35 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
     }, 2000);
   };
 
+
   const handleFilePicker = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({}); // Call to get document asynchronously
-      // console.log("doc : ", result.assets[0].mimeType);
-      setSelectedFile(result.assets[0]); 
+      // Request permission to access media library (file system)
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permission denied", "You need to allow access to your files to pick a document.");
+        return;
+      }
 
+      // Open the document picker if permission is granted
+      const result = await DocumentPicker.getDocumentAsync({});
+
+      // Check if the user canceled the file picker
+      if (result.canceled === true) {
+        return; // Exit early if the user canceled
+      }
+
+      // If a file was picked, process it
+      setSelectedFile(result);
     } catch (error) {
       console.error('Error picking file:', error);
+      alert("An error occurred while picking the file. Please try again.");
     }
   };
 
   const sendMessage = async () => {
     if (!userDC || (!message && !selectedFile)) {
-      Alert.alert("🚫 Le message est vide!");
+      messageInputRef.current?.focus();
       return;
     }
 
@@ -160,17 +178,14 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         formData.append('files.document', {
           uri: selectedFile?.uri,
           name: selectedFile?.name,
-          size:selectedFile?.size,
+          size: selectedFile?.size,
           type: selectedFile?.mimeType,
         });
         formData.append('data', JSON.stringify(newMessage));
-    
-        const fileUploadResponse = await axios.post(`${URL_BACKEND}/api/messages`, formData, {
-          headers: {
-              'Content-Type': 'multipart/form-data',
-          },
-      });
-    
+
+        const fileUploadResponse = await MessageService.addMessage(formData);
+
+
         if (fileUploadResponse.status === 200) {
           setMessage('');
           setSelectedEmojis([]);
@@ -185,14 +200,14 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
         return;
       }
     }
-    
-    else{
-    socket.emit('sendMsg', newMessage);
 
-    setMessage('');
-    setSelectedEmojis([]);
-    setSelectedFile(null);
-    fetchMessages();
+    else {
+      socket.emit('sendMsg', newMessage);
+
+      setMessage('');
+      setSelectedEmojis([]);
+      setSelectedFile(null);
+      fetchMessages();
     }
   };
 
@@ -234,25 +249,10 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModel}
-      >
-        <View style={styles.modalContainer}>
-          <TouchableOpacity onPress={handleDateSelect1}>
-            <Ionicons name="close" size={24} color="black" />
-          </TouchableOpacity>
-          <View style={styles.modalContent}>
-            <EmojiSelector columns={5} onEmojiSelected={handleEmojiSelect} category={Categories.emotion} />
-          </View>
-        </View>
-      </Modal>
       <View style={styles.container}>
-      
-        <ScrollView  
-          ref={scrollViewRef} 
+
+        <ScrollView
+          ref={scrollViewRef}
           contentContainerStyle={{ paddingBottom: 25 }}
           onScroll={handleScroll}
           scrollEventThrottle={16}
@@ -288,7 +288,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
                           onPress={() => Linking.openURL(`${URL_BACKEND}${item.attributes.document?.data.attributes.url}`)}
                         >
                           <Text style={{ color: 'blue' }}>{item.attributes.document?.data.attributes.name}</Text>
-                          
+
                         </TouchableOpacity>
                       )}
                     </View>
@@ -300,7 +300,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
             );
           })}
         </ScrollView>
-        
+
         {showScrollToBottom && (
           <TouchableOpacity
             style={styles.scrollToBottomButton}
@@ -310,22 +310,22 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
           </TouchableOpacity>
         )}
         {selectedFile && (
-            <View style={[styles.filePreviewContainer, selectedFile? styles.borderTp: {}]}>
-              {selectedFile.mimeType.includes('image') ? (
-                <Image
-                  source={{ uri: selectedFile.uri }}
-                  style={styles.filePreviewImage}
-                />
-              ) : (
-                <Text style={styles.filePreviewText}>{selectedFile.name}</Text>
-              )}
-              <TouchableOpacity onPress={() => setSelectedFile(null)} style={styles.removeFileButton}>
-                <FontAwesome name="times" size={24} color="#ff0000" />
-              </TouchableOpacity>
-            </View>
-          )} 
-        <View style={[styles.inputContainer, selectedFile? {}: styles.borderTp]}>
-        
+          <View style={[styles.filePreviewContainer, selectedFile ? styles.borderTp : {}]}>
+            {selectedFile.mimeType.includes('image') ? (
+              <Image
+                source={{ uri: selectedFile.uri }}
+                style={styles.filePreviewImage}
+              />
+            ) : (
+              <Text style={styles.filePreviewText}>{selectedFile.name}</Text>
+            )}
+            <TouchableOpacity onPress={() => setSelectedFile(null)} style={styles.removeFileButton}>
+              <FontAwesome name="times" size={24} color="#ff0000" />
+            </TouchableOpacity>
+          </View>
+        )}
+        <View style={[styles.inputContainer, selectedFile ? {} : styles.borderTp]}>
+
           <TouchableOpacity onPress={handleFilePicker} style={{ marginRight: 10 }}>
             <FontAwesome6 name="file" size={24} color="#2E86C1" />
           </TouchableOpacity>
@@ -333,6 +333,7 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
             <FontAwesome name="smile-o" size={24} color="#2E86C1" />
           </TouchableOpacity>
           <TextInput
+            ref={messageInputRef}
             value={message}
             onChangeText={setMessage}
             placeholder="Message"
@@ -341,8 +342,27 @@ const MessageScreen = ({ route, navigation }: RouterProps) => {
           <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
             <MaterialCommunityIcons name="send" size={22} color="white" />
           </TouchableOpacity>
+          
         </View>
+
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={closeModel}
+        >
+          <View style={styles.modalContainer}>
+
+            <View style={styles.modalContent}>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={40} color="black" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
+
     </View>
   );
 };
@@ -359,6 +379,8 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   modalContent: {
+    width: "100%",
+    height: 100,
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 20,
@@ -386,7 +408,7 @@ const styles = StyleSheet.create({
   receiverMessage: {
     alignSelf: 'flex-start',
     backgroundColor: '#FAE9E9',
-    borderRadius:10
+    borderRadius: 10
   },
   adminMessage: {
     borderColor: '#2E86C1',
@@ -407,7 +429,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
   },
-  borderTp:{
+  borderTp: {
     borderTopWidth: 2,
     borderTopColor: '#DDD',
   },
@@ -417,7 +439,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DDD',
     borderRadius: 20,
-    marginRight:10
+    marginRight: 10
   },
   sendButton: {
     backgroundColor: '#007AFF',
@@ -445,7 +467,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 10,
-    paddingTop:5
+    paddingTop: 5
   },
   filePreviewImage: {
     width: 60,

@@ -23,12 +23,17 @@ import Carousel from 'pinar';
 import { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import { MaterialIcons } from '@expo/vector-icons';
-import axios from 'axios';
 import { ProgressSteps, ProgressStep } from 'react-native-progress-steps';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { URL_BACKEND } from "api";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as Animatable from 'react-native-animatable';
+import OffreService from 'services/OffreService';
+import PlaningService from 'services/PlaningService';
+import ProgrammeService from 'services/ProgrammeService';
+import UserService from 'services/UserService';
+import ReservationService from 'services/ReservationService';
+import FactureService from 'services/FactureService';
 
 const INITIAL_REGION = {
   latitude: 33.5883100,
@@ -93,7 +98,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+      const response = await UserService.getUser();
       const users = response.data;
 
       const email = userData?.email;
@@ -108,8 +113,8 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${URL_BACKEND}/api/offres/${itemId}?populate=*&pagination[limit]=-1`);
-      const data = await response.json();
+      const response = await OffreService.getOffreById(itemId);
+      const data = await response.data;
       // console.log('Result5:', data.data.attributes);
       setDatafetch(data.data);
 
@@ -135,7 +140,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const fetchDataPlanning = async () => {
     try {
-      const response = await fetch(`${URL_BACKEND}/api/planings?populate=*&pagination[limit]=-1`);
+      const response = await PlaningService.getPlaning();
       const data = await response.json();
       // console.log('Result5:', data.data[0].attributes.offre?.data);
       const filteredData = data.data.filter(item => item.attributes.offre?.data.id === itemId);
@@ -269,7 +274,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
     try {
       // console.log('id :', id);
 
-      const response = await fetch(`${URL_BACKEND}/api/programmes?populate=*&pagination[limit]=-1`);
+      const response = await ProgrammeService.getProgramme();
       const data = await response.json();
       // console.log('Result5--:', data.data);
       const filteredData = data.data.filter(item => item.attributes.planing?.data.id === id);
@@ -366,7 +371,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
 
     try {
-      const response = await axios.post(`${URL_BACKEND}/api/reservations`, {
+      const response = await ReservationService.addReservation({
         data: reservationData,
       });
       // console.log('Success', 'Reservation created successfully!', response.data);
@@ -379,7 +384,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
         try {
           if (response) {
             const resID = response?.data.data.id;
-            const responseRs = await axios.get(`${URL_BACKEND}/api/reservations/${resID}?populate=*&pagination[limit]=-1`);
+            const responseRs = await ReservationService.getReservationById(resID);
             const rf = responseRs.data;
             const ref = new Date();
             const refInSeconds = Math.floor(ref.getTime() / 1000);
@@ -390,7 +395,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
               status: false
             };
 
-            const responsefacture = await axios.post(`${URL_BACKEND}/api/factures`, {
+            const responsefacture = await FactureService.addFacture({
               data: factureData,
             });
             // console,log(rf);

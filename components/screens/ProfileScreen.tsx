@@ -15,6 +15,15 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Card, Title, Paragraph } from 'react-native-paper';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
+import UserService from "services/UserService";
+import FavorieService from "services/FavorieService";
+import PaysService from "services/PaysService";
+import EnregetreService from "services/EnregetreService";
+import ReservationService from "services/ReservationService";
+import OffreService from "services/OffreService";
+import FactureService from "services/FactureService";
+import CarteService from "services/CarteService";
+import PaiementService from "services/PaiementService";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -143,7 +152,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+      const response = await UserService.getUser();
       const users = response.data;
       const email = userData?.email;
       const currentUserData = users.find(user => user.email === email);
@@ -156,10 +165,9 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${URL_BACKEND}/api/pays?populate=*&pagination[limit]=-1`);
-      const data = await response.json();
-      // console.log('Result:', data.data[0].attributes);
-      setDatafetch(data.data);
+      const response = await PaysService.getPays();
+      // Assuming the data is in response.data
+      setDatafetch(response.data.data); // Set the data to state
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -167,7 +175,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
 
   const fetchFavories = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/favories?populate=*&pagination[limit]=-1`);
+      const response = await FavorieService.getFavorie();
       const favories = response.data.data;
       setFavorie(favories);
       // console.log('Favories fetched:', favories);
@@ -178,7 +186,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
 
   const fetchEnregetrers = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/enregetrers?populate=*&pagination[limit]=-1`);
+      const response = await EnregetreService.getEnregetre();
       const enregetrers = response.data.data;
       setEnregetrer(enregetrers);
       // console.log('Favories fetched:', enregetrers);
@@ -188,7 +196,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
   };
   const fetchReservation = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/reservations?populate=*&pagination[limit]=-1`);
+      const response = await ReservationService.getReservation();
       const reservations = response.data.data;
       setReservation(reservations);
       // console.log('Reservations fetched:', reservations);
@@ -444,7 +452,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
 
   const handleGetOffre = async (itemid) => {
     try {
-      const responseOffre = await axios.get(`${URL_BACKEND}/api/offres/${itemid}?populate=*&pagination[limit]=-1`);
+      const responseOffre = await OffreService.getOffreById(itemid);
       const resesoffrebyid = responseOffre.data.data;
       setOffrebyid(resesoffrebyid);
       // console.log(resesoffrebyid)
@@ -455,7 +463,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
   };
   const handleGetFacture = async () => {
     try {
-      const responsefacture = await axios.get(`${URL_BACKEND}/api/factures?populate=*&pagination[limit]=-1`);
+      const responsefacture = await FactureService.getFacture();
       const factures = responsefacture.data.data;
       setFacture(factures);
       // console.log(factures[0].attributes.reservation.data)
@@ -465,7 +473,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
   };
   const handleGetCarte = async () => {
     try {
-      const responsecarte = await axios.get(`${URL_BACKEND}/api/cartes?populate=*&pagination[limit]=-1`);
+      const responsecarte = await CarteService.getCarte();
       const carte = responsecarte.data.data;
       const carteFiltered = carte.filter(carte =>
         carte.attributes.user?.data.id === userDC.id
@@ -500,19 +508,19 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
         date: new Date(),
         factures: [filteredFacture[0].id]
       };
-      const responsefacture = await axios.post(`${URL_BACKEND}/api/paiements`, {
+      const responsefacture = await PaiementService.addPaiement({
         data: paiementData,
       });
       try {
-        const response = await axios.put(`${URL_BACKEND}/api/factures/${filteredFacture[0].id}`, {
-          data: { status: true },
+        const response = await FactureService.updateFacture(filteredFacture[0].id, {
+          data: { status: true }
         });
         // console.log('Item updated facture :', response.data);
       } catch (error) {
         console.error('Error updating item:', error);
       }
       try {
-        const response = await axios.put(`${URL_BACKEND}/api/reservations/${filteredReservationsTrueById[0].id}`, {
+        const response = await ReservationService.updateReservation(filteredReservationsTrueById[0].id, {
           data: { status: true },
         });
         // console.log('Item updated res :', response.data);

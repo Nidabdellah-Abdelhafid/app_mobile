@@ -6,10 +6,10 @@ import { NavigationProp } from '@react-navigation/native';
 import { FlatList, TextInput } from 'react-native-gesture-handler';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_DB } from "FirebaseConfig";
-import axios from 'axios';
-import { URL_BACKEND } from "api";
 import LottieView from 'lottie-react-native';
-
+import UserService from 'services/UserService';
+import FavorieService from 'services/FavorieService';
+import EnregetreService from 'services/EnregetreService';
 
 interface Props {
   listings: any[];
@@ -87,7 +87,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/users?populate=*&pagination[limit]=-1`);
+      const response = await UserService.getUser();
       const users = response.data;
       const email = userData?.email;
       const currentUserData = users.find(user => user.email === email);
@@ -100,7 +100,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
   const fetchFavories = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/favories?populate=*&pagination[limit]=-1`);
+      const response = await FavorieService.getFavorie();
       const favories = response.data.data;
       setFavorie(favories);
       // console.log('Favories fetched:', favories);
@@ -116,7 +116,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
     };
 
     try {
-      const response = await axios.post(`${URL_BACKEND}/api/favories`, {
+      const response = await FavorieService.addFavorie({
         data: favorieData,
       });
       // console.log('Favorite added:', response.data);
@@ -131,10 +131,8 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
     if (!fvid) return;
 
-    const url = `${URL_BACKEND}/api/favories/${fvid.id}`;
-
     try {
-      const response = await axios.delete(url);
+      const response = await FavorieService.deleteFavorie(fvid.id);
       // console.log('Favorite deleted:', response.data);
       fetchFavories();
     } catch (error) {
@@ -203,7 +201,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
   const fetchenregetrers = async () => {
     try {
-      const response = await axios.get(`${URL_BACKEND}/api/enregetrers?populate=*&pagination[limit]=-1`);
+      const response = await EnregetreService.getEnregetre();
       const enregetrers = response.data.data;
       setEnregetrer(enregetrers);
       // console.log('enregetrers fetched:', enregetrers);
@@ -220,7 +218,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
     };
 
     try {
-      const response = await axios.post(`${URL_BACKEND}/api/enregetrers`, {
+      const response = await EnregetreService.addEnregetre({
         data: enregetrerData,
       });
       // console.log('Favorite added:', response.data);
@@ -239,10 +237,8 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
     if (!fvid) return;
 
-    const url = `${URL_BACKEND}/api/enregetrers/${fvid.id}`;
-
     try {
-      const response = await axios.delete(url);
+      const response = await EnregetreService.deleteEnregetre(fvid.id);
       // console.log('Favorite deleted:', response.data);
       fetchenregetrers();
     } catch (error) {
@@ -412,7 +408,7 @@ const styles = StyleSheet.create({
     left: width * 0.025,    // 2.5% of screen width
     right: width * 0.025,   // 2.5% of screen width
     backgroundColor: '#fff',
-    padding: 0,
+    margin: 10,
     borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: {
@@ -426,13 +422,11 @@ const styles = StyleSheet.create({
   modalView: {
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: width * 0.09,   // 9% of screen width
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
+    padding: width * 0.04,  
+    flexDirection: 'column',
   },
   inputView: {
-    width: '80%',           // Stays the same as it uses percentage
+    width: '100%',           // Stays the same as it uses percentage
     backgroundColor: '#fff',
     borderWidth: 1,
     borderRadius: 25,
@@ -442,7 +436,7 @@ const styles = StyleSheet.create({
     padding: width * 0.05,  // 5% of screen width
   },
   inputText: {
-    height: height * 0.07,  // 7% of screen height
+    height: height * 0.05,  // 7% of screen height
     color: 'black',
   },
   button: {

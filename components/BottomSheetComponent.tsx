@@ -344,6 +344,7 @@ const BottomSheetComponent = ({ user }) => {
               }}
             >
               <Tab.Screen name='HomePageNav' component={HomePageNav}
+              
                 initialParams={{ user: user, searchQuery: searchQueryBtm }}
                 options={{
                   tabBarIcon: ({ color }) => (
