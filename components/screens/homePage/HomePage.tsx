@@ -6,14 +6,19 @@ import {
   Animated,
   Easing,
   Text,
+  Modal,
+  Button,
 } from "react-native";
 import { NavigationProp, useFocusEffect } from "@react-navigation/native";
 import ExploreHeader from "components/headerCategories/ExploreHeader";
 import ListingMapPage from "../listingPage/ListingMapPage";
 import ListingsBottomSheet from "../listingPage/ListingBottomSheet";
-import { URL_BACKEND } from "api";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { UsesContext } from "components/Context/UsesContext";
+import PaysService from "services/PaysService";
+import ThemeService from "services/ThemeService";
+import OffreService from "services/OffreService";
+import NetInfo from '@react-native-community/netinfo'; // For network status
 
 interface Props {
   navigation: NavigationProp<any, any>;
@@ -28,28 +33,95 @@ const HomePage = ({ route, navigation }: Props) => {
   const [datafetch, setDatafetch] = useState([]);
   const [filteredOffers, setFilteredOffers] = useState([]);
   const [paysWithOffers, setPaysWithOffers] = useState([]);
-  // console.log("searchQuery in the HomePage :", searchQuery);
+  const [isConnected, setIsConnected] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
+  const [responseError, setResponseError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // New state for error message
+  const [modalVisible, setModalVisible] = useState(false); // State to control modal visibility
+  const [errorType, setErrorType] = useState(""); // New state to control error type for icon
+
+  // Check network connection status
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
 
   const fetchData = async () => {
+    if (!isConnected) {
+      setConnectionError(true);
+      setErrorMessage("No internet connection available.");
+      setErrorType("warning"); // Set warning icon for connection issue
+      setModalVisible(true); // Show modal
+      return;
+    }
+
     try {
+      let data = null;
+      let datat = null;
+      let dataoffr = null;
+
       // Fetch pays data
-      const response = await fetch(
-        `${URL_BACKEND}/api/pays?populate=*&pagination[limit]=-1`
-      );
-      const data = await response.json();
+      try {
+        const paysResponse = await PaysService.getPays();
+        if (paysResponse && paysResponse.data) {
+          data = paysResponse.data; // assuming the response data is an array of pays
+        } else {
+          throw new Error('Invalid response for pays');
+        }
+      } catch (error) {
+        console.error("Error fetching pays data:", error);
+        setResponseError(true); // Set response error for pays API
+        setErrorMessage("Error fetching pays data.");
+        setErrorType("error"); // Set error icon for response issue
+        setModalVisible(true); // Show modal
+      }
 
-      // Fetch themes (categories) data
-      const responset = await fetch(
-        `${URL_BACKEND}/api/themes?populate=*&pagination[limit]=-1`
-      );
-      const datat = await responset.json();
+      // Fetch theme data
+      try {
+        const themeResponse = await ThemeService.getTheme();
+        if (themeResponse && themeResponse.data) {
+          datat = themeResponse.data; // assuming the response data is an array of themes
+        } else {
+          throw new Error('Invalid response for themes');
+        }
+      } catch (error) {
+        console.error("Error fetching theme data:", error);
+        setResponseError(true); // Set response error for theme API
+        setErrorMessage("Error fetching theme data.");
+        setErrorType("error"); // Set error icon for response issue
+        setModalVisible(true); // Show modal
+      }
 
-      // Fetch offres data
-      const responseofr = await fetch(
-        `${URL_BACKEND}/api/offres?populate=*&pagination[limit]=-1`
-      );
-      const dataofr = await responseofr.json();
-      const offersByTheme = dataofr.data.filter((offer) => {
+      // Fetch offre data
+      try {
+        const offreResponse = await OffreService.getOffre();
+        if (offreResponse && offreResponse.data) {
+          dataoffr = offreResponse.data; // assuming the response data is an array of offers
+        } else {
+          throw new Error('Invalid response for offers');
+        }
+      } catch (error) {
+        console.error("Error fetching offre data:", error);
+        setResponseError(true); // Set response error for offre API
+        setErrorMessage("Error fetching offers data.");
+        setErrorType("error"); // Set error icon for response issue
+        setModalVisible(true); // Show modal
+      }
+
+      if (!data || !datat || !dataoffr) {
+        console.error("One or more responses are missing data.");
+        setResponseError(true);
+        setErrorMessage("One or more responses are missing data.");
+        setErrorType("error"); // Set error icon for response issue
+        setModalVisible(true); // Show modal
+        return;
+      }
+
+      // Filter offers by theme
+      const offersByTheme = dataoffr.data.filter((offer) => {
         return offer.attributes.themes.data.some(
           (theme) => theme.attributes.label === category
         );
@@ -57,8 +129,8 @@ const HomePage = ({ route, navigation }: Props) => {
 
       setFilteredOffers(offersByTheme);
 
+      // Filter pays containing offers
       const paysContainingOffers = data.data.filter((pays) => {
-        // Check if the pays has offers and if any of them match the filtered offers
         return pays.attributes.offres.data.some((offer) =>
           offersByTheme.some(
             (filteredOffer) => filteredOffer.id === offer.id // Assuming each offer has a unique id
@@ -66,26 +138,30 @@ const HomePage = ({ route, navigation }: Props) => {
         );
       });
 
-      // Filter paysContainingOffers by search value if search is not empty
-      const filteredPaysWithSearch =
-        search || searchQueryi
-          ? paysContainingOffers.filter((pays) => {
-              if (search) {
-                return pays.attributes.label
-                  .toLowerCase()
-                  .includes(search.toLowerCase());
-              } else if (searchQueryi) {
-                return pays.attributes.label
-                  .toLowerCase()
-                  .includes(searchQueryi.toLowerCase());
-              }
-            })
-          : paysContainingOffers;
+      // Filter pays containing offers by search value if search is not empty
+      const filteredPaysWithSearch = search || searchQueryi 
+        ? paysContainingOffers.filter((pays) => {
+            if (search) {
+              return pays.attributes.label
+                .toLowerCase()
+                .includes(search.toLowerCase());
+            } else if (searchQueryi) {
+              return pays.attributes.label
+                .toLowerCase()
+                .includes(searchQueryi.toLowerCase());
+            }
+          })
+        : paysContainingOffers;
 
       setPaysWithOffers(filteredPaysWithSearch);
       setDatafetch(data.data);
+
     } catch (error) {
       console.error("Error fetching data:", error);
+      setResponseError(true); // Set response error globally
+      setErrorMessage("An error occurred while fetching data.");
+      setErrorType("error"); // Set error icon for general issue
+      setModalVisible(true); // Show modal
     }
   };
 
@@ -94,14 +170,12 @@ const HomePage = ({ route, navigation }: Props) => {
   }, [category, search, searchQueryi]);
 
   useEffect(() => {
-    // Sync searchQuery with searchQueryi when route.params.searchQuery changes
     if (route.params?.searchQuery !== undefined) {
       setSearchQueryi(route.params.searchQuery); // Sync internal state with param
     }
   }, [route.params?.searchQuery]);
 
   const onDataChange = (category) => setCategory(category);
-
   const onSearchChange = (search) => setSearch(search);
 
   useEffect(() => {
@@ -138,35 +212,64 @@ const HomePage = ({ route, navigation }: Props) => {
     outputRange: ["0deg", "360deg"],
   });
 
+  // Function to close the modal
+  const closeModal = () => setModalVisible(false);
+
+  // Function to render the icon based on error type
+  const renderErrorIcon = () => {
+    if (errorType === "warning") {
+      return <Ionicons name="warning" size={40} color="orange" />;
+    }
+    return <Ionicons name="close-circle" size={40} color="red" />;
+  };
+
   return (
     <View style={{ flex: 1 }}>
 
-      <UsesContext.Provider value={{search,setSearch}}>
-      <ExploreHeader
-        onCategoryChanged={onDataChange}
-        onSearchChanged={onSearchChange}
-      />
-      <ListingMapPage
-        navigation={navigation}
-        listing={datafetch}
-        category={category}
-      />
-      {searchQueryi && !search && (
-        <TouchableOpacity
-          onPress={clearSearch}
-          style={[styles.btn, { marginTop: 15 }]}
+      <UsesContext.Provider value={{ search, setSearch }}>
+        <ExploreHeader
+          onCategoryChanged={onDataChange}
+          onSearchChanged={onSearchChange}
+        />
+        <ListingMapPage
+          navigation={navigation}
+          listing={datafetch}
+          category={category}
+        />
+        {searchQueryi && !search && (
+          <TouchableOpacity
+            onPress={clearSearch}
+            style={[styles.btn, { marginTop: 15 }]}
+          >
+            <Animated.View style={{ transform: [{ rotate: spin }] }}>
+              <Ionicons name="reload" size={20} color="#fff" />
+            </Animated.View>
+          </TouchableOpacity>
+        )}
+        <ListingsBottomSheet
+          navigation={navigation}
+          listings={paysWithOffers}
+          category={category}
+          user={user}
+        />
+
+        {/* Modal for error messages */}
+        <View style={{ flex: 1, pointerEvents: 'box-none' }}>
+        <Modal
+          visible={modalVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={closeModal}
         >
-          <Animated.View style={{ transform: [{ rotate: spin }] }}>
-            <Ionicons name="reload" size={20} color="#fff" />
-          </Animated.View>
-        </TouchableOpacity>
-      )}
-      <ListingsBottomSheet
-        navigation={navigation}
-        listings={paysWithOffers}
-        category={category}
-        user={user}
-      />
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              {renderErrorIcon()} {/* Render appropriate icon */}
+              <Text style={styles.modalText}>{errorMessage}</Text>
+              <Button title="Close" onPress={closeModal} />
+            </View>
+          </View>
+        </Modal>
+        </View>
       </UsesContext.Provider>
     </View>
   );
@@ -186,6 +289,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 1000,
   },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    width: "80%",
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: "center",
+  }
 });
 
 export default HomePage;

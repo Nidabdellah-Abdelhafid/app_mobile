@@ -546,7 +546,12 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
             <Text style={{ fontSize: 17, fontWeight: '900', color: '#fff' }}>{item.attributes?.label}</Text>
           </View>
 
-          <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', marginRight: 20, justifyContent: 'center', flexDirection: 'row' }} onPress={() => { navigation.navigate('DetailPage', { itemId: item.id }); handleDateSelect1() }}>
+          <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', marginRight: 20, justifyContent: 'center', flexDirection: 'row' }} onPress={() => {
+             navigation.navigate('HomePageNav', {
+              screen: 'DetailPage',
+              params: { itemId: item.id },
+            });
+             handleDateSelect1() }}>
             <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre
             </Text>
             <Ionicons name="chevron-forward" size={12} color="white" />
@@ -564,7 +569,13 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
     <Animated.View key={`eng-${item.id}`} style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
       <Image source={{ uri: item.attributes?.photos.data[0].attributes?.url }} style={styles.imageSave} />
 
-      <TouchableOpacity style={{ position: 'absolute', right: 15, top: 10, borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { navigation.navigate('DetailPage', { itemId: item.id }); handleDateSelect2() }}>
+      <TouchableOpacity style={{ position: 'absolute', right: 15, top: 10, borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { 
+        
+        navigation.navigate('HomePageNav', {
+          screen: 'DetailPage',
+          params: { itemId: item.id },
+        });
+         handleDateSelect2() }}>
         <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre  </Text>
         <Ionicons name="chevron-forward" size={12} color="white" />
       </TouchableOpacity>
@@ -596,7 +607,13 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
           <Text style={{ color: '#fff', fontWeight: '700' }}>Paiement  </Text>
           <Ionicons name="chevron-forward" size={12} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { navigation.navigate('DetailOffre', { itemId: item.attributes?.offre?.data.id }); handleDateSelect4() }}>
+        <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { 
+          navigation.setParams({ itemId: null});
+          navigation.navigate('HomePageNav', {
+            screen: 'DetailOffre',
+            params: { itemId: item.attributes?.offre?.data.id },
+          });
+          handleDateSelect4() }}>
           <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre  </Text>
           <Ionicons name="chevron-forward" size={12} color="white" />
         </TouchableOpacity>
@@ -628,7 +645,13 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
               <Text style={{ fontSize: 17, fontWeight: '800', color: '#fff' }}>{item.attributes?.offre?.data.attributes?.label}</Text>
             </View>
           </View>
-          <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 8, width: 130, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { navigation.navigate('DetailOffre', { itemId: item.attributes?.offre?.data.id }); handleDateSelect5() }}>
+          <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 8, width: 130, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { 
+            navigation.setParams({ itemId: null});
+            navigation.navigate('HomePageNav', {
+              screen: 'DetailOffre',
+              params: { itemId: item.attributes?.offre?.data.id },
+            });
+             handleDateSelect5() }}>
             <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre </Text>
             <Ionicons name="chevron-forward" size={12} color="white" />
           </TouchableOpacity>

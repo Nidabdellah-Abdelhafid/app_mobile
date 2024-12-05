@@ -389,6 +389,7 @@ const styles = StyleSheet.create({
     alignItems:'center',
     backgroundColor: '#222',
     marginVertical: height * 0.01, // 1% of screen height
+    
   },
   listView: {
     paddingBottom: 25,          // 1.25% of screen height
