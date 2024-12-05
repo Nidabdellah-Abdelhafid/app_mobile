@@ -13,7 +13,7 @@ class PaysService {
 
     // Get a pays by its ID
     getPaysById(pays_id) {
-        return  fetch(`${URL_BACKEND}/api/pays/${pays_id}?populate=*&pagination[limit]=-1`);
+        return  axios.get(`${URL_BACKEND}/api/pays/${pays_id}?populate=*&pagination[limit]=-1`);
     }
 
 

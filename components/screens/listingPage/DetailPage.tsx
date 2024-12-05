@@ -39,7 +39,7 @@ const DetailPage = ({ route, navigation }: RouterProps) => {
   const fetchData = async () => {
     try {
       const response = await PaysService.getPaysById(itemId);
-      const data = await response.json();
+      const data = await response.data;
       setDatafetch(data.data);
 
     } catch (error) {

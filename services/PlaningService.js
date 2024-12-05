@@ -7,7 +7,7 @@ class PlaningService {
 
     // Fetch all planings
     getPlaning() {
-        return fetch(Planing_API_BASE_URL);
+        return axios.get(Planing_API_BASE_URL);
     }
 
 

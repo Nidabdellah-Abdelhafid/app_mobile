@@ -565,8 +565,6 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
             <Ionicons name="chevron-forward" size={12} color="white" />
           </TouchableOpacity>
         </View>
-
-
       </View>
 
     </Animated.View>
@@ -598,8 +596,6 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
           </View>
           <Fontisto name='favorite' size={25} color='white' style={{ marginRight: 30 }} />
         </View>
-
-
       </View>
 
     </Animated.View>

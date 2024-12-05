@@ -141,7 +141,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const fetchDataPlanning = async () => {
     try {
       const response = await PlaningService.getPlaning();
-      const data = await response.json();
+      const data = await response.data;
       // console.log('Result5:', data.data[0].attributes.offre?.data);
       const filteredData = data.data.filter(item => item.attributes.offre?.data.id === itemId);
       // console.log("jjj: ",filteredData)
@@ -275,7 +275,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
       // console.log('id :', id);
 
       const response = await ProgrammeService.getProgramme();
-      const data = await response.json();
+      const data = await response.data;
       // console.log('Result5--:', data.data);
       const filteredData = data.data.filter(item => item.attributes.planing?.data.id === id);
       // console.log('Result5:', filteredData);

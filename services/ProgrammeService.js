@@ -7,7 +7,7 @@ class ProgrammeService {
 
     // Fetch all programmes
     getProgramme() {
-        return fetch(Programme_API_BASE_URL);
+        return axios.get(Programme_API_BASE_URL);
     }
 
 

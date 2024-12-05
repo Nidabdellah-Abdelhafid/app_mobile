@@ -238,7 +238,9 @@ export default function MainPage({ onSearchChanged }) {
                     data={filteredPays}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <TouchableWithoutFeedback onPress={() => handleSelect(item.attributes.label)}>
+                        <TouchableWithoutFeedback onPress={() => {handleSelect(item.attributes.label);onSearchChanged(searchQuery);
+                            setHideSearch(false);
+                            setEditable(false); }}>
                             <View style={styles.resultItem}>
                                 <Image source={{ uri: item?.attributes.photos?.data[0]?.attributes.url }} style={styles.profileImage} />
 
