@@ -646,7 +646,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
     <Animated.View key={`rt-${item.id}`} style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
       <Image source={{ uri: item.attributes?.offre?.data.attributes?.image }} style={styles.imageSave} />
 
-      <View style={{ width: '100%', position: 'absolute', top: 105, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: '100%', position: 'absolute', top: 85, alignItems: 'center', justifyContent: 'center' }}>
         <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
           <View style={{ marginBottom: 5 }}>
             <View>
