@@ -66,9 +66,7 @@ const RegisterScreen = ({ navigation }: RouterProps) => {
       const resp = await fetch(image!);
       const blob = await resp.blob();
       const storageRef = ref(storage, 'profileImage/' + Date.now() + '.jpg');
-
       await createUserWithEmailAndPassword(auth, email, password);
-
       await sendEmailVerification(auth.currentUser!, {
         handleCodeInApp: true,
         url: 'https://base-stage.firebaseapp.com',
