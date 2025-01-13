@@ -15,7 +15,6 @@ import React, { useEffect, useState } from 'react';
 import { FIREBASE_AUTH, FIREBASE_DB } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { NavigationProp } from '@react-navigation/native';
-import CountryPicker, { Country } from 'react-native-country-picker-modal';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { addDoc, collection } from 'firebase/firestore';
@@ -134,7 +133,7 @@ const RegisterScreen = ({ navigation }: RouterProps) => {
     }
   };
 
-  const onSelectCountry = (country: Country) => {
+  const onSelectCountry = (country) => {
     setCountryCode(country.cca2);
     setCallingCode(country.callingCode[0]);
     setIsVisible(false);
@@ -193,15 +192,7 @@ const RegisterScreen = ({ navigation }: RouterProps) => {
             </View>
 
             <View style={styles.adds}>
-              <CountryPicker
-                withFilter
-                withFlag
-                withAlphaFilter
-                withCallingCode
-                onSelect={onSelectCountry}
-                countryCode={countryCode}
-                visible={isVisible}
-              />
+              
               <Text style={{ color: 'black', marginTop: 5 }}>+{callingCode}</Text>
               <TextInput
                 style={{ color: 'black', height: 30, marginLeft: 10, width: '70%', backgroundColor: 'white' }}

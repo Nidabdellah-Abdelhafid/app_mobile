@@ -16,7 +16,6 @@ import MessageScreen from './screens/MessageScreen';
 import Invoice from './screens/Invoice';
 import * as Animatable from 'react-native-animatable';
 import { URL_BACKEND } from 'api';
-import  { UsesContext } from './Context/UsesContext';
 const Tab = createBottomTabNavigator();
 
 const CustonTabbarButton = ({ children, onPress }) => (
@@ -328,8 +327,11 @@ const BottomSheetComponent = ({ user }) => {
             ref={bottomSheetModalRef}
             snapPoints={snapPoints}
             index={0}
-            backgroundComponent={({ style }) => <View style={[style, { backgroundColor: '#555' }]} />}
-            handleIndicatorStyle={{ backgroundColor: '#555' }}
+            backgroundComponent={({ style }) => (
+              <View style={[style, { backgroundColor: 'transparent' }]} />
+            )}
+            handleIndicatorStyle={{ backgroundColor: 'transparent' }} 
+            handleComponent={() => null}
 
           >
             <Tab.Navigator

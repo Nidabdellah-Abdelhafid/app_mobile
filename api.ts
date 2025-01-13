@@ -1,1 +1,1 @@
-export const URL_BACKEND = 'http://192.168.11.104:1337';
+export const URL_BACKEND = process.env.EXPO_PUBLIC_API_URL;

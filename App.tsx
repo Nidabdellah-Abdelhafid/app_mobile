@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import MainComponent from 'components/MainComponent';
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
+import { StatusBar } from "expo-status-bar";
 
 const Stack = createStackNavigator();  // Use createStackNavigator instead
 
@@ -66,6 +67,7 @@ export default function App() {
             </Stack.Navigator>
           )}
         </NavigationContainer>
+        <StatusBar style="light" />
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

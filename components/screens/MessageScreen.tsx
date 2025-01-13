@@ -8,7 +8,6 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { FontAwesome6, FontAwesome } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
-import EmojiSelector, { Categories } from "react-native-emoji-selector";
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { URL_BACKEND } from "api";

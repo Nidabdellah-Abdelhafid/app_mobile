@@ -44,7 +44,7 @@ const ExploreHeader = ({ onCategoryChanged, onSearchChanged }: Props) => {
   };
 
   return (
-    <View style={{ backgroundColor: '#555', zIndex: 1000 }}>
+    <View style={{ backgroundColor: '#555', zIndex: 1000 ,paddingTop:30}}>
       <MainPage onSearchChanged={handleSearchSubmit} />
 
       <SafeAreaView style={styles.safeArea}>
