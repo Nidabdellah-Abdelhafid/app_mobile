@@ -227,7 +227,7 @@ const DetailPage = ({ route, navigation }: RouterProps) => {
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 100,backgroundColor:'#333' }}
         ref={scrollRef}
         scrollEventThrottle={16}
       >

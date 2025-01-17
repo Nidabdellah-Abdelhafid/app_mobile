@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   absoluteView: {
     position: 'absolute',
-    bottom: 40,
+    bottom: height*0.04,
     width: '100%',
     alignItems: 'center',
   },
