@@ -55,7 +55,13 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
   const [modalVisible1, setModalVisible1] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible3, setModalVisible3] = useState(false);
-  const items = fileData;
+
+  const [modals, setModals] = useState({
+    modal1: false,
+    modal2: false,
+    modal3: false,
+  });
+
   const [datafetch, setDatafetch] = useState(null);
   const [datafetchPlanning, setDatafetchPlanning] = useState(null);
   const [datafetchProgramme, setDatafetchProgramme] = useState(null);
@@ -78,7 +84,13 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
   const outerCarouselRef = useRef(null);
 
+  const openModal = (modalName) => {
+    setModals((prev) => ({ ...prev, [modalName]: true }));
+  };
 
+  const closeModal = (modalName) => {
+    setModals((prev) => ({ ...prev, [modalName]: false }));
+  };
 
   const fetchUserData = async () => {
     // console.log(currentUser)
@@ -635,7 +647,7 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
           <Text style={styles.description}>{datafetch?.attributes.description}</Text>
           <Animatable.View >
-            <TouchableOpacity style={[styles.stImage, { justifyContent: 'center', alignItems: 'center', marginTop: 50 }]} onPress={openModal1}>
+            <TouchableOpacity style={[styles.stImage, { justifyContent: 'center', alignItems: 'center', marginTop: 50 }]} onPress={() => openModal("modal1")}>
               <Text style={{ color: '#fff', fontSize: 12 }}>Voir le planning</Text>
               <FontAwesome name="chevron-down" size={24} color="white" />
               {/* <AntDesign name="down" size={24} color="white" /> */}
@@ -684,15 +696,14 @@ const DetailOffre = ({ route, navigation }: RouterProps) => {
 
       <View style={{ flex: 1, pointerEvents: 'box-none' }}>
         <Modal
-          animationType="fade"
+          visible={modals.modal1} 
           transparent={true}
-          visible={modalVisible1}
-          onRequestClose={closeModal1}
+           onRequestClose={() => closeModal("modal1")}
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Animatable.View>
-                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => handleDateSelect1()}>
+                <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 40 }} onPress={() => closeModal("modal1")}>
                   <FontAwesome name="chevron-up" size={20} color="white" />
                 </TouchableOpacity>
               </Animatable.View>

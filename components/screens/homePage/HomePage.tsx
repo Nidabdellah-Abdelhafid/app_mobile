@@ -254,7 +254,7 @@ const HomePage = ({ route, navigation }: Props) => {
         >
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
-              {renderErrorIcon()} {/* Render appropriate icon */}
+              {renderErrorIcon()}
               <Text style={styles.modalText}>{errorMessage}</Text>
               <Button title="Close" onPress={closeModal} />
             </View>

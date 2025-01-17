@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import ListingPage from './ListingPage';
@@ -11,9 +11,11 @@ interface Props {
   navigation: NavigationProp<any, any>;
   user: any;
 }
+const { width, height } = Dimensions.get('window');
+
 
 const ListingsBottomSheet = ({ navigation, listings, category, user }: Props) => {
-  const snapPoints = useMemo(() => ['1%', '77%'], []);
+  const snapPoints = useMemo(() => [height*0.01, Platform.OS==="web"? "85%":height*0.71], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [refresh, setRefresh] = useState<number>(0);
 
@@ -30,7 +32,7 @@ const ListingsBottomSheet = ({ navigation, listings, category, user }: Props) =>
   return (
     <>
     <View style={styles.absoluteViewList}>
-    <TouchableOpacity onPress={onShowFullList} style={[styles.btn, { marginTop: 10 }]}>
+    <TouchableOpacity onPress={onShowFullList} style={[styles.btn, { marginTop: height*0.05 }]}>
             <AntDesign name="back" size={24}  color={'#fff'} />
     </TouchableOpacity>
     </View>

@@ -29,19 +29,12 @@ interface RouterProps {
   navigation: NavigationProp<any, any>;
   route
 }
-const { width,height } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const ProfileScreen = ({ route, navigation }: RouterProps) => {
   const { user: currentUser } = route.params;
   const [userData, setUserData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible1, setModalVisible1] = useState(false);
-  const [modalVisible2, setModalVisible2] = useState(false);
-  const [modalVisible3, setModalVisible3] = useState(false);
-  const [modalVisible4, setModalVisible4] = useState(false);
-  const [modalVisible5, setModalVisible5] = useState(false);
-  const [modalVisible6, setModalVisible6] = useState(false);
-  const [modalVisible7, setModalVisible7] = useState(false);
   const [modalVisible8, setModalVisible8] = useState(false);
   const [modalVisible9, setModalVisible9] = useState(false);
   const [modalVisible10, setModalVisible10] = useState(false);
@@ -54,7 +47,6 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
   const [facture, setFacture] = useState(null);
   const [offrebyid, setOffrebyid] = useState(null);
   const [carte, setCarte] = useState([]);
-  const [isFirstRun, setIsFirstRun] = useState(true);
   const [datafetch, setDatafetch] = useState([]);
   const [paysfavorieUser, setPaysfavorieUser] = useState([]);
   const [paysenregetrerUser, setPaysenregetrerUser] = useState([]);
@@ -62,12 +54,29 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
   const [filteredReservationsTrue, setFilteredReservationsTrue] = useState([]);
   const [filteredReservationsTrueById, setFilteredReservationsTrueById] = useState([]);
   const [filteredFacture, setFilteredFacture] = useState([]);
-  const [show1View, setShow1View] = useState(true);
-  const [show2View, setShow2View] = useState(true);
-  const [show3View, setShow3View] = useState(true);
   const [hideIntrfece, setHideInterface] = useState(false);
   const [hideIntrfecepaie, setHideInterfacepaie] = useState(false);
   const [hideIntrfececarte, setHideInterfacecarte] = useState(false);
+
+  const [modals, setModals] = useState({
+    modal1: false,
+    modal2: false,
+    modal3: false,
+    modal4: false,
+    modal5: false,
+    modal6: false,
+    modal7: false
+  });
+
+  const openModal = (modalName) => {
+    setHideInterface(true);
+    setModals((prev) => ({ ...prev, [modalName]: true }));
+  };
+
+  const closeModal = (modalName) => {
+    setHideInterface(false);
+    setModals((prev) => ({ ...prev, [modalName]: false }));
+  };
 
   useEffect(() => {
     fetchUserData();
@@ -277,137 +286,6 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
 
   };
 
-  const openModal1 = () => {
-    setHideInterface(true);
-    fetchUserData()
-    fetchData()
-    fetchFavories()
-    filterPaysFavorieUser();
-    setTimeout(() => {
-      setModalVisible1(true);
-    }, 500);
-
-  };
-
-  const closeModal1 = () => {
-    setModalVisible1(false);
-  };
-  const handleDateSelect1 = () => {
-    // Close the modal
-    setHideInterface(false);
-    closeModal1();
-  };
-  const openModal2 = () => {
-    setHideInterface(true);
-    fetchUserData()
-    fetchData()
-    fetchEnregetrers()
-    filterPaysEnregetrerUser();
-    setTimeout(() => {
-      setModalVisible2(true);
-    }, 500);
-
-  };
-
-  const closeModal2 = () => {
-    setModalVisible2(false);
-  };
-  const handleDateSelect2 = () => {
-    setHideInterface(false);
-    // Close the modal
-    closeModal2();
-  };
-
-  const openModal3 = () => {
-    setHideInterface(true);
-    setModalVisible3(true);
-  };
-
-  const closeModal3 = () => {
-    setModalVisible3(false);
-    setIsButtonPressed(false);
-  };
-  const handleDateSelect3 = () => {
-    setHideInterface(false);
-    // Close the modal
-    closeModal3();
-  };
-
-  const openModal4 = () => {
-    setHideInterface(true);
-    fetchUserData()
-    fetchData()
-    fetchReservation()
-    filterReservations();
-    setTimeout(() => {
-      setModalVisible4(true);
-    }, 500);
-  };
-
-  const closeModal4 = () => {
-    fetchUserData()
-    fetchData()
-    fetchReservation()
-    filterReservations();
-    setModalVisible4(false);
-  };
-  const handleDateSelect4 = () => {
-    setHideInterface(false);
-    // Close the modal
-    closeModal4();
-  };
-
-  const openModal5 = () => {
-    setHideInterface(true);
-    fetchUserData()
-    fetchData()
-    fetchReservation()
-    filterReservations();
-    setModalVisible5(true);
-  };
-
-  const closeModal5 = () => {
-    setModalVisible5(false);
-  };
-  const handleDateSelect5 = () => {
-    setHideInterface(false);
-    // Close the modal
-    fetchUserData()
-    fetchData()
-    fetchReservation()
-    filterReservations();
-    closeModal5();
-  };
-
-  const openModal6 = () => {
-    setHideInterface(true);
-    setModalVisible6(true);
-  };
-
-  const closeModal6 = () => {
-    setModalVisible6(false);
-  };
-  const handleDateSelect6 = () => {
-    setHideInterface(false);
-    // Close the modal
-    closeModal6();
-  };
-
-  const openModal7 = () => {
-    setHideInterface(true);
-    setModalVisible7(true);
-  };
-
-  const closeModal7 = () => {
-    setModalVisible7(false);
-    setIsButtonPressed2(false);
-
-  };
-  const handleDateSelect7 = () => {
-    setHideInterface(false);
-    // Close the modal
-    closeModal7();
-  };
 
   const openModal8 = (itemid) => {
     setHideInterfacepaie(true);
@@ -556,11 +434,12 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
           </View>
 
           <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', marginRight: 20, justifyContent: 'center', flexDirection: 'row' }} onPress={() => {
-             navigation.navigate('HomePageNav', {
+            navigation.navigate('HomePageNav', {
               screen: 'DetailPage',
               params: { itemId: item.id },
             });
-             handleDateSelect1() }}>
+            closeModal("modal1");
+          }}>
             <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre
             </Text>
             <Ionicons name="chevron-forward" size={12} color="white" />
@@ -576,13 +455,14 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
     <Animated.View key={`eng-${item.id}`} style={styles.listViewlike} entering={FadeInRight} exiting={FadeOutLeft}>
       <Image source={{ uri: item.attributes?.photos.data[0].attributes?.url }} style={styles.imageSave} />
 
-      <TouchableOpacity style={{ position: 'absolute', right: 15, top: 10, borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { 
-        
+      <TouchableOpacity style={{ position: 'absolute', right: 15, top: 10, borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => {
+
         navigation.navigate('HomePageNav', {
           screen: 'DetailPage',
           params: { itemId: item.id },
         });
-         handleDateSelect2() }}>
+        closeModal("modal2");
+      }}>
         <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre  </Text>
         <Ionicons name="chevron-forward" size={12} color="white" />
       </TouchableOpacity>
@@ -612,13 +492,14 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
           <Text style={{ color: '#fff', fontWeight: '700' }}>Paiement  </Text>
           <Ionicons name="chevron-forward" size={12} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { 
-          navigation.setParams({ itemId: null});
+        <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 3, width: 110, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => {
+          navigation.setParams({ itemId: null });
           navigation.navigate('HomePageNav', {
             screen: 'DetailOffre',
             params: { itemId: item.attributes?.offre?.data.id },
           });
-          handleDateSelect4() }}>
+          closeModal("modal4");
+        }}>
           <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre  </Text>
           <Ionicons name="chevron-forward" size={12} color="white" />
         </TouchableOpacity>
@@ -650,13 +531,14 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
               <Text style={{ fontSize: 17, fontWeight: '800', color: '#fff' }}>{item.attributes?.offre?.data.attributes?.label}</Text>
             </View>
           </View>
-          <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 8, width: 130, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => { 
-            navigation.setParams({ itemId: null});
+          <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 10, padding: 8, width: 130, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }} onPress={() => {
+            navigation.setParams({ itemId: null });
             navigation.navigate('HomePageNav', {
               screen: 'DetailOffre',
               params: { itemId: item.attributes?.offre?.data.id },
             });
-             handleDateSelect5() }}>
+            closeModal("modal5");
+          }}>
             <Text style={{ color: '#fff', fontWeight: '700' }}>Voir l'Offre </Text>
             <Ionicons name="chevron-forward" size={12} color="white" />
           </TouchableOpacity>
@@ -689,15 +571,6 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
     return `**** **** **** ${lastPart}`;
   };
 
-  const handlePress1 = () => {
-    setShow1View(false);
-  };
-  const handlePress2 = () => {
-    setShow3View(false);
-  };
-  const handlePress3 = () => {
-    setShow3View(false);
-  };
   const [currentStep, setCurrentStep] = useState(1);
 
   const handleNextStep = () => {
@@ -769,7 +642,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
           <View style={styles.imageFloat}>
             <Image source={{ uri: userData?.image }} style={styles.profileImage} />
           </View>
-          <View style={[styles.card,{pointerEvents: 'box-none' }]}>
+          <View style={[styles.card, { pointerEvents: 'box-none' }]}>
 
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{userData?.fullName}</Text>
@@ -786,7 +659,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
               <View style={{ justifyContent: 'space-between', alignItems: 'center', padding: 13 }}>
                 <Ionicons name="heart" size={25} color="white" />
                 <Text style={{ color: '#C4C2C2', fontWeight: '700', }}>{paysfavorieUser?.length} Places Like</Text>
-                <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 15, padding: 10, width: 110, alignItems: 'center' }} onPress={openModal1}>
+                <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 15, padding: 10, width: 110, alignItems: 'center' }} onPress={() => openModal("modal1")}>
                   <Text style={{ color: '#fff', fontWeight: '800' }}>Voir</Text>
 
                 </TouchableOpacity>
@@ -801,13 +674,13 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
                   <Text style={{ color: '#C4C2C2', fontWeight: '700', }}>Enregistre</Text>
                   <Text style={{ color: '#C4C2C2', fontWeight: '700' }}>dans les favoris</Text>
                 </View>
-                <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 15, padding: 10, width: 110, alignItems: 'center' }} onPress={openModal2}>
+                <TouchableOpacity style={{ borderColor: '#fff', borderWidth: 2, borderRadius: 15, padding: 10, width: 110, alignItems: 'center' }} onPress={() => openModal("modal2")}>
                   <Text style={{ color: '#fff', fontWeight: '800' }}>Voir</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={{ justifyContent: 'center', marginTop: 10 }}>
-              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal3}>
+              <TouchableOpacity style={styles.loginBtnOption} onPress={() => openModal("modal3")}>
                 <FontAwesome6 name="user-large" size={19} color="white" style={styles.icon} />
                 <View style={{ flex: 5, flexDirection: 'row' }}>
                   <Text style={styles.loginTextOption}>Modifier le profil</Text>
@@ -815,7 +688,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
                 <Ionicons name="chevron-forward" size={20} color="white" style={{ marginRight: 10 }} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal4}>
+              <TouchableOpacity style={styles.loginBtnOption} onPress={() => openModal("modal4")}>
                 <MaterialIcons name="shopping-cart" size={25} color="white" style={styles.icon} />
                 <View style={{ flex: 5, flexDirection: 'row' }}>
                   <Text style={styles.loginTextOption}>Panier</Text>
@@ -826,7 +699,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
                 <Ionicons name="chevron-forward" size={20} color="white" style={{ marginRight: 10 }} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal5}>
+              <TouchableOpacity style={styles.loginBtnOption} onPress={() => openModal("modal5")}>
                 <MaterialCommunityIcons name="clipboard-text" size={25} color="white" style={styles.icon} />
                 <View style={{ flex: 5, flexDirection: 'row' }}>
                   <Text style={styles.loginTextOption}>Historique</Text>
@@ -834,7 +707,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
                 <Ionicons name="chevron-forward" size={20} color="white" style={{ marginRight: 10 }} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal6}>
+              <TouchableOpacity style={styles.loginBtnOption} onPress={() => openModal("modal6")}>
                 <Ionicons name="notifications" size={25} color="white" style={styles.icon} />
                 <View style={{ flex: 5, flexDirection: 'row' }}>
                   <Text style={styles.loginTextOption}>Notification</Text>
@@ -845,7 +718,7 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
                 <Ionicons name="chevron-forward" size={20} color="white" style={{ marginRight: 10 }} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.loginBtnOption} onPress={openModal7}>
+              <TouchableOpacity style={styles.loginBtnOption} onPress={() => openModal("modal7")}>
                 <MaterialIcons name="credit-card" size={25} color="white" style={styles.icon} />
                 <View style={{ flex: 5, flexDirection: 'row' }}>
                   <Text style={styles.loginTextOption}>Cartes</Text>
@@ -868,201 +741,182 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
       {/* <View style={{margin:30,justifyContent:'flex-end',alignContent:'flex-end',alignSelf:'center',alignItems:'center'}}>
                
           </View> */}
-
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible1}
-          onRequestClose={closeModal1}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.imageFloatM}>
-              <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-            </View>
-            <View style={styles.modalView}>
-
-              <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                <Text style={styles.userName}>{userData?.fullName}</Text>
-              </View>
-              <Ionicons name="heart" size={25} color="white" />
-              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginTop: 10 }}>{paysfavorieUser?.length} Places Like</Text>
-              <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect1()}>
-                <Ionicons name="close" size={26} color="white" />
-              </TouchableOpacity>
-              <FlatList
-                renderItem={renderRow}
-                data={paysfavorieUser}
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-              />
-            </View>
-          </View>
-        </Modal>
-      </View>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible2}
-          onRequestClose={closeModal2}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.imageFloatM}>
-              <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-            </View>
-            <View style={styles.modalView}>
-
-              <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                <Text style={styles.userName}>{userData?.fullName}</Text>
-              </View>
-              <Fontisto name='favorite' size={25} color='white' />
-              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginTop: 10 }}>Enregistre dans les favoris</Text>
-              <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect2()}>
-                <Ionicons name="close" size={26} color="white" />
-              </TouchableOpacity>
-              <FlatList
-                renderItem={renderRowErg}
-                data={paysenregetrerUser}
-              />
-            </View>
-          </View>
-        </Modal>
-      </View>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible3}
-          onRequestClose={closeModal3}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.imageFloatM}>
-              <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-            </View>
-            <View style={styles.modalView}>
-
-              <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                <Text style={styles.userName}>{userData?.fullName}</Text>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <FontAwesome6 name="user-large" size={19} color="white" />
-                <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Modifier le profil</Text>
-              </View>
-              <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect3()}>
-                <Ionicons name="close" size={26} color="white" />
-              </TouchableOpacity>
-              <View style={{ width: '100%', marginTop: 20, padding: 10 }}>
-                <Text style={styles.inputText}>Le nom complet</Text>
-                <TextInput
-                  placeholder=""
-                  value={null}
-                  onChangeText={null}
-                  style={styles.inputView}
-                />
-              </View>
-              <View style={{ width: '100%', padding: 10 }}>
-                <Text style={styles.inputText}>Email</Text>
-                <TextInput
-                  placeholder=""
-                  value={null}
-                  onChangeText={null}
-                  style={styles.inputView}
-                />
-              </View>
-              <View style={{ width: '100%', padding: 10 }}>
-                <Text style={styles.inputText}>Numero de telephone</Text>
-                <TextInput
-                  placeholder=""
-                  value={null}
-                  onChangeText={null}
-                  style={styles.inputView}
-                />
-              </View>
-              <View style={{ width: '100%', padding: 10, justifyContent: 'center', alignItems: 'center' }}>
-                <TouchableOpacity
-                  onPress={handleButtonPress}
-                  style={[styles.button2, isButtonPressed ? styles.buttonPressed : null]}
-                >
-                  <Text style={[styles.loginText, isButtonPressed ? { color: 'black', fontSize: 15, fontWeight: '700' } : null]}>Approve</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      </View>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        {/* panier */}
-        {
-          hideIntrfecepaie ? <View></View> :
-            <Modal
-              animationType="fade"
-              transparent={true}
-              visible={modalVisible4}
-              onRequestClose={closeModal4}
-            // style={hideIntrfece? styles.hidden:{} }
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.imageFloatM}>
-                  <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-                </View>
-                <View style={styles.modalView}>
-
-                  <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                    <Text style={styles.userName}>{userData?.fullName}</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row' }}>
-                    <MaterialIcons name="shopping-cart" size={25} color="white" />
-                    <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Panier</Text>
-                  </View>
-                  <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect4()}>
-                    <Ionicons name="close" size={26} color="white" />
-                  </TouchableOpacity>
-                  <FlatList
-                    renderItem={renderRowResF}
-                    data={filteredReservations}
-                  />
-                </View>
-              </View>
-            </Modal>
-        }
-      </View>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible5}
-          onRequestClose={closeModal5}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.imageFloatM}>
-              <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-            </View>
-            <View style={styles.modalView}>
-
-              <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                <Text style={styles.userName}>{userData?.fullName}</Text>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <MaterialCommunityIcons name="clipboard-text" size={25} color="white" />
-                <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Historique</Text>
-              </View>
-              <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect5()}>
-                <Ionicons name="close" size={26} color="white" />
-              </TouchableOpacity>
-              <FlatList
-                renderItem={renderRowResT}
-                data={filteredReservationsTrue}
-              />
-            </View>
-          </View>
-        </Modal>
-      </View>
       <Modal
-        animationType="fade"
+        visible={modals.modal1}
         transparent={true}
-        visible={modalVisible6}
-        onRequestClose={closeModal6}
+        onRequestClose={() => closeModal("modal1")}>
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <Ionicons name="heart" size={25} color="white" />
+            <Text style={{ color: '#C4C2C2', fontWeight: '700', marginTop: 10 }}>{paysfavorieUser?.length} Places Like</Text>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => closeModal("modal1")}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <FlatList
+              renderItem={renderRow}
+              data={paysfavorieUser}
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+            />
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={modals.modal2}
+        transparent={true}
+        onRequestClose={() => closeModal("modal2")}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <Fontisto name='favorite' size={25} color='white' />
+            <Text style={{ color: '#C4C2C2', fontWeight: '700', marginTop: 10 }}>Enregistre dans les favoris</Text>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => closeModal("modal2")}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <FlatList
+              renderItem={renderRowErg}
+              data={paysenregetrerUser}
+            />
+          </View>
+        </View>
+      </Modal>
+
+
+      <Modal
+        visible={modals.modal3}
+        transparent={true}
+        onRequestClose={() => closeModal("modal3")}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <FontAwesome6 name="user-large" size={19} color="white" />
+              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Modifier le profil</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => closeModal("modal3")}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <View style={{ width: '100%', marginTop: 20, padding: 10 }}>
+              <Text style={styles.inputText}>Le nom complet</Text>
+              <TextInput
+                placeholder=""
+                value={null}
+                onChangeText={null}
+                style={styles.inputView}
+              />
+            </View>
+            <View style={{ width: '100%', padding: 10 }}>
+              <Text style={styles.inputText}>Email</Text>
+              <TextInput
+                placeholder=""
+                value={null}
+                onChangeText={null}
+                style={styles.inputView}
+              />
+            </View>
+            <View style={{ width: '100%', padding: 10 }}>
+              <Text style={styles.inputText}>Numero de telephone</Text>
+              <TextInput
+                placeholder=""
+                value={null}
+                onChangeText={null}
+                style={styles.inputView}
+              />
+            </View>
+            <View style={{ width: '100%', padding: 10, justifyContent: 'center', alignItems: 'center' }}>
+              <TouchableOpacity
+                onPress={handleButtonPress}
+                style={[styles.button2, isButtonPressed ? styles.buttonPressed : null]}
+              >
+                <Text style={[styles.loginText, isButtonPressed ? { color: 'black', fontSize: 15, fontWeight: '700' } : null]}>Approve</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={modals.modal4}
+        transparent={true}
+        onRequestClose={() => closeModal("modal4")}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <MaterialIcons name="shopping-cart" size={25} color="white" />
+              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Panier</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => closeModal("modal4")}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <FlatList
+              renderItem={renderRowResF}
+              data={filteredReservations}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={modals.modal5}
+        transparent={true}
+        onRequestClose={() => closeModal("modal5")}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <MaterialCommunityIcons name="clipboard-text" size={25} color="white" />
+              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Historique</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => closeModal("modal5")}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <FlatList
+              renderItem={renderRowResT}
+              data={filteredReservationsTrue}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={modals.modal6}
+        transparent={true}
+        onRequestClose={() => closeModal("modal6")}
       >
         <View style={styles.centeredView}>
           <View style={styles.imageFloatM}>
@@ -1077,247 +931,251 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
               <Ionicons name="notifications" size={25} color="white" />
               <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Notification</Text>
             </View>
-            <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect6()}>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => closeModal("modal6")}>
               <Ionicons name="close" size={26} color="white" />
             </TouchableOpacity>
             <Text style={{ color: '#fff' }}>6</Text>
           </View>
         </View>
       </Modal>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        {/* hona pay */}
-        {
-          hideIntrfececarte ? <View></View> :
-            <Modal
-              animationType="fade"
-              transparent={true}
-              visible={modalVisible7}
-              onRequestClose={closeModal7}
-            >
-              <View style={styles.centeredView}>
-                <View style={styles.imageFloatM}>
-                  <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-                </View>
-                <View style={styles.modalView}>
 
-                  <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                    <Text style={styles.userName}>{userData?.fullName}</Text>
+      <Modal
+        visible={modals.modal7}
+        transparent={true}
+        onRequestClose={() => closeModal("modal7")}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <MaterialIcons name="credit-card" size={25} color="white" />
+              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Cartes</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => closeModal("modal7")}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+
+            <View style={{ width: "100%", height: 170, padding: 10, marginTop: 15, backgroundColor: '#333', borderRadius: 20 }}>
+              <Text style={{ color: '#fff', marginBottom: 20, height: 20, fontWeight: '900', fontSize: 17 }}>Paiement</Text>
+
+              <View style={{ width: "100%", height: 50, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <Image source={{ uri: 'https://www.pngmart.com/files/22/Mastercard-Logo-PNG-HD.png' }} style={{ width: 80, height: 40 }} />
+                <View style={{ width: "60%", height: 50, marginLeft: 5 }}>
+                  <Text style={{ color: '#fff' }}>Master Card</Text>
+                  <Text style={{ color: '#fff', fontWeight: '900', fontSize: 18 }}>{carte[0]?.attributes?.numero ? formatCardNumber(carte[0].attributes.numero) : ''}</Text>
+                </View>
+                <AntDesign name="checkcircle" size={30} color="green" />
+              </View>
+
+              <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={handleButtonPress2}
+                  style={[styles.button3, isButtonPressed2 ? styles.buttonPressed : null]}
+                >
+                  <Text style={[styles.loginText, isButtonPressed2 ? { color: 'black', fontSize: 15, fontWeight: '700' } : null]}>Modifier</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', width: "100%", padding: 25 }}>
+              <TouchableOpacity style={{ backgroundColor: '#fff' }}>
+                <AntDesign name="check" size={20} color="#000" />
+              </TouchableOpacity>
+              <Text style={{ color: '#fff', marginLeft: 5, fontSize: 13, fontWeight: '700' }}>Utiliser comme mode de paiement par defaut</Text>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
+
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible8}
+        onRequestClose={closeModal8}
+
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <MaterialIcons name="shopping-cart" size={25} color="white" />
+              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Panier</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect8()}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <View style={{ width: '100%', marginTop: 10, padding: 20, alignItems: 'center' }}>
+              <View style={{ width: '95%', padding: 5, backgroundColor: '#fff', alignItems: 'center', borderRadius: 20 }}>
+                <Image source={{ uri: offrebyid?.attributes.image }} style={styles.imagePay} />
+
+                {currentStep === 1 && (
+                  <View>
+                    <Text style={{ textAlign: 'center', fontWeight: '700' }}>{offrebyid?.attributes.label}</Text>
+                    <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 5 }}>
+                      <Text style={{ textAlign: 'center', fontWeight: '700', marginRight: 5 }}>{offrebyid?.attributes.pay?.data.attributes.label}</Text>
+                      <Entypo name="location" size={20} color="#999" />
+                    </View>
+                    <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-around', borderRadius: 3, borderTopWidth: 1, borderColor: '#999', marginTop: 15 }}>
+                      <View style={{ marginTop: 10 }}>
+                        <Text style={{ fontWeight: '700', fontSize: 14 }}>Passager</Text>
+                        <Text>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_adultes} Adulte</Text>
+                        <Text>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants} Enfant</Text>
+                      </View>
+                      <View style={{ marginTop: 10 }}>
+                        <Text style={{ fontWeight: '700', fontSize: 14 }}>Depart</Text>
+                        <Text>{filteredReservationsTrueById[0]?.attributes.date_partir}</Text>
+                      </View>
+                      <View style={{ marginTop: 10 }}>
+                        <Text style={{ fontWeight: '700', fontSize: 14 }}>Classe</Text>
+                        <Text>{filteredReservationsTrueById[0]?.attributes.cabine}</Text>
+                      </View>
+                    </View>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                      <TouchableOpacity onPress={openModal10} style={{ width: '65%', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', padding: 5, backgroundColor: '#999', borderRadius: 8 }}>
+                        <MaterialIcons name="save-alt" size={22} color="white" />
+                        <Text style={{ color: '#fff' }}>Telecharger</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <View style={{ flexDirection: 'row' }}>
-                    <MaterialIcons name="credit-card" size={25} color="white" />
-                    <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Cartes</Text>
+                )}
+
+                {currentStep === 2 && (
+                  <View style={{ justifyContent: 'center', marginBottom: 20 }}>
+                    <Text style={{ color: '#000', fontWeight: '900', textAlign: 'center', marginBottom: 30, fontSize: 20 }}>Confirmation</Text>
+                    <View style={{ width: "100%", flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                      <TouchableOpacity style={{ backgroundColor: '#000', marginRight: 20 }}>
+                        <AntDesign name="check" size={20} color="#fff" />
+                      </TouchableOpacity>
+                      <Fontisto name="mastercard" size={30} color="black" />
+                      <View style={{ width: "60%", height: 50, marginLeft: 10 }}>
+                        <Text style={{ color: '#111', fontWeight: '900', fontSize: 17 }}>{carte[0]?.attributes?.numero ? formatCardNumber(carte[0].attributes.numero) : ''}</Text>
+                        <Text style={{ color: '#000', fontWeight: '600' }}>Master Card</Text>
+                      </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginBottom: 30 }}>
+                      <TouchableOpacity style={{ backgroundColor: '#fff', marginRight: 20, borderWidth: 1, width: 20, marginLeft: 5 }}>
+
+                      </TouchableOpacity>
+                      <Text style={{ color: '#999', fontWeight: '600' }}>Je souhaite passer à l'agence</Text>
+                    </View>
+
                   </View>
-                  <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect7()}>
-                    <Ionicons name="close" size={26} color="white" />
+                )}
+
+                {currentStep === 3 && (
+                  <View style={{ justifyContent: 'center' }}>
+                    <Text style={{ color: '#000', fontWeight: '900', textAlign: 'center', marginBottom: 5, fontSize: 20 }}>Felicitations</Text>
+                    <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 5 }}>
+                      <FontAwesome name="check" size={30} color="green" />
+                    </View>
+                    <View style={{ width: "100%", justifyContent: 'center', alignItems: 'center' }}>
+                      <Text style={{ color: '#444', fontWeight: '500', textAlign: 'center', fontSize: 13 }}>Nous confirmons que nous avons bien recu votre paiement securise en ligne. Voici une copie detaillee de votre facture</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                      <TouchableOpacity onPress={openModal10} style={{ width: '65%', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', padding: 5, backgroundColor: '#444', borderRadius: 8 }}>
+                        <MaterialIcons name="save-alt" size={22} color="white" />
+                        <Text style={{ color: '#fff' }}>Telecharger</Text>
+                      </TouchableOpacity>
+                    </View>
+
+
+                  </View>
+                )}
+                <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
+                  <View style={{ height: 2, backgroundColor: '#999', width: 17 }}></View>
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+
+
+                  {currentStep > 1 && currentStep < 3 && (
+                    <TouchableOpacity
+                      style={{ width: '30%', alignItems: 'center', padding: 10, borderRadius: 8, borderWidth: 1, marginBottom: 20, marginRight: 40 }}
+                      onPress={() => handlePrevStep()}
+                    >
+                      <Text style={{ color: '#000', fontWeight: '700' }}>Retour</Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    style={currentStep > 1 ? { width: '50%', alignItems: 'center', padding: 10, backgroundColor: '#000', borderRadius: 8, marginBottom: 20 } : { width: '70%', alignItems: 'center', padding: 10, backgroundColor: '#000', borderRadius: 8, marginBottom: 20 }}
+                    onPress={() => handleNextStep()}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>{getButtonText()}</Text>
                   </TouchableOpacity>
 
-                  <View style={{ width: "100%", height: 170, padding: 10, marginTop: 15, backgroundColor: '#333', borderRadius: 20 }}>
-                    <Text style={{ color: '#fff', marginBottom: 20, height: 20, fontWeight: '900', fontSize: 17 }}>Paiement</Text>
-
-                    <View style={{ width: "100%", height: 50, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                      <Image source={{ uri: 'https://www.pngmart.com/files/22/Mastercard-Logo-PNG-HD.png' }} style={{ width: 80, height: 40 }} />
-                      <View style={{ width: "60%", height: 50, marginLeft: 5 }}>
-                        <Text style={{ color: '#fff' }}>Master Card</Text>
-                        <Text style={{ color: '#fff', fontWeight: '900', fontSize: 18 }}>{carte[0]?.attributes?.numero ? formatCardNumber(carte[0].attributes.numero) : ''}</Text>
-                      </View>
-                      <AntDesign name="checkcircle" size={30} color="green" />
-                    </View>
-
-                    <View style={{ width: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                      <TouchableOpacity
-                        onPress={handleButtonPress2}
-                        style={[styles.button3, isButtonPressed2 ? styles.buttonPressed : null]}
-                      >
-                        <Text style={[styles.loginText, isButtonPressed2 ? { color: 'black', fontSize: 15, fontWeight: '700' } : null]}>Modifier</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: 'row', width: "100%", padding: 25 }}>
-                    <TouchableOpacity style={{ backgroundColor: '#fff' }}>
-                      <AntDesign name="check" size={20} color="#000" />
-                    </TouchableOpacity>
-                    <Text style={{ color: '#fff', marginLeft: 5, fontSize: 13, fontWeight: '700' }}>Utiliser comme mode de paiement par defaut</Text>
-                  </View>
-
                 </View>
-              </View>
-            </Modal>
-        }
-      </View>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible8}
-          onRequestClose={closeModal8}
 
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.imageFloatM}>
-              <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-            </View>
-            <View style={styles.modalView}>
-
-              <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                <Text style={styles.userName}>{userData?.fullName}</Text>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <MaterialIcons name="shopping-cart" size={25} color="white" />
-                <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Panier</Text>
-              </View>
-              <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect8()}>
-                <Ionicons name="close" size={26} color="white" />
-              </TouchableOpacity>
-              <View style={{ width: '100%', marginTop: 10, padding: 20, alignItems: 'center' }}>
-                <View style={{ width: '95%', padding: 5, backgroundColor: '#fff', alignItems: 'center', borderRadius: 20 }}>
-                  <Image source={{ uri: offrebyid?.attributes.image }} style={styles.imagePay} />
-
-                  {currentStep === 1 && (
-                    <View>
-                      <Text style={{ textAlign: 'center', fontWeight: '700' }}>{offrebyid?.attributes.label}</Text>
-                      <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 5 }}>
-                        <Text style={{ textAlign: 'center', fontWeight: '700', marginRight: 5 }}>{offrebyid?.attributes.pay?.data.attributes.label}</Text>
-                        <Entypo name="location" size={20} color="#999" />
-                      </View>
-                      <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-around', borderRadius: 3, borderTopWidth: 1, borderColor: '#999', marginTop: 15 }}>
-                        <View style={{ marginTop: 10 }}>
-                          <Text style={{ fontWeight: '700', fontSize: 14 }}>Passager</Text>
-                          <Text>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_adultes} Adulte</Text>
-                          <Text>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants} Enfant</Text>
-                        </View>
-                        <View style={{ marginTop: 10 }}>
-                          <Text style={{ fontWeight: '700', fontSize: 14 }}>Depart</Text>
-                          <Text>{filteredReservationsTrueById[0]?.attributes.date_partir}</Text>
-                        </View>
-                        <View style={{ marginTop: 10 }}>
-                          <Text style={{ fontWeight: '700', fontSize: 14 }}>Classe</Text>
-                          <Text>{filteredReservationsTrueById[0]?.attributes.cabine}</Text>
-                        </View>
-                      </View>
-                      <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                        <TouchableOpacity onPress={openModal10} style={{ width: '65%', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', padding: 5, backgroundColor: '#999', borderRadius: 8 }}>
-                          <MaterialIcons name="save-alt" size={22} color="white" />
-                          <Text style={{ color: '#fff' }}>Telecharger</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  )}
-
-                  {currentStep === 2 && (
-                    <View style={{ justifyContent: 'center', marginBottom: 20 }}>
-                      <Text style={{ color: '#000', fontWeight: '900', textAlign: 'center', marginBottom: 30, fontSize: 20 }}>Confirmation</Text>
-                      <View style={{ width: "100%", flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                        <TouchableOpacity style={{ backgroundColor: '#000', marginRight: 20 }}>
-                          <AntDesign name="check" size={20} color="#fff" />
-                        </TouchableOpacity>
-                        <Fontisto name="mastercard" size={30} color="black" />
-                        <View style={{ width: "60%", height: 50, marginLeft: 10 }}>
-                          <Text style={{ color: '#111', fontWeight: '900', fontSize: 17 }}>{carte[0]?.attributes?.numero ? formatCardNumber(carte[0].attributes.numero) : ''}</Text>
-                          <Text style={{ color: '#000', fontWeight: '600' }}>Master Card</Text>
-                        </View>
-                      </View>
-                      <View style={{ flexDirection: 'row', marginBottom: 30 }}>
-                        <TouchableOpacity style={{ backgroundColor: '#fff', marginRight: 20, borderWidth: 1, width: 20, marginLeft: 5 }}>
-
-                        </TouchableOpacity>
-                        <Text style={{ color: '#999', fontWeight: '600' }}>Je souhaite passer à l'agence</Text>
-                      </View>
-
-                    </View>
-                  )}
-
-                  {currentStep === 3 && (
-                    <View style={{ justifyContent: 'center' }}>
-                      <Text style={{ color: '#000', fontWeight: '900', textAlign: 'center', marginBottom: 5, fontSize: 20 }}>Felicitations</Text>
-                      <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 5 }}>
-                        <FontAwesome name="check" size={30} color="green" />
-                      </View>
-                      <View style={{ width: "100%", justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ color: '#444', fontWeight: '500', textAlign: 'center', fontSize: 13 }}>Nous confirmons que nous avons bien recu votre paiement securise en ligne. Voici une copie detaillee de votre facture</Text>
-                      </View>
-                      <View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                        <TouchableOpacity onPress={openModal10} style={{ width: '65%', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', padding: 5, backgroundColor: '#444', borderRadius: 8 }}>
-                          <MaterialIcons name="save-alt" size={22} color="white" />
-                          <Text style={{ color: '#fff' }}>Telecharger</Text>
-                        </TouchableOpacity>
-                      </View>
-
-
-                    </View>
-                  )}
-                  <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 16, marginRight: 10 }}></View>
-                    <View style={{ height: 2, backgroundColor: '#999', width: 17 }}></View>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-
-
-                    {currentStep > 1 && currentStep < 3 && (
-                      <TouchableOpacity
-                        style={{ width: '30%', alignItems: 'center', padding: 10, borderRadius: 8, borderWidth: 1, marginBottom: 20, marginRight: 40 }}
-                        onPress={() => handlePrevStep()}
-                      >
-                        <Text style={{ color: '#000', fontWeight: '700' }}>Retour</Text>
-                      </TouchableOpacity>
-                    )}
-
-                    <TouchableOpacity
-                      style={currentStep > 1 ? { width: '50%', alignItems: 'center', padding: 10, backgroundColor: '#000', borderRadius: 8, marginBottom: 20 } : { width: '70%', alignItems: 'center', padding: 10, backgroundColor: '#000', borderRadius: 8, marginBottom: 20 }}
-                      onPress={() => handleNextStep()}
-                    >
-                      <Text style={{ color: '#fff', fontWeight: '700' }}>{getButtonText()}</Text>
-                    </TouchableOpacity>
-
-                  </View>
-
-                </View>
               </View>
             </View>
           </View>
-        </Modal>
-      </View>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible9}
-          onRequestClose={closeModal9}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.imageFloatM}>
-              <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-            </View>
-            <View style={styles.modalView}>
+        </View>
+      </Modal>
 
-              <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                <Text style={styles.userName}>{userData?.fullName}</Text>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                <MaterialIcons name="credit-card" size={25} color="white" />
-                <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Cartes</Text>
-              </View>
-              <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect9()}>
-                <Ionicons name="close" size={26} color="white" />
-              </TouchableOpacity>
-              <View style={{ width: '100%', marginTop: 20, padding: 10 }}>
-                <Text style={styles.inputText}>Le nom sur la carte</Text>
-                <TextInput
-                  placeholder=""
-                  value={carte[0]?.attributes.nameOncard}
-                  onChangeText={null}
-                  style={styles.inputViewCarte}
-                />
-              </View>
-              <View style={{ width: '100%', padding: 10 }}>
-                <Text style={styles.inputText}>Numero de carte</Text>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible9}
+        onRequestClose={closeModal9}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <MaterialIcons name="credit-card" size={25} color="white" />
+              <Text style={{ color: '#C4C2C2', fontWeight: '700', marginLeft: 10 }}>Cartes</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect9()}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <View style={{ width: '100%', marginTop: 20, padding: 10 }}>
+              <Text style={styles.inputText}>Le nom sur la carte</Text>
+              <TextInput
+                placeholder=""
+                value={carte[0]?.attributes.nameOncard}
+                onChangeText={null}
+                style={styles.inputViewCarte}
+              />
+            </View>
+            <View style={{ width: '100%', padding: 10 }}>
+              <Text style={styles.inputText}>Numero de carte</Text>
+              <TextInput
+                placeholder=""
+                value={carte[0]?.attributes.numero}
+                onChangeText={null}
+                style={styles.inputViewCarte}
+              />
+            </View>
+            <View style={{ width: '100%', padding: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ width: '55%' }}>
+                <Text style={styles.inputText}>Date d'expiration</Text>
                 <TextInput
                   placeholder=""
                   value={carte[0]?.attributes.numero}
@@ -1325,159 +1183,146 @@ const ProfileScreen = ({ route, navigation }: RouterProps) => {
                   style={styles.inputViewCarte}
                 />
               </View>
-              <View style={{ width: '100%', padding: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
-                <View style={{ width: '55%' }}>
-                  <Text style={styles.inputText}>Date d'expiration</Text>
-                  <TextInput
-                    placeholder=""
-                    value={carte[0]?.attributes.numero}
-                    onChangeText={null}
-                    style={styles.inputViewCarte}
-                  />
-                </View>
-                <View style={{ width: '45%' }}>
-                  <Text style={styles.inputText}>CVV</Text>
-                  <TextInput
-                    placeholder=""
-                    value={carte[0]?.attributes.CVV}
-                    onChangeText={null}
-                    style={styles.inputViewCarte}
-                  />
-                </View>
-
-
+              <View style={{ width: '45%' }}>
+                <Text style={styles.inputText}>CVV</Text>
+                <TextInput
+                  placeholder=""
+                  value={carte[0]?.attributes.CVV}
+                  onChangeText={null}
+                  style={styles.inputViewCarte}
+                />
               </View>
-              <View style={{ width: '100%', padding: 16, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' }}>
-                <TouchableOpacity
-                  onPress={() => handleDateSelect9()}
-                  style={[styles.button4]}
-                >
-                  <Text style={[styles.loginText, isButtonPressed ? { color: 'black', fontSize: 15, fontWeight: '700' } : null]}>Annuler</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleDateSelect9()}
-                  style={[styles.button4, styles.buttonPressed, {}]}
-                >
-                  <Text style={[styles.loginText, { color: 'black', fontSize: 15, fontWeight: '700' }]}>Valider</Text>
-                </TouchableOpacity>
-              </View>
+
 
             </View>
-          </View>
-        </Modal>
-      </View>
-      <View style={{ flex: 1, pointerEvents: 'box-none' }}>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible10}
-          onRequestClose={closeModal10}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.imageFloatM}>
-              <Image source={{ uri: userData?.image }} style={styles.profileImage} />
-            </View>
-            <View style={styles.modalView}>
-
-              <View style={[styles.userInfo, { marginBottom: 20 }]}>
-                <Text style={styles.userName}>{userData?.fullName}</Text>
-              </View>
-              <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect10()}>
-                <Ionicons name="close" size={26} color="white" />
-              </TouchableOpacity>
-              <ScrollView style={styles.containerf}
-                contentContainerStyle={{ paddingBottom: 150 }}
-                scrollEventThrottle={16}
+            <View style={{ width: '100%', padding: 16, justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row' }}>
+              <TouchableOpacity
+                onPress={() => handleDateSelect9()}
+                style={[styles.button4]}
               >
-                <View ref={viewRef} style={styles.invoicef} >
-                  <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/base-stage.appspot.com/o/profileImage%2FTOPimage.jpg?alt=media&token=22f95c62-8b93-4faf-97d4-289daae51b6c' }} style={{
-                    width: "100%",
-                    height: 80,
-                    backgroundColor: '#000',
-                    opacity: 0.8
-                  }} />
-                  <View style={styles.headerf}>
-                    <Text style={styles.headerTextf}>{offrebyid?.attributes.label}</Text>
-                    <Text style={styles.headerSubTextf}>{offrebyid?.attributes.pay?.data.attributes.label}</Text>
-                    <Text style={[styles.invoiceNumberf, { flex: 1, marginTop: 10 }]}>N° {filteredFacture[0]?.id}</Text>
-                    <Text style={[styles.invoiceDatef, { flex: 2 }]}>{formattedDate}</Text>
+                <Text style={[styles.loginText, isButtonPressed ? { color: 'black', fontSize: 15, fontWeight: '700' } : null]}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleDateSelect9()}
+                style={[styles.button4, styles.buttonPressed, {}]}
+              >
+                <Text style={[styles.loginText, { color: 'black', fontSize: 15, fontWeight: '700' }]}>Valider</Text>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible10}
+        onRequestClose={closeModal10}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.imageFloatM}>
+            <Image source={{ uri: userData?.image }} style={styles.profileImage} />
+          </View>
+          <View style={styles.modalView}>
+
+            <View style={[styles.userInfo, { marginBottom: 20 }]}>
+              <Text style={styles.userName}>{userData?.fullName}</Text>
+            </View>
+            <TouchableOpacity style={styles.closeBTN} onPress={() => handleDateSelect10()}>
+              <Ionicons name="close" size={26} color="white" />
+            </TouchableOpacity>
+            <ScrollView style={styles.containerf}
+              contentContainerStyle={{ paddingBottom: 150 }}
+              scrollEventThrottle={16}
+            >
+              <View ref={viewRef} style={styles.invoicef} >
+                <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/base-stage.appspot.com/o/profileImage%2FTOPimage.jpg?alt=media&token=22f95c62-8b93-4faf-97d4-289daae51b6c' }} style={{
+                  width: "100%",
+                  height: 80,
+                  backgroundColor: '#000',
+                  opacity: 0.8
+                }} />
+                <View style={styles.headerf}>
+                  <Text style={styles.headerTextf}>{offrebyid?.attributes.label}</Text>
+                  <Text style={styles.headerSubTextf}>{offrebyid?.attributes.pay?.data.attributes.label}</Text>
+                  <Text style={[styles.invoiceNumberf, { flex: 1, marginTop: 10 }]}>N° {filteredFacture[0]?.id}</Text>
+                  <Text style={[styles.invoiceDatef, { flex: 2 }]}>{formattedDate}</Text>
+
+                </View>
+                <View style={styles.contactInfof}>
+                  <View>
+                    <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
+                      <View style={{ width: 25, height: 25, backgroundColor: '#FF9800', borderRadius: 40, marginRight: 10, justifyContent: 'center', alignItems: 'center' }}>
+                        <Entypo name="location-pin" size={20} color="#fff" />
+                      </View>
+                      <Text style={styles.contactTextf}>Atlas voyages, n°3</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
+                      <View style={{ width: 25, height: 25, backgroundColor: '#FF9800', borderRadius: 40, marginRight: 10, justifyContent: 'center', alignItems: 'center' }}>
+                        <FontAwesome name="phone" size={20} color="#fff" />
+                      </View>
+                      <Text style={styles.contactTextf}>(212) 529 001 002</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
+                      <View style={{ width: 25, height: 25, backgroundColor: '#FF9800', borderRadius: 40, marginRight: 10, justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialIcons name="email" size={20} color="#fff" />
+                      </View>
+                      <Text style={styles.contactTextf}>https://atlasvoyages.com</Text>
+                    </View>
+
 
                   </View>
-                  <View style={styles.contactInfof}>
-                    <View>
-                      <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
-                        <View style={{ width: 25, height: 25, backgroundColor: '#FF9800', borderRadius: 40, marginRight: 10, justifyContent: 'center', alignItems: 'center' }}>
-                          <Entypo name="location-pin" size={20} color="#fff" />
-                        </View>
-                        <Text style={styles.contactTextf}>Atlas voyages, n°3</Text>
-                      </View>
-                      <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
-                        <View style={{ width: 25, height: 25, backgroundColor: '#FF9800', borderRadius: 40, marginRight: 10, justifyContent: 'center', alignItems: 'center' }}>
-                          <FontAwesome name="phone" size={20} color="#fff" />
-                        </View>
-                        <Text style={styles.contactTextf}>(212) 529 001 002</Text>
-                      </View>
-                      <View style={{ flexDirection: 'row', marginBottom: 10, alignItems: 'center' }}>
-                        <View style={{ width: 25, height: 25, backgroundColor: '#FF9800', borderRadius: 40, marginRight: 10, justifyContent: 'center', alignItems: 'center' }}>
-                          <MaterialIcons name="email" size={20} color="#fff" />
-                        </View>
-                        <Text style={styles.contactTextf}>https://atlasvoyages.com</Text>
-                      </View>
+                </View>
 
+
+                <Card style={styles.cardf}>
+                  <Card.Content>
+                    <Title>Passager</Title>
+                    <View style={styles.itemHeaderf}>
+                      <Text style={styles.itemTextf}>Description</Text>
+                      <Text style={styles.itemTextf}>Price</Text>
+                      <Text style={styles.itemTextf}>Qty</Text>
+                      <Text style={styles.itemTextf}>Total</Text>
+                    </View>
+                    <View style={styles.itemf}>
+                      <Text style={styles.itemTextf}>Adultes</Text>
+                      <Text style={styles.itemTextf}>{offrebyid?.attributes.prix}DH</Text>
+                      <Text style={styles.itemTextf}>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_adultes}</Text>
+                      <Text style={styles.itemTextf}>{offrebyid?.attributes.prix * filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants}DH</Text>
 
                     </View>
-                  </View>
-
-
-                  <Card style={styles.cardf}>
-                    <Card.Content>
-                      <Title>Passager</Title>
-                      <View style={styles.itemHeaderf}>
-                        <Text style={styles.itemTextf}>Description</Text>
-                        <Text style={styles.itemTextf}>Price</Text>
-                        <Text style={styles.itemTextf}>Qty</Text>
-                        <Text style={styles.itemTextf}>Total</Text>
-                      </View>
-                      <View style={styles.itemf}>
-                        <Text style={styles.itemTextf}>Adultes</Text>
-                        <Text style={styles.itemTextf}>{offrebyid?.attributes.prix}DH</Text>
-                        <Text style={styles.itemTextf}>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_adultes}</Text>
-                        <Text style={styles.itemTextf}>{offrebyid?.attributes.prix * filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants}DH</Text>
-
-                      </View>
-                      <View style={styles.itemf}>
-                        <Text style={styles.itemTextf}>Enfant</Text>
-                        <Text style={styles.itemTextf}>{offrebyid?.attributes.prix}DH</Text>
-                        <Text style={styles.itemTextf}>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants}</Text>
-                        <Text style={styles.itemTextf}>{offrebyid?.attributes.prix * filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants}DH</Text>
-                      </View>
-                      <View style={styles.itemf}>
-                        <Text style={styles.itemTextf}>Duree(J)</Text>
-                        <Text style={styles.itemTextf}>{offrebyid?.attributes.prix}DH</Text>
-                        <Text style={styles.itemTextf}>{filteredReservationsTrueById[0]?.attributes.duree}</Text>
-                        <Text style={styles.itemTextf}>{offrebyid?.attributes.prix * filteredReservationsTrueById[0]?.attributes.duree}DH</Text>
-                      </View>
-                    </Card.Content>
-                  </Card>
-                  <View style={styles.summaryf}>
-                    <Text style={styles.summaryTextf}><Text style={{ color: '#FF9800' }}>TOTAL</Text> {filteredFacture[0]?.attributes.prixTotal}DH</Text>
-                  </View>
-                  <View style={styles.paymentInfof}>
-                    <Text style={[styles.paymentTextf, { fontWeight: '900', color: '#FF9800' }]}>Payment Information</Text>
-                    <Text style={styles.paymentTextf}>Account: {carte[0]?.attributes.numero}</Text>
-                    <Text style={styles.paymentTextf}>Name: {carte[0]?.attributes.nameOncard}</Text>
-                  </View>
-                  <View style={styles.footerf}>
-                    <Text style={styles.footerTextf}>https://atlasvoyages.com</Text>
-                  </View>
+                    <View style={styles.itemf}>
+                      <Text style={styles.itemTextf}>Enfant</Text>
+                      <Text style={styles.itemTextf}>{offrebyid?.attributes.prix}DH</Text>
+                      <Text style={styles.itemTextf}>{filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants}</Text>
+                      <Text style={styles.itemTextf}>{offrebyid?.attributes.prix * filteredReservationsTrueById[0]?.attributes.nbr_voyageurs_enfants}DH</Text>
+                    </View>
+                    <View style={styles.itemf}>
+                      <Text style={styles.itemTextf}>Duree(J)</Text>
+                      <Text style={styles.itemTextf}>{offrebyid?.attributes.prix}DH</Text>
+                      <Text style={styles.itemTextf}>{filteredReservationsTrueById[0]?.attributes.duree}</Text>
+                      <Text style={styles.itemTextf}>{offrebyid?.attributes.prix * filteredReservationsTrueById[0]?.attributes.duree}DH</Text>
+                    </View>
+                  </Card.Content>
+                </Card>
+                <View style={styles.summaryf}>
+                  <Text style={styles.summaryTextf}><Text style={{ color: '#FF9800' }}>TOTAL</Text> {filteredFacture[0]?.attributes.prixTotal}DH</Text>
                 </View>
+                <View style={styles.paymentInfof}>
+                  <Text style={[styles.paymentTextf, { fontWeight: '900', color: '#FF9800' }]}>Payment Information</Text>
+                  <Text style={styles.paymentTextf}>Account: {carte[0]?.attributes.numero}</Text>
+                  <Text style={styles.paymentTextf}>Name: {carte[0]?.attributes.nameOncard}</Text>
+                </View>
+                <View style={styles.footerf}>
+                  <Text style={styles.footerTextf}>https://atlasvoyages.com</Text>
+                </View>
+              </View>
 
-                <Button title="Save Facture" onPress={saveFacture} />
-              </ScrollView>
-            </View>
+              <Button title="Save Facture" onPress={saveFacture} />
+            </ScrollView>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
 
     </ImageBackground>
   );
@@ -1583,10 +1428,10 @@ const styles = StyleSheet.create({
   },
   modalView: {
     position: 'absolute',
-    top: Platform.OS=="ios" ? height*0.15  : height*0.085,
+    top: Platform.OS == "ios" ? height * 0.15 : height * 0.085,
     left: 20,
     right: 20,
-    height:  Platform.OS=="ios" ? height*0.73 : height*0.78,
+    height: Platform.OS == "ios" ? height * 0.73 : height * 0.78,
     backgroundColor: '#000',
     opacity: 0.8,
     borderRadius: 20,
@@ -1797,7 +1642,7 @@ const styles = StyleSheet.create({
   },
   closeBTN: {
     position: 'absolute',
-    top:-8,
+    top: -8,
     right: 0,
     backgroundColor: '#000',
     borderRadius: 26,

@@ -5,14 +5,14 @@
   "build": {
     "development": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://192.168.11.102:1337"
+        "EXPO_PUBLIC_API_URL": "http://192.168.11.105:1337"
       },
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://192.168.11.102:1337"
+        "EXPO_PUBLIC_API_URL": "http://192.168.11.105:1337"
       },
       "android":{
         "buildType": "apk"
