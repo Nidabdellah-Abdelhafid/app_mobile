@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Button, ActivityIndicator, Modal, ListRenderItem, ImageBackground } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Button, ActivityIndicator, Modal, ListRenderItem, ImageBackground, Platform, Dimensions } from "react-native";
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_AUTH, FIREBASE_DB } from "FirebaseConfig";
 import { NavigationProp } from '@react-navigation/native';
@@ -29,6 +29,7 @@ interface RouterProps {
   navigation: NavigationProp<any, any>;
   route
 }
+const { width,height } = Dimensions.get('window');
 
 const ProfileScreen = ({ route, navigation }: RouterProps) => {
   const { user: currentUser } = route.params;
@@ -1531,7 +1532,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     zIndex: 2,
-    top: 45
+    top: 27
   },
   userInfo: {
 
@@ -1582,10 +1583,10 @@ const styles = StyleSheet.create({
   },
   modalView: {
     position: 'absolute',
-    top: 93,
+    top: Platform.OS=="ios" ? height*0.15  : height*0.085,
     left: 20,
     right: 20,
-    height: "78%",
+    height:  Platform.OS=="ios" ? height*0.73 : height*0.78,
     backgroundColor: '#000',
     opacity: 0.8,
     borderRadius: 20,
@@ -1796,8 +1797,8 @@ const styles = StyleSheet.create({
   },
   closeBTN: {
     position: 'absolute',
-    bottom: 595,
-    left: 330,
+    top:-8,
+    right: 0,
     backgroundColor: '#000',
     borderRadius: 26,
     opacity: 0.5

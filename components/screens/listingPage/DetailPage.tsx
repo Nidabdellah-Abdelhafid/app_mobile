@@ -305,11 +305,11 @@ const DetailPage = ({ route, navigation }: RouterProps) => {
             <View style={styles.modalView}>
               <TouchableOpacity style={{
                 position: 'absolute',
-                bottom: height * 0.85,
-                left: width * 0.9,
+                top:-9,
+                right: 0,
                 backgroundColor: '#000',
                 borderRadius: width * 0.065,
-                opacity: 0.5
+                opacity: 0.7
               }}
                 onPress={() => handleDateSelect1()}
               >
@@ -484,8 +484,8 @@ const styles = StyleSheet.create({
   modalView: {
     position: 'absolute',
     top: height * 0.01,
-    left: width * 0.01,
-    right: width * 0.01,
+    left: width * 0.02,
+    right: width * 0.02,
     height: height * 0.87,
     backgroundColor: '#000',
     opacity: 0.85,

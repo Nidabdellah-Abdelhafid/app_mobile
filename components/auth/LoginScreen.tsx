@@ -54,7 +54,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
 
   const logn = async (data :{ email: string,password:string}) => {
     try {
-      const response = await axios.post('http://192.168.11.101:8080/login', 
+      const response = await axios.post('https://app-spg.onrender.com/login', 
       JSON.stringify(data), 
       {
         headers: {
@@ -77,7 +77,7 @@ const LoginScreen = ({ navigation }: RouterProps) => {
       console.log("Fetched Token: ", token);
   
       if (token) {
-        const response = await axios.get('http://192.168.11.101:8080/api/pays', {
+        const response = await axios.get('https://app-spg.onrender.com/api/pays', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

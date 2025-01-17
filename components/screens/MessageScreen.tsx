@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, RefreshControl, StyleSheet, Modal, Alert, Image } from 'react-native';
+import { View, Text, TextInput, RefreshControl, StyleSheet, Modal, Alert, Image, Dimensions, Platform } from 'react-native';
 import socket from './socket';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FIREBASE_DB } from "FirebaseConfig";
@@ -19,6 +19,7 @@ interface RouterProps {
   navigation: NavigationProp<any, any>;
   route: any;
 }
+const { width,height } = Dimensions.get('window');
 
 const ADMIN_ID = 1;
 
@@ -449,7 +450,7 @@ const styles = StyleSheet.create({
   },
   scrollToBottomButton: {
     position: 'absolute',
-    bottom: 20, // Reduced from 80 to ensure it's closer to the screen bottom
+    bottom: height*0.05,  // Platform.OS=="ios" ? height*0.15  : height*0.085,
     right: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.7)', // Red background for visibility
     borderRadius: 30,
