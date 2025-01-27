@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     },
     modalView: {
         position: 'absolute',
-        bottom: 420,
+        bottom: 465,
         left: 150,
         right: 10,
         backgroundColor: '#111',
