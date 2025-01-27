@@ -19,6 +19,8 @@ interface Props {
   user: any;
 }
 
+const { width, height } = Dimensions.get('window');
+
 const ListingPage = ({ navigation, listings: items, refresh, category, user }: Props) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -164,7 +166,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
     return (
       <TouchableOpacity
-        style={{ position: 'absolute', right: 5, top: 0 }}
+        style={{ position: 'absolute', right: 0, top: 0 }}
         onPress={() => {
           if (isFavorited()) {
             deleteItem(item?.id);
@@ -257,7 +259,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 
     return (
       <TouchableOpacity
-        style={{ position: 'absolute', right: 35, top: 180 }}
+        style={{ position: 'absolute', right: width*0.08, top: height*0.215 }}
         onPress={() => {
           if (!isEnregetrer()) {
             openModal(item?.id);
@@ -290,7 +292,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
       <Animated.View style={styles.listView} entering={FadeInRight} exiting={FadeOutLeft}>
         <Image source={{ uri: item?.attributes.photos?.data[0]?.attributes.url }} style={styles.image} />
         {favorieItem(item)}
-        <View style={{ position: 'absolute', left: 35, top: 160, flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={{ position: 'absolute', left: width*0.035, top: height*0.2, flexDirection: 'row', justifyContent: 'space-between' }}>
           <View>
             <Text style={{ fontSize: 17, fontWeight: '900', color: '#fff' }}>{item?.attributes.label}</Text>
             <View style={{ flexDirection: 'row', gap: 4 }}>
@@ -373,7 +375,7 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
 export default ListingPage;
 
 
-const { width, height } = Dimensions.get('window');
+
 
 const styles = StyleSheet.create({
   heartLottie: {
