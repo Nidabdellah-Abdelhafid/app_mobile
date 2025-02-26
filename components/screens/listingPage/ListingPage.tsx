@@ -366,6 +366,14 @@ const ListingPage = ({ navigation, listings: items, refresh, category, user }: P
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
+        ListEmptyComponent={()=>(
+          <View style={styles.flatEmpty}>
+            <Image  source={require('../../../assets/search.png')} style={styles.flatEmptyImage} resizeMode="contain" />
+            {/* <Text style={styles.flatEmptyText}>Create the first story for your kids</Text> */}
+            <Text style={styles.flatEmptyText}>No Items Found</Text>
+          </View>
+        )
+        }
       />
       
     </View>
@@ -378,6 +386,21 @@ export default ListingPage;
 
 
 const styles = StyleSheet.create({
+  flatEmpty:{
+    justifyContent:'center',
+    alignItems:'center',
+    marginTop:"50%",
+    paddingHorizontal:90
+  },
+  flatEmptyText:{
+    marginTop:20,
+    color:'#fff'
+  },
+  flatEmptyImage:{
+    width:90,
+    height:90
+
+  },
   heartLottie: {
     width: width * 0.21,  // 20% of screen width
     height: width * 0.21, // Maintain square aspect ratio
@@ -406,9 +429,9 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     position: 'absolute',
-    bottom: height * 0.1,   // 10% of screen height
-    left: width * 0.025,    // 2.5% of screen width
-    right: width * 0.025,   // 2.5% of screen width
+    bottom: height * 0.1,   
+    left: width * 0.025,    
+    right: width * 0.025,   
     backgroundColor: '#fff',
     margin: 10,
     borderRadius: 20,
@@ -428,28 +451,28 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   inputView: {
-    width: '100%',           // Stays the same as it uses percentage
+    width: '100%',           
     backgroundColor: '#fff',
     borderWidth: 1,
     borderRadius: 25,
-    height: height * 0.07,  // 7% of screen height
-    marginBottom: height * 0.025, // 2.5% of screen height
+    height: height * 0.07,  
+    marginBottom: height * 0.025, 
     justifyContent: 'center',
-    padding: width * 0.05,  // 5% of screen width
+    padding: width * 0.05,  
   },
   inputText: {
-    height: height * 0.05,  // 7% of screen height
+    height: height * 0.05,  
     color: 'black',
   },
   button: {
     backgroundColor: '#000',
-    paddingVertical: height * 0.02, // 2% of screen height
-    paddingHorizontal: width * 0.05, // 5% of screen width
+    paddingVertical: height * 0.02, 
+    paddingHorizontal: width * 0.05, 
     borderRadius: 5,
   },
   buttonText: {
     color: 'white',
-    fontSize: width * 0.04,  // 4% of screen width
+    fontSize: width * 0.04,  
     fontWeight: 'bold',
   },
 });
